@@ -35,7 +35,7 @@ Problem Parser::parseProblem(std::string path) {
             pointer1 = pointer2+1;
             vehicle.capacity = std::stoi(line.substr(pointer1));
 
-            problem.vehicles[vehicle.index-1] = vehicle;
+            problem.vehicles.push_back(vehicle);
         }
 
         // Parse the number of calls
