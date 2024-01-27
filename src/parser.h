@@ -6,7 +6,6 @@
 
 class Parser {
     public:
-
     /**
      * @brief Parse a given problem data file into a problem instance.
      * 
@@ -16,7 +15,6 @@ class Parser {
     static Problem parseProblem(std::string path);
 
     private:
-
     // This is a static class, prevent class creation
     Parser();
 };
