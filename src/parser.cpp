@@ -66,6 +66,43 @@ Problem Parser::parseProblem(std::string path) {
             problem.vehicles[vehicleIndex-1].possibleCalls.push_back(std::stoi(line.substr(pointer1)));
         }
 
+        // Parse information per call
+        file.ignore(LONG_MAX, '\n');
+        for (int i = 0; i < problem.noCalls; i++) {
+            std::getline(file, line);
+            int pointer1 = 0, pointer2 = line.find(',');
+
+            Call call;
+            call.index = std::stoi(line.substr(pointer1, pointer2));
+            pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
+            call.originNode = std::stoi(line.substr(pointer1, pointer2));
+            pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
+            call.destinationNode= std::stoi(line.substr(pointer1, pointer2));
+            pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
+            call.size= std::stoi(line.substr(pointer1, pointer2));
+            pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
+            call.costOfNotTransporting = std::stoi(line.substr(pointer1));
+            
+            int lowerbound, upperbound;
+            pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
+            lowerbound = std::stoi(line.substr(pointer1, pointer2));
+            pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
+            upperbound = std::stoi(line.substr(pointer1, pointer2));
+            call.pickupWindow = std::make_pair(lowerbound, upperbound);
+
+            pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
+            lowerbound = std::stoi(line.substr(pointer1, pointer2));
+            pointer1 = pointer2+1;
+            upperbound = std::stoi(line.substr(pointer1));
+            call.deliveryWindow = std::make_pair(lowerbound, upperbound);
+
+            problem.calls.push_back(call);
+        }
+        // Sort the vector based on the call index (call index might not match vector index)
+        std::sort(problem.calls.begin(), problem.calls.end(), [ ](const Call& lhs, const Call& rhs) {
+            return lhs.index < rhs.index;
+        });
+
         // Close the file after finished reading
         file.close();
     } else {
