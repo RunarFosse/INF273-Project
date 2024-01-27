@@ -5,9 +5,9 @@
 
 int main(int argc, char const *argv[])
 {
-    std::string out = Parser::parseProblem("problem.txt");
-    
-    std::cout << out << std::endl;
+    Problem problem = Parser::parseProblem("/data/Call_7_Vehicle_3.txt");
+
+    std::cout << "Problem solved" << std::endl;
 
     return 0;
 }
