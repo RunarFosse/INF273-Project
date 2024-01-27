@@ -37,6 +37,10 @@ Problem Parser::parseProblem(std::string path) {
 
             problem.vehicles.push_back(vehicle);
         }
+        // Sort the vector based on the vehicle index (vehicle index might not match vector index)
+        std::sort(problem.vehicles.begin(), problem.vehicles.end(), [ ](const Vehicle& lhs, const Vehicle& rhs) {
+            return lhs.index < rhs.index;
+        });
 
         // Parse the number of calls
         file.ignore(LONG_MAX, '\n');
