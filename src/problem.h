@@ -7,6 +7,7 @@ struct {
     int homeNode;
     int startTime;
     int capacity;
+    std::vector<int> possibleCalls;
 } typedef Vehicle;
 
 class Problem {

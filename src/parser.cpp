@@ -23,7 +23,6 @@ Problem Parser::parseProblem(std::string path) {
         file.ignore(LONG_MAX, '\n');
         for (int i = 0; i < problem.noVehicles; i++) {
             std::getline(file, line);
-
             int pointer1 = 0, pointer2 = line.find(',');
 
             Vehicle vehicle;
@@ -42,10 +41,30 @@ Problem Parser::parseProblem(std::string path) {
             return lhs.index < rhs.index;
         });
 
+
         // Parse the number of calls
         file.ignore(LONG_MAX, '\n');
         std::getline(file, line);
         problem.noCalls = std::stoi(line);
+
+        // Parse possible calls per vehicle
+        file.ignore(LONG_MAX, '\n');
+        for (int i = 0; i < problem.noVehicles; i++) {
+            std::getline(file, line);
+            int pointer1 = 0, pointer2 = line.find(',');
+
+            // If the current line has no other entries other than vehicle index, skip this iteration
+            if (pointer2 == std::string::npos || pointer2 == line.length()-2)
+                continue;
+
+            int vehicleIndex = std::stoi(line.substr(pointer1, pointer2));
+            pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
+            while (pointer2 != std::string::npos) {
+                problem.vehicles[vehicleIndex-1].possibleCalls.push_back(std::stoi(line.substr(pointer1, pointer2)));
+                pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
+            }
+            problem.vehicles[vehicleIndex-1].possibleCalls.push_back(std::stoi(line.substr(pointer1)));
+        }
 
         // Close the file after finished reading
         file.close();
