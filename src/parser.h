@@ -1,9 +1,11 @@
 #include <string>
 
+#include "problem.h"
+
 class Parser {
     public:
 
-    static std::string parseProblem(std::string path);
+    static Problem parseProblem(std::string path);
 
     private:
 
