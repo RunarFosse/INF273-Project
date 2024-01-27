@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 
 #include "problem.h"
 
@@ -9,5 +10,5 @@ class Debugger {
      * 
      * @param problem Pointer to problem instance
      */
-    void printProblem(Problem& problem);
+    void printProblem(Problem* problem);
 };
