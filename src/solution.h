@@ -1,9 +1,13 @@
+#pragma once
+
 #include <vector>
 
 #include "problem.h"
 
 class Solution {
     public:
+    std::vector<int> representation;
+
     /**
      * @brief Constructs the intial solution for the given problem.
      * The initial solution is the baseline solution, where none of the 
@@ -16,8 +20,7 @@ class Solution {
 
     private:
     // Only allow static instance creation
-    Solution();
+    Solution(Problem* problem);
 
     Problem* problem;
-    std::vector<int> representation;
 };
