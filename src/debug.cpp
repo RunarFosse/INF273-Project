@@ -1,7 +1,6 @@
 #include "debug.h"
 
 void Debugger::printProblem(Problem* problem, bool printMap) {
-
     std::cout << "Number of nodes: " << std::to_string(problem->noNodes) << std::endl;
     std::cout << "Number of vehicles: " << std::to_string(problem->noVehicles) << std::endl;
     std::cout << "Number of calls: " << std::to_string(problem->noCalls) << std::endl;
