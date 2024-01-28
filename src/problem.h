@@ -32,5 +32,4 @@ class Problem {
     int noCalls;
     std::vector<Vehicle> vehicles;
     std::vector<Call> calls;
-    // Todo: Include remaining fields
 };
