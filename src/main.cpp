@@ -8,7 +8,7 @@ int main(int argc, char const *argv[])
 {
     Problem problem = Parser::parseProblem("data/Call_7_Vehicle_3.txt");
 
-    Debugger::printProblem(&problem);
+    Debugger::printProblem(&problem, false);
 
     return 0;
 }

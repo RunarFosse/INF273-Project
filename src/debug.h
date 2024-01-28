@@ -10,7 +10,7 @@ class Debugger {
      * 
      * @param problem Pointer to problem instance
      */
-    static void printProblem(Problem* problem);
+    static void printProblem(Problem* problem, bool printMap = true);
 
     private:
     // This is a static class, prevent class creation
