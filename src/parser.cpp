@@ -39,10 +39,10 @@ Problem Parser::parseProblem(std::string path) {
             pointer1 = pointer2+1;
             vehicle->capacity = std::stoi(line.substr(pointer1));
 
-            // Reserve space for the vehicle maps
-            vehicle->map.reserve(problem.noNodes);
+            // Reserve space for the vehicle graph
+            vehicle->routeTimeCost.reserve(problem.noNodes);
             for (int j = 0; j < problem.noNodes; j++) {
-                vehicle->map[j].reserve(problem.noNodes);
+                vehicle->routeTimeCost[j].reserve(problem.noNodes);
             }
         }
 
@@ -107,7 +107,7 @@ Problem Parser::parseProblem(std::string path) {
             call->deliveryWindow = std::make_pair(lowerbound, upperbound);
         }
 
-        // Parse map information per vehicle
+        // Parse graph information per vehicle
         file.ignore(LONG_MAX, '\n');
         for (int i = 0; i < problem.noNodes; i++) {
             for (int j = 0; j < problem.noNodes; j++) {
@@ -125,7 +125,7 @@ Problem Parser::parseProblem(std::string path) {
                     pointer1 = pointer2+1;
                     int travelCost = std::stoi(line.substr(pointer1));
 
-                    problem.vehicles[vehicleIndex-1].map[originNode-1][destinationNode-1] = std::make_pair(travelTime, travelCost);
+                    problem.vehicles[vehicleIndex-1].routeTimeCost[originNode-1][destinationNode-1] = std::make_pair(travelTime, travelCost);
                 }
             }
         }

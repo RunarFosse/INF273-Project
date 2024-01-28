@@ -44,8 +44,8 @@ void Debugger::printProblem(Problem* problem, bool printMap) {
                     std::cout << std::to_string(problem->vehicles[k].index) << ", ";
                     std::cout << std::to_string(i+1) << ", ";
                     std::cout << std::to_string(j+1) << ", ";
-                    std::cout << std::to_string(problem->vehicles[k].map[i][j].first) << ", ";
-                    std::cout << std::to_string(problem->vehicles[k].map[i][j].second) << std::endl;
+                    std::cout << std::to_string(problem->vehicles[k].routeTimeCost[i][j].first) << ", ";
+                    std::cout << std::to_string(problem->vehicles[k].routeTimeCost[i][j].second) << std::endl;
                 }
             }
         }
