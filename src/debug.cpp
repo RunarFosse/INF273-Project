@@ -62,3 +62,16 @@ void Debugger::printProblem(Problem* problem, bool printMap) {
         }
     }
 };
+
+void Debugger::printSolution(Solution* solution) {
+    std::cout << "[";
+
+    for (int i = 0; i < solution->representation.size(); i++) {
+        std::cout << std::to_string(solution->representation[i]);
+        if (i < solution->representation.size()-1) {
+            std::cout << ", ";
+        }
+    }
+
+    std::cout << "]" << std::endl;
+};
