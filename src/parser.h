@@ -10,7 +10,7 @@ class Parser {
     /**
      * @brief Parse a given problem data file into a problem instance.
      * 
-     * @param path problem data file
+     * @param path Problem data file
      * @return Problem instance of given data file
      */
     static Problem parseProblem(std::string path);
