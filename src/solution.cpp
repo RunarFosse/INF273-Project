@@ -20,5 +20,5 @@ Solution Solution::initialSolution(Problem* problem) {
     }
 
     // Return initial solution
-    return solution
-};
+    return solution;
+}
