@@ -2,12 +2,18 @@
 
 #include <vector>
 
+// TODO: Optimize storage (remove storing of index (all indicies are implicit))
+//       Use specific structs instead of std::pair
+
+typedef std::vector<std::vector<std::pair<int, int>>> Map;
+
 struct {
     int index;
     int homeNode;
     int startTime;
     int capacity;
     std::vector<int> possibleCalls;
+    Map map;
 } typedef Vehicle;
 
 struct {

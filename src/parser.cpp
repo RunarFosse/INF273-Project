@@ -19,6 +19,7 @@ Problem Parser::parseProblem(std::string path) {
         std::getline(file, line);
         problem.noVehicles = std::stoi(line);
 
+        // Reserve space for vehicles
         problem.vehicles.reserve(problem.noVehicles);
 
         // Parse information per vehicle
@@ -37,6 +38,12 @@ Problem Parser::parseProblem(std::string path) {
             vehicle->startTime = std::stoi(line.substr(pointer1, pointer2));
             pointer1 = pointer2+1;
             vehicle->capacity = std::stoi(line.substr(pointer1));
+
+            // Reserve space for the vehicle maps
+            vehicle->map.reserve(problem.noNodes);
+            for (int j = 0; j < problem.noNodes; j++) {
+                vehicle->map[j].reserve(problem.noNodes);
+            }
         }
 
         // Parse the number of calls
@@ -44,6 +51,7 @@ Problem Parser::parseProblem(std::string path) {
         std::getline(file, line);
         problem.noCalls = std::stoi(line);
 
+        // Reserve space for vehicles
         problem.calls.reserve(problem.noCalls);
 
         // Parse possible calls per vehicle
@@ -53,9 +61,10 @@ Problem Parser::parseProblem(std::string path) {
             int pointer1 = 0, pointer2 = line.find(',');
 
             // If the current line has no other entries other than vehicle index, skip this iteration
-            if (pointer2 == std::string::npos || pointer2 == line.length()-2)
+            if (pointer2 == std::string::npos || pointer2 == line.length()-2) {
                 continue;
-
+            }
+            
             int vehicleIndex = std::stoi(line.substr(pointer1, pointer2));
             pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
             while (pointer2 != std::string::npos) {
@@ -96,6 +105,29 @@ Problem Parser::parseProblem(std::string path) {
             pointer1 = pointer2+1;
             upperbound = std::stoi(line.substr(pointer1));
             call->deliveryWindow = std::make_pair(lowerbound, upperbound);
+        }
+
+        // Parse map information per vehicle
+        file.ignore(LONG_MAX, '\n');
+        for (int i = 0; i < problem.noNodes; i++) {
+            for (int j = 0; j < problem.noNodes; j++) {
+                for (int k = 0; k < problem.noVehicles; k++) {
+                    std::getline(file, line);
+                    int pointer1 = 0, pointer2 = line.find(',');
+
+                    int vehicleIndex = std::stoi(line.substr(pointer1, pointer2));
+                    pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
+                    int originNode = std::stoi(line.substr(pointer1, pointer2));
+                    pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
+                    int destinationNode = std::stoi(line.substr(pointer1, pointer2));
+                    pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
+                    int travelTime = std::stoi(line.substr(pointer1, pointer2));
+                    pointer1 = pointer2+1;
+                    int travelCost = std::stoi(line.substr(pointer1));
+
+                    problem.vehicles[vehicleIndex-1].map[originNode-1][destinationNode-1] = std::make_pair(travelTime, travelCost);
+                }
+            }
         }
 
         // Close the file after finished reading

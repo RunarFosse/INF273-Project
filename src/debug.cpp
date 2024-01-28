@@ -35,4 +35,17 @@ void Debugger::printProblem(Problem* problem) {
         std::cout << "(" << std::to_string(problem->calls[i].deliveryWindow.first) << ", ";
         std::cout << std::to_string(problem->calls[i].deliveryWindow.second) << ")" << std::endl;
     }
+
+    std::cout << "For each vehicle's node edge: vehicle index, origin node, destination node, travel time (in hours), travel cost (in Euro)" << std::endl;
+    for (int i = 0; i < problem->noNodes; i++) {
+        for (int j = 0; j < problem->noNodes; j++) {
+            for (int k = 0; k < problem->noVehicles; k++) {
+                std::cout << std::to_string(problem->vehicles[k].index) << ", ";
+                std::cout << std::to_string(i+1) << ", ";
+                std::cout << std::to_string(j+1) << ", ";
+                std::cout << std::to_string(problem->vehicles[k].map[i][j].first) << ", ";
+                std::cout << std::to_string(problem->vehicles[k].map[i][j].second) << std::endl;
+            }
+        }
+    }
 };
