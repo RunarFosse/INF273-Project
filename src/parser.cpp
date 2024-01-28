@@ -20,7 +20,7 @@ Problem Parser::parseProblem(std::string path) {
         problem.noVehicles = std::stoi(line);
 
         // Reserve space for vehicles
-        problem.vehicles.reserve(problem.noVehicles);
+        problem.vehicles.resize(problem.noVehicles);
 
         // Parse information per vehicle
         file.ignore(LONG_MAX, '\n');
@@ -39,10 +39,10 @@ Problem Parser::parseProblem(std::string path) {
             pointer1 = pointer2+1;
             vehicle->capacity = std::stoi(line.substr(pointer1));
 
-            // Reserve space for the vehicle graph
-            vehicle->routeTimeCost.reserve(problem.noNodes);
+            // Reserve space for the vehicle edge time/cost
+            vehicle->routeTimeCost.resize(problem.noNodes);
             for (int j = 0; j < problem.noNodes; j++) {
-                vehicle->routeTimeCost[j].reserve(problem.noNodes);
+                vehicle->routeTimeCost[j].resize(problem.noNodes);
             }
         }
 
@@ -52,7 +52,7 @@ Problem Parser::parseProblem(std::string path) {
         problem.noCalls = std::stoi(line);
 
         // Reserve space for vehicles
-        problem.calls.reserve(problem.noCalls);
+        problem.calls.resize(problem.noCalls);
 
         // Parse possible calls per vehicle
         file.ignore(LONG_MAX, '\n');
@@ -72,6 +72,9 @@ Problem Parser::parseProblem(std::string path) {
                 pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
             }
             problem.vehicles[vehicleIndex-1].possibleCalls.push_back(std::stoi(line.substr(pointer1)));
+
+            // Reserve space for the call node time/cost
+            problem.vehicles[vehicleIndex-1].callTimeCost.resize(problem.noCalls);
         }
 
         // Parse information per call
@@ -107,7 +110,7 @@ Problem Parser::parseProblem(std::string path) {
             call->deliveryWindow = std::make_pair(lowerbound, upperbound);
         }
 
-        // Parse graph information per vehicle
+        // Parse time/cost per edge per vehicle
         file.ignore(LONG_MAX, '\n');
         for (int i = 0; i < problem.noNodes; i++) {
             for (int j = 0; j < problem.noNodes; j++) {
@@ -130,11 +133,37 @@ Problem Parser::parseProblem(std::string path) {
             }
         }
 
+        // Parse time/cost for each call per vehicle
+        file.ignore(LONG_MAX, '\n');
+        for (int i = 0; i < problem.noVehicles; i++) {
+            for (int j = 0; j < problem.noCalls; j++) {
+                std::getline(file, line);
+                int pointer1 = 0, pointer2 = line.find(',');
+
+                int vehicleIndex = std::stoi(line.substr(pointer1, pointer2));
+                pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
+                int callIndex = std::stoi(line.substr(pointer1, pointer2));
+                pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
+
+                int originNodeTime = std::stoi(line.substr(pointer1, pointer2));
+                pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
+                int originNodeCost = std::stoi(line.substr(pointer1, pointer2));
+                pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
+                int destinationNodeTime = std::stoi(line.substr(pointer1, pointer2));
+                pointer1 = pointer2+1;
+                int destinationNodeCost = std::stoi(line.substr(pointer1));
+                
+                std::pair<int, int> originTimeCost = std::make_pair(originNodeTime, originNodeCost);
+                std::pair<int, int> destinationTimeCost = std::make_pair(destinationNodeTime, destinationNodeCost);
+                problem.vehicles[vehicleIndex-1].callTimeCost[callIndex-1] = std::make_pair(originTimeCost, destinationTimeCost);
+            }
+        }
+
         // Close the file after finished reading
         file.close();
     } else {
         // If the file is not open, something went wrong
-        std::cerr << "Error: Couldn't open data file '" << path << "'" << std::endl;
+        std::cerr << "ERROR: Couldn't open data file '" << path << "'" << std::endl;
     }
 
     // Return the problem instance

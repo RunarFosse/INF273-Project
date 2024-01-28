@@ -12,6 +12,7 @@ struct {
     int capacity;
     std::vector<int> possibleCalls;
     std::vector<std::vector<std::pair<int, int>>> routeTimeCost;
+    std::vector<std::pair<std::pair<int, int>, std::pair<int, int>>> callTimeCost;
 } typedef Vehicle;
 
 struct {

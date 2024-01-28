@@ -50,4 +50,16 @@ void Debugger::printProblem(Problem* problem, bool printMap) {
             }
         }
     }
+
+    std::cout << "For each vehicle's call: vehicle, call, origin node time (in hours), origin node costs (in Euro), destination node time (in hours), destination node costs (in Euro)" << std::endl;
+    for (int i = 0; i < problem->noVehicles; i++) {
+        for (int j = 0; j < problem->noCalls; j++) {
+            std::cout << std::to_string(problem->vehicles[i].index) << ", ";
+            std::cout << std::to_string(j+1) << ", ";
+            std::cout << "(" << std::to_string(problem->vehicles[i].callTimeCost[j].first.first) << ", ";
+            std::cout << std::to_string(problem->vehicles[i].callTimeCost[j].first.second) << "), ";
+            std::cout << "(" << std::to_string(problem->vehicles[i].callTimeCost[j].second.first) << ", ";
+            std::cout << std::to_string(problem->vehicles[i].callTimeCost[j].second.second) << ")" << std::endl;
+        }
+    }
 };
