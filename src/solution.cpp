@@ -1,8 +1,8 @@
 #include "solution.h"
 
-Solution::Solution(Problem* problemPointer) {
+Solution::Solution(Problem* problem) {
     // Link problem to solution
-    problem = problemPointer;
+    this->problem = problem;
 
     // Reserve representation size
     representation.reserve(problem->noVehicles + 2 * problem->noCalls);

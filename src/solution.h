@@ -34,7 +34,7 @@ class Solution {
 
     private:
     // Only allow static instance creation
-    Solution(Problem* problemPointer);
+    Solution(Problem* problem);
 
     std::pair<bool, bool> feasibilityCache;
 };
