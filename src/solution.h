@@ -1,6 +1,10 @@
 #pragma once
 
+#include <memory>
 #include <vector>
+#include <unordered_set>
+
+#include <iostream>
 
 #include "problem.h"
 
@@ -18,9 +22,19 @@ class Solution {
      */
     static Solution initialSolution(Problem* problem);
 
+    /**
+     * @brief Checks if the given solution is feasible.
+     * Results are cached to prevent redundant computation.
+     * 
+     * @return true if feasible,
+     * @return false if infeasible
+     */
+    bool isFeasible();
+    Problem* problem;
+
     private:
     // Only allow static instance creation
-    Solution(Problem* problem);
+    Solution(Problem* problemPointer);
 
-    Problem* problem;
+    std::pair<bool, bool> feasibilityCache;
 };
