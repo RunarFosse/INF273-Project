@@ -14,6 +14,7 @@ int main(int argc, char const *argv[])
     Debugger::printSolution(&solution);
     if (solution.isFeasible()) {
         std::cout << "Solution is feasible!" << std::endl;
+        std::cout << "Total cost: " << std::to_string(solution.getCost()) << std::endl;
     } else {
         std::cout << "Solution is infeasible." << std::endl;
     }

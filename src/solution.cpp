@@ -91,7 +91,7 @@ bool Solution::isFeasible() {
                 // Deliver call cargo
                 Call call = this->problem->calls[callIndex-1];
 
-                // Travel to call origin node
+                // Travel to call destination node
                 currentTime += vehicle.routeTimeCost[currentNode-1][call.destinationNode-1].time;
                 currentNode = call.destinationNode;
 
@@ -158,4 +158,74 @@ bool Solution::isFeasible() {
     // The solution is feasible!
     this->feasibilityCache = std::make_pair(true, true);
     return this->feasibilityCache.second;
+}
+
+int Solution::getCost() {
+    // Check if value is cached
+    if (this->costCache.first) {
+        return this->costCache.second;
+    }
+
+    int i = 0;
+    int totalCost = 0;
+
+    // Handle our vehicles
+    for (int vehicleIndex = 1; vehicleIndex <= this->problem->noVehicles; vehicleIndex++) {
+        Vehicle vehicle = this->problem->vehicles[vehicleIndex-1];
+
+        int currentNode = vehicle.homeNode;
+        std::unordered_set<int> startedCalls;
+
+        while (this->representation[i]) {
+            int callIndex = this->representation[i];
+
+            if (startedCalls.find(callIndex) == startedCalls.end()) {
+                // Pickup call cargo
+                Call call = this->problem->calls[callIndex-1];
+
+                // Travel to call origin node
+                totalCost += vehicle.routeTimeCost[currentNode-1][call.originNode-1].cost;
+                currentNode = call.originNode;
+
+                // Pickup cargo at origin node (wait some time)
+                totalCost += vehicle.callTimeCost[callIndex-1].first.cost;
+
+                startedCalls.insert(callIndex);
+            } else {
+                // Deliver call cargo
+                Call call = this->problem->calls[callIndex-1];
+
+                // Travel to call destination node
+                totalCost += vehicle.routeTimeCost[currentNode-1][call.destinationNode-1].cost;
+                currentNode = call.destinationNode;
+
+                // Deliver cargo at destination node (wait some time)
+                totalCost += vehicle.callTimeCost[callIndex-1].second.cost;
+            }
+
+            i++;
+        }
+        i++;
+    }
+
+    // Handle outsourced calls
+    std::unordered_set<int> outsourcedCalls;
+    while (i < this->representation.size()) {
+        int callIndex = this->representation[i];
+
+        // Only count outsourced calls once (for effiency)
+        if (outsourcedCalls.find(callIndex) == outsourcedCalls.end()) {
+            // Outsource the call
+            Call call = this->problem->calls[callIndex-1];
+            totalCost += call.costOfNotTransporting;
+
+            outsourcedCalls.insert(callIndex);
+        }
+
+        i++;
+    }
+
+    // Cache and return the computed cost
+    this->costCache = std::make_pair(true, totalCost);
+    return this->costCache.second;
 }

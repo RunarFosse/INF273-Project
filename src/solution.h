@@ -30,11 +30,22 @@ class Solution {
      * @return false if infeasible
      */
     bool isFeasible();
-    Problem* problem;
+
+    /**
+     * @brief Calculates and returns the cost of the solution.
+     * Results are cached to prevent redundant computation.
+     * 
+     * @note Solutions are assumed feasible. No feasibility check will be ran.
+     * 
+     * @return Total cost of the solution
+     */
+    int getCost();
 
     private:
     // Only allow static instance creation
     Solution(Problem* problem);
 
+    Problem* problem;
     std::pair<bool, bool> feasibilityCache;
+    std::pair<bool, int> costCache;
 };
