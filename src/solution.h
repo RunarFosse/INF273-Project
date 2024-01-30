@@ -42,10 +42,10 @@ class Solution {
     /**
      * @brief Construct a new Solution given representation as vector.
      * 
-     * @param problem Problem to solve
      * @param representation Given solution representation
+     * @param problem Problem to solve
      */
-    Solution(Problem* problem, std::vector<int> representation);
+    Solution(std::vector<int> representation, Problem* problem);
 
     private:
     // Only allow static instance creation, unless created from given vector (above)
