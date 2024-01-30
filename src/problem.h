@@ -2,11 +2,9 @@
 
 #include <vector>
 
-// TODO: Optimize storage (remove storing of index (all indicies are implicit))
-//       Use specific structs instead of std::pair
+// TODO: Use specific structs instead of std::pair
 
 struct {
-    int index;
     int homeNode;
     int startTime;
     int capacity;
@@ -16,7 +14,6 @@ struct {
 } typedef Vehicle;
 
 struct {
-    int index;
     int originNode;
     int destinationNode;
     int size;

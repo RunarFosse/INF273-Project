@@ -31,7 +31,6 @@ Problem Parser::parseProblem(std::string path) {
             int index = std::stoi(line.substr(pointer1, pointer2));
 
             Vehicle* vehicle = &problem.vehicles[index-1];
-            vehicle->index = index;
             pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
             vehicle->homeNode = std::stoi(line.substr(pointer1, pointer2));
             pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
@@ -86,7 +85,6 @@ Problem Parser::parseProblem(std::string path) {
             int index = std::stoi(line.substr(pointer1, pointer2));
 
             Call* call = &problem.calls[index-1];
-            call->index = index;
             pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
             call->originNode = std::stoi(line.substr(pointer1, pointer2));
             pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
