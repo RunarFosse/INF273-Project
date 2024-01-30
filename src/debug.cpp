@@ -29,10 +29,10 @@ void Debugger::printProblem(Problem* problem, bool printMap) {
         std::cout << std::to_string(problem->calls[i-1].destinationNode) << ", ";
         std::cout << std::to_string(problem->calls[i-1].size) << ", ";
         std::cout << std::to_string(problem->calls[i-1].costOfNotTransporting) << ", ";
-        std::cout << "(" << std::to_string(problem->calls[i-1].pickupWindow.first) << ", ";
-        std::cout << std::to_string(problem->calls[i-1].pickupWindow.second) << "), ";
-        std::cout << "(" << std::to_string(problem->calls[i-1].deliveryWindow.first) << ", ";
-        std::cout << std::to_string(problem->calls[i-1].deliveryWindow.second) << ")" << std::endl;
+        std::cout << "(" << std::to_string(problem->calls[i-1].pickupWindow.start) << ", ";
+        std::cout << std::to_string(problem->calls[i-1].pickupWindow.end) << "), ";
+        std::cout << "(" << std::to_string(problem->calls[i-1].deliveryWindow.start) << ", ";
+        std::cout << std::to_string(problem->calls[i-1].deliveryWindow.end) << ")" << std::endl;
     }
 
     if (printMap) {
@@ -43,8 +43,8 @@ void Debugger::printProblem(Problem* problem, bool printMap) {
                     std::cout << std::to_string(k) << ", ";
                     std::cout << std::to_string(i) << ", ";
                     std::cout << std::to_string(j) << ", ";
-                    std::cout << std::to_string(problem->vehicles[k-1].routeTimeCost[i-1][j-1].first) << ", ";
-                    std::cout << std::to_string(problem->vehicles[k-1].routeTimeCost[i-1][j-1].second) << std::endl;
+                    std::cout << std::to_string(problem->vehicles[k-1].routeTimeCost[i-1][j-1].time) << ", ";
+                    std::cout << std::to_string(problem->vehicles[k-1].routeTimeCost[i-1][j-1].cost) << std::endl;
                 }
             }
         }
@@ -55,10 +55,10 @@ void Debugger::printProblem(Problem* problem, bool printMap) {
         for (int j = 1; j <= problem->noCalls; j++) {
             std::cout << std::to_string(i) << ", ";
             std::cout << std::to_string(j) << ", ";
-            std::cout << "(" << std::to_string(problem->vehicles[i-1].callTimeCost[j-1].first.first) << ", ";
-            std::cout << std::to_string(problem->vehicles[i-1].callTimeCost[j-1].first.second) << "), ";
-            std::cout << "(" << std::to_string(problem->vehicles[i-1].callTimeCost[j-1].second.first) << ", ";
-            std::cout << std::to_string(problem->vehicles[i-1].callTimeCost[j-1].second.second) << ")" << std::endl;
+            std::cout << "(" << std::to_string(problem->vehicles[i-1].callTimeCost[j-1].first.time) << ", ";
+            std::cout << std::to_string(problem->vehicles[i-1].callTimeCost[j-1].first.cost) << "), ";
+            std::cout << "(" << std::to_string(problem->vehicles[i-1].callTimeCost[j-1].second.time) << ", ";
+            std::cout << std::to_string(problem->vehicles[i-1].callTimeCost[j-1].second.cost) << ")" << std::endl;
         }
     }
 };

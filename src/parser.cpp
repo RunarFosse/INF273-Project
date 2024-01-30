@@ -99,13 +99,13 @@ Problem Parser::parseProblem(std::string path) {
             lowerbound = std::stoi(line.substr(pointer1, pointer2));
             pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
             upperbound = std::stoi(line.substr(pointer1, pointer2));
-            call->pickupWindow = std::make_pair(lowerbound, upperbound);
+            call->pickupWindow = {lowerbound, upperbound};
 
             pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
             lowerbound = std::stoi(line.substr(pointer1, pointer2));
             pointer1 = pointer2+1;
             upperbound = std::stoi(line.substr(pointer1));
-            call->deliveryWindow = std::make_pair(lowerbound, upperbound);
+            call->deliveryWindow = {lowerbound, upperbound};
         }
 
         // Parse time/cost per edge per vehicle
@@ -126,7 +126,7 @@ Problem Parser::parseProblem(std::string path) {
                     pointer1 = pointer2+1;
                     int travelCost = std::stoi(line.substr(pointer1));
 
-                    problem.vehicles[vehicleIndex-1].routeTimeCost[originNode-1][destinationNode-1] = std::make_pair(travelTime, travelCost);
+                    problem.vehicles[vehicleIndex-1].routeTimeCost[originNode-1][destinationNode-1] = {travelTime, travelCost};
                 }
             }
         }
@@ -151,8 +151,8 @@ Problem Parser::parseProblem(std::string path) {
                 pointer1 = pointer2+1;
                 int destinationNodeCost = std::stoi(line.substr(pointer1));
                 
-                std::pair<int, int> originTimeCost = std::make_pair(originNodeTime, originNodeCost);
-                std::pair<int, int> destinationTimeCost = std::make_pair(destinationNodeTime, destinationNodeCost);
+                TimeCost originTimeCost = {originNodeTime, originNodeCost};
+                TimeCost destinationTimeCost = {destinationNodeTime, destinationNodeCost};
                 problem.vehicles[vehicleIndex-1].callTimeCost[callIndex-1] = std::make_pair(originTimeCost, destinationTimeCost);
             }
         }

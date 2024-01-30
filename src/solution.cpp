@@ -60,22 +60,22 @@ bool Solution::isFeasible() {
                 Call call = this->problem->calls[callIndex-1];
                 
                 // Travel to call origin node
-                currentTime += vehicle.routeTimeCost[currentNode-1][call.originNode-1].first;
+                currentTime += vehicle.routeTimeCost[currentNode-1][call.originNode-1].time;
                 currentNode = call.originNode;
 
                 // Verify within time window for pickup (inclusive)
-                if (currentTime < call.pickupWindow.first) {
+                if (currentTime < call.pickupWindow.start) {
                     // Wait if arrived early
-                    currentTime = call.pickupWindow.first;
+                    currentTime = call.pickupWindow.start;
                 }
-                if (currentTime > call.pickupWindow.second) {
+                if (currentTime > call.pickupWindow.end) {
                     // Arrived outside timewindow
                     this->feasibilityCache = std::make_pair(true, false);
                     return this->feasibilityCache.second;
                 }
 
                 // Pickup cargo at origin node (wait some time)
-                currentTime += vehicle.callTimeCost[callIndex-1].first.first;
+                currentTime += vehicle.callTimeCost[callIndex-1].first.time;
                 currentCapacity -= call.size;
                 startedCalls++;
 
@@ -92,22 +92,22 @@ bool Solution::isFeasible() {
                 Call call = this->problem->calls[callIndex-1];
 
                 // Travel to call origin node
-                currentTime += vehicle.routeTimeCost[currentNode-1][call.destinationNode-1].first;
+                currentTime += vehicle.routeTimeCost[currentNode-1][call.destinationNode-1].time;
                 currentNode = call.destinationNode;
 
                 // Verify within time window for delivery (inclusive)
-                if (currentTime < call.deliveryWindow.first) {
+                if (currentTime < call.deliveryWindow.start) {
                     // Wait if arrived early
-                    currentTime = call.deliveryWindow.first;
+                    currentTime = call.deliveryWindow.start;
                 }
-                if (currentTime > call.deliveryWindow.second) {
+                if (currentTime > call.deliveryWindow.end) {
                     // Arrived outside timewindow
                     this->feasibilityCache = std::make_pair(true, false);
                     return this->feasibilityCache.second;
                 }
 
                 // Deliver cargo at destination node (wait some time)
-                currentTime += vehicle.callTimeCost[callIndex-1].second.first;
+                currentTime += vehicle.callTimeCost[callIndex-1].second.time;
                 currentCapacity += call.size;
                 finishedCalls++;
                 

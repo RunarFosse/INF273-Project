@@ -2,15 +2,23 @@
 
 #include <vector>
 
-// TODO: Use specific structs instead of std::pair
+struct {
+    int time;
+    int cost;
+} typedef TimeCost;
+
+struct {
+    int start;
+    int end;
+} typedef Interval;
 
 struct {
     int homeNode;
     int startTime;
     int capacity;
     std::vector<int> possibleCalls;
-    std::vector<std::vector<std::pair<int, int>>> routeTimeCost;
-    std::vector<std::pair<std::pair<int, int>, std::pair<int, int>>> callTimeCost;
+    std::vector<std::vector<TimeCost>> routeTimeCost;
+    std::vector<std::pair<TimeCost, TimeCost>> callTimeCost;
 } typedef Vehicle;
 
 struct {
@@ -18,8 +26,8 @@ struct {
     int destinationNode;
     int size;
     int costOfNotTransporting;
-    std::pair<int, int> pickupWindow;
-    std::pair<int, int> deliveryWindow;
+    Interval pickupWindow;
+    Interval deliveryWindow;
 } typedef Call;
 
 class Problem {
