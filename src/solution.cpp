@@ -8,6 +8,14 @@ Solution::Solution(Problem* problem) {
     this->representation.reserve(problem->noVehicles + 2 * problem->noCalls);
 }
 
+Solution::Solution(Problem* problem, std::vector<int> representation) {
+    // Link problem to solution
+    this->problem = problem;
+
+    // Set representation to what is given
+    this->representation = representation;
+}
+
 Solution Solution::initialSolution(Problem* problem) {
     // Create an empty solution
     Solution solution(problem);

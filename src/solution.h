@@ -4,8 +4,6 @@
 #include <vector>
 #include <unordered_set>
 
-#include <iostream>
-
 #include "problem.h"
 
 class Solution {
@@ -41,8 +39,16 @@ class Solution {
      */
     int getCost();
 
+    /**
+     * @brief Construct a new Solution given representation as vector.
+     * 
+     * @param problem Problem to solve
+     * @param representation Given solution representation
+     */
+    Solution(Problem* problem, std::vector<int> representation);
+
     private:
-    // Only allow static instance creation
+    // Only allow static instance creation, unless created from given vector (above)
     Solution(Problem* problem);
 
     Problem* problem;
