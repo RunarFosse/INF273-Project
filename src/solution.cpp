@@ -54,6 +54,11 @@ bool Solution::isFeasible() {
         int currentNode = vehicle.homeNode;
 
         while (this->representation[i] != 0) {
+            if (i == this->representation.size()) {
+                // Not enough vehicles (there should be exactly noVehicles 0s in the representation)
+                this->feasibilityCache = std::make_pair(true, false);
+                return this->feasibilityCache.second;
+            }
             int callIndex = this->representation[i];
 
             if (possibleCalls.find(callIndex) == possibleCalls.end()) {
