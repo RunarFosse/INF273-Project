@@ -4,6 +4,8 @@ set (CMAKE_CXX_STANDARD 14)
 
 project(INF273)
 
+include_directories(src/headers)
+
 file(GLOB SOURCES
     src/*.h
     src/*.cpp
