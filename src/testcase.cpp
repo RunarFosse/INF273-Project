@@ -27,7 +27,7 @@ void InstanceRunner::blindRandomSearch(std::string instanceName, int experiments
         }
 
         // At the end of the experiment, count the current best cost towards the average cost
-        averageObjective += bestSolution.getCost() / experiments;
+        averageObjective += (double)bestSolution.getCost() / experiments;
         // and check if it is better than the current best overall solution
         if (bestSolution.getCost() < bestSolutionOverall.getCost()) {
             bestSolutionOverall = bestSolution;

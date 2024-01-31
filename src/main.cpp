@@ -15,10 +15,10 @@ int main(int argc, char const *argv[])
     // Run each test case given
     InstanceRunner::blindRandomSearch("Call_7_Vehicle_3", 10, 10000, rng);
     InstanceRunner::blindRandomSearch("Call_18_Vehicle_5", 10, 10000, rng);
-    //InstanceRunner::blindRandomSearch("Call_35_Vehicle_7", 10, 10000, rng);
-    //InstanceRunner::blindRandomSearch("Call_80_Vehicle_20", 10, 10000, rng);
-    //InstanceRunner::blindRandomSearch("Call_130_Vehicle_40", 10, 10000, rng);
-    //InstanceRunner::blindRandomSearch("Call_300_Vehicle_90", 10, 10000, rng);
+    InstanceRunner::blindRandomSearch("Call_35_Vehicle_7", 10, 10000, rng);
+    InstanceRunner::blindRandomSearch("Call_80_Vehicle_20", 10, 10000, rng);
+    InstanceRunner::blindRandomSearch("Call_130_Vehicle_40", 10, 10000, rng);
+    InstanceRunner::blindRandomSearch("Call_300_Vehicle_90", 10, 10000, rng);
 
     return 0;
 }
