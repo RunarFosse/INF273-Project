@@ -59,6 +59,7 @@ bool Solution::isFeasible() {
                 this->feasibilityCache = std::make_pair(true, false);
                 return this->feasibilityCache.second;
             }
+            
             int callIndex = this->representation[i];
 
             if (possibleCalls.find(callIndex) == possibleCalls.end()) {
