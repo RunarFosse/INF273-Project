@@ -33,6 +33,17 @@ Solution Solution::initialSolution(Problem* problem) {
     return solution;
 }
 
+Solution Solution::randomSolution(Problem* problem, std::default_random_engine& rng) {
+    // Create an initial solution
+    Solution solution = Solution::initialSolution(problem);
+
+    // Shuffle the representation of the initial solution
+    std::shuffle(solution.representation.begin(), solution.representation.end(), rng);
+
+    // Return the randomized solution
+    return solution;
+}
+
 bool Solution::isFeasible() {
     // Check if value is cached
     if (this->feasibilityCache.first) {
@@ -59,7 +70,7 @@ bool Solution::isFeasible() {
                 this->feasibilityCache = std::make_pair(true, false);
                 return this->feasibilityCache.second;
             }
-            
+
             int callIndex = this->representation[i];
 
             if (possibleCalls.find(callIndex) == possibleCalls.end()) {

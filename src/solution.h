@@ -2,6 +2,8 @@
 
 #include <memory>
 #include <vector>
+#include <random>
+#include <algorithm>
 #include <unordered_set>
 
 #include "problem.h"
@@ -19,6 +21,14 @@ class Solution {
      * @return Initial solution for the given problem
      */
     static Solution initialSolution(Problem* problem);
+
+    /**
+     * @brief Constructs a random solution, spanning the whole solution space.
+     * 
+     * @param problem Problem to solve
+     * @return Random solution for the given problem 
+     */
+    static Solution randomSolution(Problem* problem, std::default_random_engine& rng);
 
     /**
      * @brief Checks if the given solution is feasible.
