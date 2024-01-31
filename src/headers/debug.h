@@ -20,6 +20,17 @@ class Debugger {
      */
     static void printSolution(Solution* solution);
 
+    /**
+     * @brief Print the results of running a test instance.
+     * 
+     * @param instanceName Name of the instance ran
+     * @param averageObjective Average objective over all experiments
+     * @param bestObjective Best objective of all experiments
+     * @param improvement Percent improvement from the initial solution
+     * @param runningTime Total instance running time
+     */
+    static void printResults(std::string instanceName, double averageObjective, double bestObjective, double improvement, long long runningTime, Solution* bestSolution);
+
     private:
     // This is a static class, prevent class creation
     Debugger();

@@ -75,3 +75,19 @@ void Debugger::printSolution(Solution* solution) {
 
     std::cout << "]" << std::endl;
 };
+
+void Debugger::printResults(std::string instanceName, double averageObjective, double bestObjective, double improvement, long long runningTime, Solution* bestSolution) {
+    std::cout << std::endl;
+
+    std::cout << "Instance name     :    " << instanceName << std::endl;
+    std::cout << "Average objective :    " << std::to_string(averageObjective) << std::endl;
+    std::cout << "Best objective    :    " << std::to_string(bestObjective) << std::endl;
+    std::cout << "Improvement (%)   :    " << std::to_string(improvement) << " %" << std::endl;
+    std::cout << "Running time (ms) :    " << std::to_string(runningTime) << " ms" << std::endl;
+
+
+    std::cout << "Best solution     :    ";
+    Debugger::printSolution(bestSolution);
+
+    std::cout << std::endl;
+}

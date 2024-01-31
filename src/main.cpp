@@ -1,4 +1,5 @@
 #include <string>
+#include <chrono>
 #include <iostream>
 
 #include "solution.h"
@@ -7,22 +8,42 @@
 
 int main(int argc, char const *argv[])
 {
-    Problem problem = Parser::parseProblem("data/Call_7_Vehicle_3.txt");
 
-    //Solution solution = Solution::initialSolution(&problem);
-    //Solution solution = Solution({0, 2, 2, 0, 1, 5, 5, 3, 1, 3, 0, 7, 4, 6, 7, 4, 6}, &problem);
+    int EXPERIMENTS = 10;
+    int ITERATIONS = 10000;
+    std::string INSTANCE = "Call_7_Vehicle_3";
 
     std::default_random_engine rng = std::default_random_engine{std::random_device {}()};
-    
-    for (int i = 0; i < 10000; i++) {
-        Solution solution = Solution::randomSolution(&problem, rng);
 
-        if (solution.isFeasible()) {
-            Debugger::printSolution(&solution);
-            std::cout << "Solution is feasible!" << std::endl;
-            std::cout << "Total cost: " << std::to_string(solution.getCost()) << std::endl << std::endl;
+    Problem problem = Parser::parseProblem("data/" + INSTANCE + ".txt");
+    
+    Solution bestSolutionOverall = Solution::initialSolution(&problem);
+    double initialObjective = bestSolutionOverall.getCost();
+    double averageObjective = 0;
+    double bestObjective = initialObjective;
+
+    std::chrono::steady_clock::time_point timeStart = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < EXPERIMENTS; i++) {
+        Solution bestSolution = Solution::initialSolution(&problem);
+        for (int j = 0; j < ITERATIONS; j++) {
+            Solution solution = Solution::randomSolution(&problem, rng);
+
+            if (solution.isFeasible() && solution.getCost() < bestSolution.getCost()) {
+                bestSolution = solution;
+            }
+        }
+        averageObjective += bestSolution.getCost() / EXPERIMENTS;
+        if (bestSolution.getCost() < bestObjective) {
+            bestObjective = bestSolution.getCost();
+            bestSolutionOverall = bestSolution;
         }
     }
+    std::chrono::steady_clock::time_point timeEnd = std::chrono::high_resolution_clock::now();
+
+    double improvement = 100 * (initialObjective - bestObjective) / initialObjective;
+    long long runningTime = std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count();
+
+    Debugger::printResults(INSTANCE, averageObjective, bestObjective, improvement, runningTime, &bestSolutionOverall);
 
     return 0;
 }
