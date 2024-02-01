@@ -34,6 +34,8 @@ class Solution {
      * @brief Checks if the given solution is feasible.
      * Results are cached to prevent redundant computation.
      * 
+     * @note Solutions are assumed valid. Validity checks will NOT be done.
+     * 
      * @return true if feasible,
      * @return false if infeasible
      */

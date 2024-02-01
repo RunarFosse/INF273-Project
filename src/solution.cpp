@@ -51,13 +51,12 @@ bool Solution::isFeasible() {
     }
 
     int i = 0;
-    int startedCalls = 0, finishedCalls = 0;
-    std::vector<int> processedCalls(this->problem->noCalls);
 
     // Handle our vehicles
     for (int vehicleIndex = 1; vehicleIndex <= this->problem->noVehicles; vehicleIndex++) {
         Vehicle vehicle = this->problem->vehicles[vehicleIndex-1];
 
+        std::unordered_set<int> startedCalls;
         std::unordered_set<int> possibleCalls(vehicle.possibleCalls.begin(), vehicle.possibleCalls.end());
 
         int currentTime = vehicle.startTime;
@@ -65,12 +64,6 @@ bool Solution::isFeasible() {
         int currentNode = vehicle.homeNode;
 
         while (this->representation[i] != 0) {
-            if (i == this->representation.size()) {
-                // Not enough vehicles (there should be exactly noVehicles 0s in the representation)
-                this->feasibilityCache = std::make_pair(true, false);
-                return this->feasibilityCache.second;
-            }
-
             int callIndex = this->representation[i];
 
             if (possibleCalls.find(callIndex) == possibleCalls.end()) {
@@ -79,8 +72,8 @@ bool Solution::isFeasible() {
                 return this->feasibilityCache.second;
             }
 
-            if (processedCalls[callIndex-1] == 0) {
-                processedCalls[callIndex-1]++;
+            if (startedCalls.find(callIndex) == startedCalls.end()) {
+                startedCalls.insert(callIndex);
                 // Pickup call cargo
                 Call call = this->problem->calls[callIndex-1];
                 
@@ -102,7 +95,6 @@ bool Solution::isFeasible() {
                 // Pickup cargo at origin node (wait some time)
                 currentTime += vehicle.callTimeCost[callIndex-1].first.time;
                 currentCapacity -= call.size;
-                startedCalls++;
 
                 // Verify capacity is not exceeded
                 if (currentCapacity < 0) {
@@ -111,8 +103,7 @@ bool Solution::isFeasible() {
                     return this->feasibilityCache.second;
                 }
                 
-            } else if (processedCalls[callIndex-1]== 1) {
-                processedCalls[callIndex-1]++;
+            } else {
                 // Deliver call cargo
                 Call call = this->problem->calls[callIndex-1];
 
@@ -134,18 +125,12 @@ bool Solution::isFeasible() {
                 // Deliver cargo at destination node (wait some time)
                 currentTime += vehicle.callTimeCost[callIndex-1].second.time;
                 currentCapacity += call.size;
-                finishedCalls++;
-                
-            } else {
-                // Call is processed more than twice, error
-                this->feasibilityCache = std::make_pair(true, false);
-                return this->feasibilityCache.second;
             }
             i++;
         }
 
-        // Verify that all picked up calls were delivered
-        if (startedCalls != finishedCalls) {
+        // Verify that all picked up calls were delivered (Only validity check as it is efficient to compute)
+        if (currentCapacity != vehicle.capacity) {
             // Did not finish all started calls
             this->feasibilityCache = std::make_pair(true, false);
             return this->feasibilityCache.second;
@@ -154,31 +139,7 @@ bool Solution::isFeasible() {
         i++;
     }
 
-    // Handle outsourced calls
-    while (i < this->representation.size()) {
-        int callIndex = this->representation[i];
-
-        if (processedCalls[callIndex-1] == 0) {
-            processedCalls[callIndex-1]++;
-            startedCalls++;
-        } else if (processedCalls[callIndex-1] == 1) {
-            processedCalls[callIndex-1]++;
-            finishedCalls++;
-        } else {
-            // Call is processed more than twice, error (even if it is outsourced)
-            this->feasibilityCache = std::make_pair(true, false);
-            return this->feasibilityCache.second;
-        }
-
-        i++;
-    }
-
-    // Verify that all calls were handled
-    if (startedCalls != finishedCalls || finishedCalls != this->problem->noCalls) {
-        // Not all calls were handled
-        this->feasibilityCache = std::make_pair(true, false);
-        return this->feasibilityCache.second;
-    }
+    // We do not need to check outsource calls (feasible if solution is valid)
 
     // The solution is feasible!
     this->feasibilityCache = std::make_pair(true, true);
