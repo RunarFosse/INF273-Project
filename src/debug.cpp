@@ -1,5 +1,31 @@
 #include "debug.h"
 
+// Set values of private static variables
+bool Debugger::outputChanged = false;
+std::streambuf *Debugger::coutbuf = std::cout.rdbuf();
+std::ofstream Debugger::filebuf;
+
+void Debugger::outputToFile(std::string path) {
+    outputChanged = true;
+
+    // Redirect standard output to 'path'
+    filebuf = std::ofstream(path);
+    std::cout.rdbuf(filebuf.rdbuf());
+}
+
+void Debugger::printToTerminal(std::string message) {
+    // Redirect standard output to terminal
+    if (outputChanged) {
+        std::cout.rdbuf(coutbuf);
+    }
+    // Print the message
+    std::cout << message << std::endl;
+    // Redirect standard output back to what it was
+    if (outputChanged) {
+        std::cout.rdbuf(filebuf.rdbuf());
+    }
+}
+
 void Debugger::printProblem(Problem* problem, bool printMap) {
     std::cout << "Number of nodes: " << std::to_string(problem->noNodes) << std::endl;
     std::cout << "Number of vehicles: " << std::to_string(problem->noVehicles) << std::endl;

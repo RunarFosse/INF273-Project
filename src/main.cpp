@@ -9,8 +9,7 @@ int main(int argc, char const *argv[])
     std::default_random_engine rng = std::default_random_engine{std::random_device {}()};
 
     // Redirect standard output to 'results.txt'
-    std::ofstream out("results.txt");
-    std::cout.rdbuf(out.rdbuf());
+    Debugger::outputToFile("results.txt");
 
     // Run each test case given
     InstanceRunner::blindRandomSearch("Call_7_Vehicle_3", 10, 10000, rng);

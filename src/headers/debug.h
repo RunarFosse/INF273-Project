@@ -1,5 +1,6 @@
 #pragma once
 
+#include <fstream>
 #include <iostream>
 #include <string>
 
@@ -8,6 +9,20 @@
 
 class Debugger {
     public:
+    /**
+     * @brief Change standard output to file.
+     * 
+     * @param path Path of the given output file
+     */
+    static void outputToFile(std::string path);
+
+    /**
+     * @brief Prints a message to the terminal.
+     * 
+     * @param message 
+     */
+    static void printToTerminal(std::string message);
+
     /**
      * @brief Print the problem description to standard output.
      * 
@@ -36,4 +51,9 @@ class Debugger {
     private:
     // This is a static class, prevent class creation
     Debugger();
+
+    // Different outbuffers (terminal and file)
+    static bool outputChanged;
+    static std::streambuf *coutbuf;
+    static std::ofstream filebuf;
 };

@@ -1,6 +1,8 @@
 #include "testcase.h"
 
 void InstanceRunner::blindRandomSearch(std::string instanceName, int experiments, int iterations, std::default_random_engine& rng) {
+    Debugger::printToTerminal("Running Testcase: " + instanceName);
+
     // Parse the given test instance
     Problem problem = Parser::parseProblem("data/" + instanceName + ".txt");
     
