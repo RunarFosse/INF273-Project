@@ -28,6 +28,7 @@ struct {
     int costOfNotTransporting;
     Interval pickupWindow;
     Interval deliveryWindow;
+    std::vector<int> possibleVehicles;
 } typedef Call;
 
 class Problem {

@@ -106,6 +106,16 @@ Problem Parser::parseProblem(std::string path) {
             pointer1 = pointer2+1;
             upperbound = std::stoi(line.substr(pointer1));
             call->deliveryWindow = {lowerbound, upperbound};
+
+            // Add a vector containing all vehicles which can take this call
+            for (int vehicleIndex = 1; vehicleIndex <= problem.noVehicles; vehicleIndex++) {
+                for (int possibleCall : problem.vehicles[vehicleIndex-1].possibleCalls) {
+                    if (possibleCall == index) {
+                        call->possibleVehicles.push_back(vehicleIndex);
+                        break;
+                    }
+                }
+            }
         }
 
         // Parse time/cost per edge per vehicle
