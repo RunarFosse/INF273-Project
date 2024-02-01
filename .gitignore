@@ -15,7 +15,7 @@ _deps
 *.exe
 
 # Ignore output results
-results.txt
+results*.txt
 
 # Ignore .vscode
 .vscode
