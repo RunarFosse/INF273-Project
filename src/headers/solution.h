@@ -1,5 +1,6 @@
 #pragma once
 
+#include <queue>
 #include <memory>
 #include <vector>
 #include <random>
@@ -62,6 +63,12 @@ class Solution {
     private:
     // Only allow static instance creation, unless created from given vector (above)
     Solution(Problem* problem);
+
+    /**
+     * @brief Invalidates the current caches.
+     * Call whenever solution is modified.
+     */
+    void invalidateCache();
 
     Problem* problem;
     std::pair<bool, bool> feasibilityCache;

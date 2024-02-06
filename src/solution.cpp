@@ -34,11 +34,57 @@ Solution Solution::initialSolution(Problem* problem) {
 }
 
 Solution Solution::randomSolution(Problem* problem, std::default_random_engine& rng) {
-    // Create an initial solution
-    Solution solution = Solution::initialSolution(problem);
+    // Create an empty initial solution
+    Solution solution(problem);
 
-    // Shuffle the representation of the initial solution
-    std::shuffle(solution.representation.begin(), solution.representation.end(), rng);
+    // For each vehicle + outsource, initialize a vector
+    std::vector<std::deque<int>> vehicles(problem->noVehicles + 1);
+
+    // For each call
+    for (int callIndex = 1; callIndex <= problem->noCalls; callIndex++) {
+        // Retrieve the list of possible vehicles for this call
+        std::vector<int> possibleVehicles = problem->calls[callIndex-1].possibleVehicles;
+
+        // Pick a random vehicle which can take this call
+        std::uniform_int_distribution<std::size_t> distribution(0, possibleVehicles.size()+2);
+        int index = distribution(rng);
+
+        // Check if we should outsource the call (3x higher chance)
+        if (index >= possibleVehicles.size()) {
+            vehicles[vehicles.size()-1].push_back(callIndex);
+            vehicles[vehicles.size()-1].push_back(callIndex);
+            continue;
+        }
+
+        int vehicleIndex = possibleVehicles[index];
+        vehicles[vehicleIndex-1].push_back(callIndex);
+        vehicles[vehicleIndex-1].push_back(callIndex);
+    }
+
+    // Add the calls to the solution representation
+    for (int i = 0; i < vehicles.size(); i++) {
+        while (!vehicles[i].empty()) {
+            solution.representation.push_back(vehicles[i].front());
+            vehicles[i].pop_front();
+        }
+
+        // Add a 0 if not finished
+        if (i < vehicles.size() - 1) {
+            solution.representation.push_back(0);
+        }
+    }
+
+    int retries = 5;
+    do {
+        // Then shuffle the order of calls in our vehicles (not the outsourced as that is redundant)
+        std::vector<int>::iterator vehicleCallsBegin = solution.representation.begin(), vehicleCallsEnd = std::find(vehicleCallsBegin, solution.representation.end(), 0);
+        while (vehicleCallsEnd != solution.representation.end()) {
+            std::shuffle(vehicleCallsBegin, vehicleCallsEnd, rng);
+            vehicleCallsBegin = vehicleCallsEnd+1, vehicleCallsEnd = std::find(vehicleCallsBegin, solution.representation.end(), 0);
+        }
+        solution.invalidateCache();
+        retries--;
+    } while (!solution.isFeasible() && retries > 0);
 
     // Return the randomized solution
     return solution;
@@ -214,4 +260,9 @@ int Solution::getCost() {
     // Cache and return the computed cost
     this->costCache = std::make_pair(true, totalCost);
     return this->costCache.second;
+}
+
+void Solution::invalidateCache() {
+    this->feasibilityCache.first = false;
+    this->costCache.first = false;
 }
