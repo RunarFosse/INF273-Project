@@ -74,7 +74,7 @@ Solution Solution::randomSolution(Problem* problem, std::default_random_engine& 
         }
     }
 
-    int retries = 5;
+    int retries = 3;
     do {
         // Then shuffle the order of calls in our vehicles (not the outsourced as that is redundant)
         std::vector<int>::iterator vehicleCallsBegin = solution.representation.begin(), vehicleCallsEnd = std::find(vehicleCallsBegin, solution.representation.end(), 0);
