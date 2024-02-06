@@ -14,8 +14,8 @@ _deps
 # Ignore final executable
 *.exe
 
-# Ignore output results
-results*.txt
+# Ignore output results (in root folder)
+/results*.txt
 
 # Ignore .vscode
 .vscode
