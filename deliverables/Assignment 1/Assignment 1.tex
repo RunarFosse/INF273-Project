@@ -3,7 +3,7 @@
 \usepackage{enumitem}
 \usepackage{tikz}
 
-\title{\vspace{-2.0cm}INF 273 - Assignment 1}
+\title{\vspace{-2.0cm} Assignment 1}
 \author{Runar Fosse}
 \date{}
 
@@ -16,7 +16,7 @@
     \\[10pt]
     A good solution representation is one which encompasses all feasible solutions to the problem, while still not being so large that it covers a lot of invalid solutions. One should try to prevent duplicate solutions from being stored as different representations, and a solution representation should be easy to modify.
     \\[10pt]
-    We can store the route of the mothership as a list of node values. Whenever we want to drop off daughterships, we can insert a negative integer in the list. The absolute value of this integer denotes the "id" of said daughtership which is dropped off. Storing the integer as a negative means we easily can identify whenever we drop off any daughterships. For each daughtership we can store a seperate list containing their route in the same way we represented the mothership's route (just without any negative numbers).
+    We can store the route of the mothership as a list of node values. Whenever we want to drop off daughterships, we can insert a negative integer in the list. The absolute value of this integer denotes the "id" of said daughtership which is dropped off. Storing the integer as a negative means we easily can identify whenever we drop off any daughterships. For each daughtership we can store a separate list containing their route in the same way we represented the mothership's route (just without any negative numbers).
     \\[10pt]
     The daughterships do not need to store the port they start or end at, as this will be equal to the port where the mothership was located when they disembarked. We know implicitly given the requirements that at the start of a given daughtership's route they are located at this current port, and they will return to this same port at the end of their list.
     \\[10pt]
