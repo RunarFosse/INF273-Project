@@ -10,11 +10,14 @@ void InstanceRunner::blindRandomSearch(std::string instanceName, int experiments
     double initialObjective = bestSolutionOverall.getCost();
     double averageObjective = 0;
 
-    // Get the time before starting
-    std::chrono::steady_clock::time_point timeStart = std::chrono::high_resolution_clock::now();
+    // Keep track of average running time per experiment
+    double runningTime = 0;
 
     // Run the experiments
     for (int i = 0; i < experiments; i++) {
+        // Get the time before starting current experiment
+        std::chrono::steady_clock::time_point timeStart = std::chrono::high_resolution_clock::now();
+
         // Initialize the initial solution as the "current best"
         Solution bestSolution = Solution::initialSolution(&problem);
         // Run iterations per experiment
@@ -28,6 +31,12 @@ void InstanceRunner::blindRandomSearch(std::string instanceName, int experiments
             }
         }
 
+        // Get the time after ending current experiment
+        std::chrono::steady_clock::time_point timeEnd = std::chrono::high_resolution_clock::now();
+
+        // Calculate the running time as the difference between starttime and endtime, and add to average running time
+        runningTime += (double)std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count() / experiments;
+
         // At the end of the experiment, count the current best cost towards the average cost
         averageObjective += (double)bestSolution.getCost() / experiments;
         // and check if it is better than the current best overall solution
@@ -35,11 +44,6 @@ void InstanceRunner::blindRandomSearch(std::string instanceName, int experiments
             bestSolutionOverall = bestSolution;
         }
     }
-    // Get the time after ending
-    std::chrono::steady_clock::time_point timeEnd = std::chrono::high_resolution_clock::now();
-
-    // Calculate the running time as the difference between starttime and endtime
-    long long runningTime = std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count();
 
     // Calculate the improvement from the initial solution
     double improvement = 100 * (initialObjective - bestSolutionOverall.getCost()) / initialObjective;

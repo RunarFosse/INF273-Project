@@ -46,11 +46,19 @@ class Debugger {
      * @param improvement Percent improvement from the initial solution
      * @param runningTime Total instance running time
      */
-    static void printResults(std::string instanceName, double averageObjective, double bestObjective, double improvement, long long runningTime, Solution* bestSolution);
+    static void printResults(std::string instanceName, double averageObjective, double bestObjective, double improvement, double runningTime, Solution* bestSolution);
 
     private:
     // This is a static class, prevent class creation
     Debugger();
+
+    /**
+     * @brief Formats a double for printing.
+     * 
+     * @param number to format
+     * @return Formatted string
+     */
+    static std::string formatDouble(double number);
 
     // Different outbuffers (terminal and file)
     static bool outputChanged;
