@@ -34,8 +34,8 @@ void InstanceRunner::blindRandomSearch(std::string instanceName, int experiments
         // Get the time after ending current experiment
         std::chrono::steady_clock::time_point timeEnd = std::chrono::high_resolution_clock::now();
 
-        // Calculate the running time as the difference between starttime and endtime, and add to average running time
-        runningTime += (double)std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count() / experiments;
+        // Calculate the running time as the difference between starttime and endtime (in seconds), and add to average running time
+        runningTime += std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count() / (1000.0 * experiments);
 
         // At the end of the experiment, count the current best cost towards the average cost
         averageObjective += (double)bestSolution.getCost() / experiments;

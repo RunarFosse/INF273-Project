@@ -106,10 +106,10 @@ void Debugger::printResults(std::string instanceName, double averageObjective, d
     std::cout << std::endl;
 
     std::cout << "Instance name     :    " << instanceName << std::endl;
-    std::cout << "Average objective :    " << formatDouble(averageObjective) << std::endl;
-    std::cout << "Best objective    :    " << formatDouble(bestObjective) << std::endl;
+    std::cout << "Average objective :    " << formatDouble(averageObjective, 2) << std::endl;
+    std::cout << "Best objective    :    " << formatDouble(bestObjective, 2) << std::endl;
     std::cout << "Improvement (%)   :    " << std::to_string(improvement) << " %" << std::endl;
-    std::cout << "Running time (ms) :    " << formatDouble(runningTime) << " ms" << std::endl;
+    std::cout << "Running time (s)  :    " << formatDouble(runningTime, 3) << " s" << std::endl;
 
 
     std::cout << "Best solution     :    ";
@@ -118,11 +118,19 @@ void Debugger::printResults(std::string instanceName, double averageObjective, d
     std::cout << std::endl;
 }
 
-std::string Debugger::formatDouble(double number) {
+std::string Debugger::formatDouble(double number, int decimals) {
+    // Stringify number
     std::string string = std::to_string(number);
-    // Remove 4 last characters (leaving 2 decimal places)
-    for (int i = 0; i < 4; i++) {
+
+    // Prevent decimals being set to negative
+    if (decimals < 0) {
+        decimals = 0;
+    }
+
+    // Remove characters such that wanted number of decimals remain
+    for (int i = 0; i < 6 - decimals; i++) {
         string.pop_back();
     }
+
     return string;
 }

@@ -56,9 +56,10 @@ class Debugger {
      * @brief Formats a double for printing.
      * 
      * @param number to format
+     * @param decimals places after formatting
      * @return Formatted string
      */
-    static std::string formatDouble(double number);
+    static std::string formatDouble(double number, int decimals);
 
     // Different outbuffers (terminal and file)
     static bool outputChanged;
