@@ -19,7 +19,7 @@ void Debugger::printToTerminal(std::string message) {
         std::cout.rdbuf(coutbuf);
     }
     // Print the message
-    std::cout << message << std::endl;
+    std::cout << message << std::flush;
     // Redirect standard output back to what it was
     if (outputChanged) {
         std::cout.rdbuf(filebuf.rdbuf());
@@ -116,6 +116,39 @@ void Debugger::printResults(std::string instanceName, double averageObjective, d
     Debugger::printSolution(bestSolution);
 
     std::cout << std::endl;
+}
+
+void Debugger::printProgress(std::string title, int completed, int total) {
+    // Print title to terminal
+    Debugger::printToTerminal(title);
+
+    // End character (either newline or carriage return)
+    char terminator = (completed == total) ? '\n' : '\r';
+
+    // Create the bar
+    std::string bar = "  [";
+    bar.reserve(total);
+    while (total > 0) {
+        if (completed > 0) {
+            bar.push_back('#');
+            completed--;
+        } else {
+            bar.push_back('.');
+        }
+        total--;
+    }
+
+    bar.push_back(']');
+    bar.push_back(terminator);
+
+    // Output to terminal and set cursor back to start of line
+    Debugger::printToTerminal(bar);
+}
+
+void Debugger::displayCursor(bool show) {
+    // Uses ansi code to display or hide terminal cursor
+    std::string code = show ? "\e[?25h" : "\e[?25l";
+    Debugger::printToTerminal(code);
 }
 
 std::string Debugger::formatDouble(double number, int decimals) {

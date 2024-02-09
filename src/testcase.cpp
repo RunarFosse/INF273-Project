@@ -1,8 +1,6 @@
 #include "testcase.h"
 
 void InstanceRunner::blindRandomSearch(std::string instanceName, int experiments, int iterations, std::default_random_engine& rng) {
-    Debugger::printToTerminal("Running Testcase: " + instanceName);
-
     // Parse the given test instance
     Problem problem = Parser::parseProblem("data/" + instanceName + ".txt");
     
@@ -15,6 +13,9 @@ void InstanceRunner::blindRandomSearch(std::string instanceName, int experiments
 
     // Run the experiments
     for (int i = 0; i < experiments; i++) {
+        // Print progress bar
+        Debugger::printProgress("Running Testcase: " + instanceName, i, experiments);
+
         // Get the time before starting current experiment
         std::chrono::steady_clock::time_point timeStart = std::chrono::high_resolution_clock::now();
 
@@ -44,6 +45,9 @@ void InstanceRunner::blindRandomSearch(std::string instanceName, int experiments
             bestSolutionOverall = bestSolution;
         }
     }
+
+    // Fill the progress bar
+    Debugger::printProgress("Running Testcase: " + instanceName, experiments, experiments);
 
     // Calculate the improvement from the initial solution
     double improvement = 100 * (initialObjective - bestSolutionOverall.getCost()) / initialObjective;

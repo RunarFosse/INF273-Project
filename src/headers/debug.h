@@ -19,6 +19,8 @@ class Debugger {
     /**
      * @brief Prints a message to the terminal.
      * 
+     * @note Endline has to be included if intended. This function only flushes output buffer.
+     * 
      * @param message 
      */
     static void printToTerminal(std::string message);
@@ -48,6 +50,24 @@ class Debugger {
      */
     static void printResults(std::string instanceName, double averageObjective, double bestObjective, double improvement, double runningTime, Solution* bestSolution);
 
+    /**
+     * @brief Prints a title together with a progress bar to the terminal.
+     * 
+     * @note Only prints an ending newline character if completed == total.
+     * 
+     * @param title to be displayed left of loading bar
+     * @param completed pieces of loading bar which are filled in
+     * @param total size of loading bar
+     */
+    static void printProgress(std::string title, int completed, int total);
+
+    /**
+     * @brief Decide whether the cursor should display in the terminal.
+     * 
+     * @param show Show the cursor blinking
+     */
+    static void displayCursor(bool show);
+
     private:
     // This is a static class, prevent class creation
     Debugger();
@@ -55,8 +75,8 @@ class Debugger {
     /**
      * @brief Formats a double for printing.
      * 
-     * @param number to format
-     * @param decimals places after formatting
+     * @param number the number to format
+     * @param decimals decimal places after formatting
      * @return Formatted string
      */
     static std::string formatDouble(double number, int decimals);
