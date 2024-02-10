@@ -38,7 +38,7 @@ Solution Solution::randomSolution(Problem* problem, std::default_random_engine& 
     Solution solution(problem);
 
     // For each vehicle + outsource, initialize a vector
-    std::vector<std::deque<int>> vehicles(problem->noVehicles + 1);
+    std::vector<std::vector<int>> vehicles(problem->noVehicles + 1);
 
     // For each call
     for (int callIndex = 1; callIndex <= problem->noCalls; callIndex++) {
@@ -63,28 +63,20 @@ Solution Solution::randomSolution(Problem* problem, std::default_random_engine& 
 
     // Add the calls to the solution representation
     for (int i = 0; i < vehicles.size(); i++) {
-        while (!vehicles[i].empty()) {
-            solution.representation.push_back(vehicles[i].front());
-            vehicles[i].pop_front();
+        // Then shuffle the order of calls in our vehicles (not the outsourced as that is redundant)
+        bool isNotOutsourcing = i < vehicles.size() - 1;
+        if (isNotOutsourcing) {
+            std::shuffle(vehicles[i].begin(), vehicles[i].end(), rng);
+        }
+        for (int callIndex : vehicles[i]) {
+            solution.representation.push_back(callIndex);
         }
 
         // Add a 0 if not finished
-        if (i < vehicles.size() - 1) {
+        if (isNotOutsourcing) {
             solution.representation.push_back(0);
         }
     }
-
-    int retries = 3;
-    do {
-        // Then shuffle the order of calls in our vehicles (not the outsourced as that is redundant)
-        std::vector<int>::iterator vehicleCallsBegin = solution.representation.begin(), vehicleCallsEnd = std::find(vehicleCallsBegin, solution.representation.end(), 0);
-        while (vehicleCallsEnd != solution.representation.end()) {
-            std::shuffle(vehicleCallsBegin, vehicleCallsEnd, rng);
-            vehicleCallsBegin = vehicleCallsEnd+1, vehicleCallsEnd = std::find(vehicleCallsBegin, solution.representation.end(), 0);
-        }
-        solution.invalidateCache();
-        retries--;
-    } while (!solution.isFeasible() && retries > 0);
 
     // Return the randomized solution
     return solution;
