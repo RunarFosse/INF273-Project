@@ -1,5 +1,21 @@
 #include "testcase.h"
 
+void InstanceRunner::testAlgorithm(std::function<void(std::string, int, int, std::default_random_engine&)> algorithm, int experiments, int iterations, std::default_random_engine& rng) {
+    // Hide cursor from terminal
+    Debugger::displayCursor(false);
+    
+    // Run the given algorithm on all different testcases, given experiment and iteration count
+    algorithm("Call_7_Vehicle_3", experiments, iterations, rng);
+    algorithm("Call_18_Vehicle_5", experiments, iterations, rng);
+    algorithm("Call_35_Vehicle_7", experiments, iterations, rng);
+    algorithm("Call_80_Vehicle_20", experiments, iterations, rng);
+    algorithm("Call_130_Vehicle_40", experiments, iterations, rng);
+    algorithm("Call_300_Vehicle_90", experiments, iterations, rng);
+
+    // Show cursor in terminal
+    Debugger::displayCursor(true);
+}
+
 void InstanceRunner::blindRandomSearch(std::string instanceName, int experiments, int iterations, std::default_random_engine& rng) {
     // Parse the given test instance
     Problem problem = Parser::parseProblem("data/" + instanceName + ".txt");

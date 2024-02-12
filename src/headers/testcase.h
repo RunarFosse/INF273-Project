@@ -8,6 +8,16 @@
 class InstanceRunner {
     public:
     /**
+     * @brief Tests a given algorithm on all different testcases. Writes results to stdout and current progress to terminal.
+     * 
+     * @param algorithm Algorithm to test
+     * @param experiments Number of experiments to run
+     * @param iterations Number of iterations to run each experiment
+     * @param rng Random number generator engine
+     */
+    static void testAlgorithm(std::function<void(std::string, int, int, std::default_random_engine&)> algorithm, int experiments, int iterations, std::default_random_engine& rng);
+
+    /**
      * @brief Assignment 2. 
      * Runs 'Blind Random Search' on the given test case, outputting the results to standard output.
      * 
