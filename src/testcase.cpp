@@ -1,6 +1,10 @@
 #include "testcase.h"
 
 void InstanceRunner::testAlgorithm(std::function<void(std::string, int, int, std::default_random_engine&)> algorithm, int experiments, int iterations, std::default_random_engine& rng) {
+    
+    // Redirect standard output to 'results.txt'
+    Debugger::outputToFile("results.txt");
+
     // Hide cursor from terminal
     Debugger::displayCursor(false);
     
