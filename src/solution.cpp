@@ -16,6 +16,10 @@ Solution::Solution(std::vector<int> representation, Problem* problem) {
     this->representation = representation;
 }
 
+Solution Solution::copy() {
+    return Solution(this->representation, this->problem);
+}
+
 Solution Solution::initialSolution(Problem* problem) {
     // Create an empty solution
     Solution solution(problem);
@@ -79,6 +83,88 @@ Solution Solution::randomSolution(Problem* problem, std::default_random_engine& 
     }
 
     // Return the randomized solution
+    return solution;
+}
+
+Solution Solution::getNeighbour(std::default_random_engine& rng) {
+    // Create a copy of the current solution
+    Solution solution = this->copy();
+
+    // Select a random call
+    int callIndex = std::uniform_int_distribution<std::size_t>(1, solution.problem->noCalls)(rng);
+
+    // Retrieve the list of possible vehicles for this call
+    std::vector<int> possibleVehicles = problem->calls[callIndex-1].possibleVehicles;
+
+    // Then select a random vehicle (or outsource) to take this call instead
+    int index = std::uniform_int_distribution<std::size_t>(0, possibleVehicles.size())(rng), vehicleIndex;
+    if (index >= possibleVehicles.size()) {
+        vehicleIndex = solution.problem->noVehicles+1;
+    } else {
+        vehicleIndex = possibleVehicles[index];
+    }
+
+    // Find startIndex and endIndex of vehicle to take call
+    // aswell as finding vehicle index of which vehicle currently has the call
+    int startIndex = 0, endIndex = solution.representation.size();
+    int currentVehicle = 1, callIndexCurrentVehicle;
+    for (int i = 0; i < solution.representation.size(); i++) {
+        if (solution.representation[i] == callIndex) {
+            callIndexCurrentVehicle = currentVehicle;
+        }
+
+        if (solution.representation[i] == 0) {
+            currentVehicle++;
+
+            if (currentVehicle == vehicleIndex) {
+                startIndex = i+1;
+            } else if (currentVehicle == vehicleIndex + 1) {
+                endIndex = i;
+            }
+        }
+    }
+
+    // Select two random different indices to place callIndex under
+    if (callIndexCurrentVehicle < vehicleIndex) {
+        startIndex -= 2;
+    } else if (callIndexCurrentVehicle > vehicleIndex) {
+        endIndex += 2;
+    }
+    std::uniform_int_distribution<std::size_t> distribution(startIndex, endIndex-1);
+    int insert1 = distribution(rng), insert2 = distribution(rng);
+    if (insert1 == insert2) {
+        if (insert1 == endIndex-1) {
+            insert1--;
+        } else {
+            insert2++;
+        }
+    }
+
+    // Then iterate the solution representation, removing occurences of callIndex
+    // and inserting new ones under the random vehicleIndex indices
+    int skip = 0;
+    std::deque<int> buffer;
+    for (int i = 0; i < solution.representation.size(); i++) {
+        while (solution.representation[i+skip] == callIndex) {
+            skip++;
+        }
+
+        if (i+skip < solution.representation.size()) {
+            buffer.push_back(solution.representation[i+skip]);
+        } else {
+            // Don't read past allocated memory
+            buffer.push_back(-1);
+        }
+
+        if (i == insert1 || i == insert2) {
+            solution.representation[i] = callIndex;
+        } else {
+            solution.representation[i] = buffer.front();
+            buffer.pop_front();
+        }
+    }
+
+    // Return the modified neighbour solution
     return solution;
 }
 

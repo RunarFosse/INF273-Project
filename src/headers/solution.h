@@ -32,6 +32,14 @@ class Solution {
     static Solution randomSolution(Problem* problem, std::default_random_engine& rng);
 
     /**
+     * @brief Get a random neighbour following the 1-insert heuristic.
+     * 
+     * @param rng Random number generator engine
+     * @return Neighbour solution 
+     */
+    Solution getNeighbour(std::default_random_engine& rng);
+
+    /**
      * @brief Checks if the given solution is feasible.
      * Results are cached to prevent redundant computation.
      * 
@@ -59,6 +67,13 @@ class Solution {
      * @param problem Problem to solve
      */
     Solution(std::vector<int> representation, Problem* problem);
+
+    /**
+     * @brief Returns a copy of the current solution.
+     * 
+     * @return Copy of solution 
+     */
+    Solution copy();
 
     private:
     // Only allow static instance creation, unless created from given vector (above)
