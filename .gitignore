@@ -17,5 +17,6 @@ _deps
 # Ignore output results (in root folder)
 /results*.txt
 
-# Ignore .vscode
+# Ignore .vscode and .DS_Store
 .vscode
+.DS_Store
