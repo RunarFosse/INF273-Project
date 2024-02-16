@@ -1,7 +1,7 @@
 #include "testcase.h"
 
 void InstanceRunner::testAlgorithm(std::function<void(std::string, int, int, std::default_random_engine&)> algorithm, int experiments, int iterations, std::default_random_engine& rng) {
-    
+
     // Redirect standard output to 'results.txt'
     Debugger::outputToFile("results.txt");
 
@@ -74,4 +74,12 @@ void InstanceRunner::blindRandomSearch(std::string instanceName, int experiments
 
     // Print the results to standard output
     Debugger::printResults(instanceName, averageObjective, bestSolutionOverall.getCost(), improvement, runningTime, &bestSolutionOverall);
+}
+
+void InstanceRunner::localSearch(std::string instanceName, int experiments, int iterations, std::default_random_engine& rng) {
+    // TODO
+}
+
+void InstanceRunner::simulatedAnnealing(std::string instanceName, int experiments, int iterations, std::default_random_engine& rng) {
+    // TODO
 }

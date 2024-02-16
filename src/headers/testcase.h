@@ -28,6 +28,28 @@ class InstanceRunner {
      */
     static void blindRandomSearch(std::string instanceName, int experiments, int iterations, std::default_random_engine& rng);
 
+    /**
+     * @brief Assignment 3.
+     * Runs 'Local Search' on the given test case, outputting the results to standard output.
+     * 
+     * @param instanceName Name of the test case instance to run
+     * @param experiments Number of experiments to run
+     * @param iterations Number of iterations per experiment
+     * @param rng Random number generator (for randomness)
+     */
+    static void localSearch(std::string instanceName, int experiments, int iterations, std::default_random_engine& rng);
+
+    /**
+     * @brief Assignment 3.
+     * Runs 'Simulated Annealing' on the given test case, outputting the results to standard output.
+     * 
+     * @param instanceName Name of the test case instance to run
+     * @param experiments Number of experiments to run
+     * @param iterations Number of iterations per experiment
+     * @param rng Random number generator (for randomness)
+     */
+    static void simulatedAnnealing(std::string instanceName, int experiments, int iterations, std::default_random_engine& rng);
+
     private:
     // This is a static class, prevent class creation
     InstanceRunner();
