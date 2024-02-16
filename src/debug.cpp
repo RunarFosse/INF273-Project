@@ -120,10 +120,10 @@ void Debugger::printResults(std::string instanceName, double averageObjective, d
 
 void Debugger::printProgress(std::string title, int completed, int total) {
     // Print title to terminal
-    Debugger::printToTerminal(title);
+    Debugger::printToTerminal("\r" + title);
 
     // End character (either newline or carriage return)
-    char terminator = (completed == total) ? '\n' : '\r';
+    char terminator = (completed == total) ? '\n' : ' ';
 
     // Create the bar
     std::string bar = "  [";
