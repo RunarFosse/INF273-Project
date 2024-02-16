@@ -1,5 +1,7 @@
 #include "solution.h"
 
+#include "debug.h"
+
 Solution::Solution(Problem* problem) {
     // Link problem to solution
     this->problem = problem;
@@ -104,63 +106,59 @@ Solution Solution::getNeighbour(std::default_random_engine& rng) {
         vehicleIndex = possibleVehicles[index];
     }
 
-    // Find startIndex and endIndex of vehicle to take call
-    // aswell as finding vehicle index of which vehicle currently has the call
-    int startIndex = 0, endIndex = solution.representation.size();
-    int currentVehicle = 1, callIndexCurrentVehicle;
-    for (int i = 0; i < solution.representation.size(); i++) {
-        if (solution.representation[i] == callIndex) {
-            callIndexCurrentVehicle = currentVehicle;
-        }
-
-        if (solution.representation[i] == 0) {
-            currentVehicle++;
-
-            if (currentVehicle == vehicleIndex) {
-                startIndex = i+1;
-            } else if (currentVehicle == vehicleIndex + 1) {
-                endIndex = i;
-            }
-        }
-    }
-
-    // Select two random different indices to place callIndex under
-    if (callIndexCurrentVehicle < vehicleIndex) {
-        startIndex -= 2;
-    } else if (callIndexCurrentVehicle > vehicleIndex) {
-        endIndex += 2;
-    }
-    std::uniform_int_distribution<std::size_t> distribution(startIndex, endIndex-1);
-    int insert1 = distribution(rng), insert2 = distribution(rng);
-    if (insert1 == insert2) {
-        if (insert1 == endIndex-1) {
-            insert1--;
-        } else {
-            insert2++;
-        }
-    }
-
     // Then iterate the solution representation, removing occurences of callIndex
     // and inserting new ones under the random vehicleIndex indices
     int skip = 0;
     std::deque<int> buffer;
+    int currentVehicle = 1, inserted = 0;
+    int insert1 = -1, insert2 = -1;
     for (int i = 0; i < solution.representation.size(); i++) {
-        while (solution.representation[i+skip] == callIndex) {
-            skip++;
+        // If we haven't calculated insertion positions for call,
+        // and we are at the right vehicle, then do so
+        if (currentVehicle == vehicleIndex && insert1 == -1) {
+            bool hasCall = false;
+            int startIndex = i, endIndex = solution.representation.size();
+            for (int j = i+skip; j < solution.representation.size(); j++) {
+                if (solution.representation[j] == callIndex) {
+                    hasCall = true;
+                } else if (solution.representation[j] == 0) {
+                    endIndex = hasCall ? j : j+2;
+                    break;
+                }
+            }
+
+            std::uniform_int_distribution<std::size_t> distribution(startIndex, endIndex-1);
+            insert1 = distribution(rng), insert2 = distribution(rng);
+            if (insert1 == insert2) {
+                if (insert1 == endIndex-1) {
+                    insert1--;
+                } else {
+                    insert2++;
+                }
+            }
         }
 
+        // Skip instances of callIndex and read past "skipped" indices
         if (i+skip < solution.representation.size()) {
+            while (i+skip < solution.representation.size() && solution.representation[i+skip] == callIndex) {
+                skip++;
+            }
             buffer.push_back(solution.representation[i+skip]);
-        } else {
-            // Don't read past allocated memory
-            buffer.push_back(-1);
         }
 
+        // Insert callIndex if at insertion position,
+        // if not, insert from front of buffer
         if (i == insert1 || i == insert2) {
-            solution.representation[i] = callIndex;
+            inserted = callIndex;
         } else {
-            solution.representation[i] = buffer.front();
+            inserted = buffer.front();
             buffer.pop_front();
+        }
+        solution.representation[i] = inserted;
+
+        // Increment current vehicle if seperator is found
+        if (inserted == 0) {
+            currentVehicle++;
         }
     }
 
