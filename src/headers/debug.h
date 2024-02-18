@@ -42,13 +42,14 @@ class Debugger {
     /**
      * @brief Print the results of running a test instance.
      * 
-     * @param instanceName Name of the instance ran
+     * @param instance Name of the instance ran
+     * @param algorithm Name of the algorithm ran
      * @param averageObjective Average objective over all experiments
      * @param bestObjective Best objective of all experiments
      * @param improvement Percent improvement from the initial solution
      * @param runningTime Total instance running time
      */
-    static void printResults(std::string instanceName, double averageObjective, double bestObjective, double improvement, double runningTime, Solution* bestSolution);
+    static void printResults(std::string instance, std::string algorithm, double averageObjective, double bestObjective, double improvement, double runningTime, Solution* bestSolution);
 
     /**
      * @brief Prints a title together with a progress bar to the terminal.

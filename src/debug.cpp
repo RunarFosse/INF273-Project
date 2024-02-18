@@ -102,10 +102,10 @@ void Debugger::printSolution(Solution* solution) {
     std::cout << "]" << std::endl;
 };
 
-void Debugger::printResults(std::string instanceName, double averageObjective, double bestObjective, double improvement, double runningTime, Solution* bestSolution) {
+void Debugger::printResults(std::string instance, std::string algorithm, double averageObjective, double bestObjective, double improvement, double runningTime, Solution* bestSolution) {
     std::cout << std::endl;
 
-    std::cout << "Instance name     :    " << instanceName << std::endl;
+    std::cout << "Instance name     :    " << instance << std::endl;
     std::cout << "Average objective :    " << formatDouble(averageObjective, 2) << std::endl;
     std::cout << "Best objective    :    " << formatDouble(bestObjective, 2) << std::endl;
     std::cout << "Improvement (%)   :    " << std::to_string(improvement) << " %" << std::endl;
@@ -115,7 +115,7 @@ void Debugger::printResults(std::string instanceName, double averageObjective, d
     Debugger::printSolution(bestSolution);
     
     // "ready-to-copypaste"
-    std::cout << "LaTeX copypaste   :    " << "& ";
+    std::cout << "LaTeX copypaste   :    " << algorithm << " & ";
     std::cout << formatDouble(averageObjective, 2) << " & ";
     std::cout << formatDouble(bestObjective, 2) << " & ";
     std::cout << std::to_string(improvement) << " \\% & ";
