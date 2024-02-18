@@ -118,7 +118,7 @@ void Debugger::printResults(std::string instanceName, double averageObjective, d
     std::cout << "LaTeX copypaste   :    " << "& ";
     std::cout << formatDouble(averageObjective, 2) << " & ";
     std::cout << formatDouble(bestObjective, 2) << " & ";
-    std::cout << std::to_string(improvement) << " \% & ";
+    std::cout << std::to_string(improvement) << " \\% & ";
     std::cout << formatDouble(runningTime, 3) << " s\\\\" << std::endl;
 
     std::cout << std::endl;
