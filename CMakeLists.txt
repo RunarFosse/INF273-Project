@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.27)
 # Compile with C++14
 set (CMAKE_CXX_STANDARD 14)
 
+# Compile as release
+set (CMAKE_BUILD_TYPE RELEASE)
+
 # Set the project name to INF273
 project(INF273)
 
