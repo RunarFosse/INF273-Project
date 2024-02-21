@@ -186,8 +186,6 @@ void InstanceRunner::simulatedAnnealing(std::string instance, int experiments, i
             }
         }
 
-
-
         // Calculate annealing values
         double temperature_0 = -deltaAverage / log(explorationProbability);
         double alpha = pow(temperature_f / temperature_0, 1.0 / (iterations - warmupIterations));
