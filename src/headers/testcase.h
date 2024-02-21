@@ -16,7 +16,7 @@ class InstanceRunner {
      * @param iterations Number of iterations to run each experiment
      * @param rng Random number generator engine
      */
-    static void testAlgorithm(std::function<void(std::string, int, int, std::default_random_engine&)> algorithm, bool shallow, int experiments, int iterations, std::default_random_engine& rng);
+    static void testAlgorithm(std::function<void(std::string, int, int, std::default_random_engine&)> algorithm, int experiments, int iterations, std::default_random_engine& rng);
 
     /**
      * @brief Assignment 2. 

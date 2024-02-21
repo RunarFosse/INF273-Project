@@ -61,19 +61,19 @@ class Solution {
     int getCost();
 
     /**
+     * @brief Returns a copy of the current solution.
+     * 
+     * @return Copy of solution 
+     */
+    Solution copy();
+
+    /**
      * @brief Construct a new Solution given representation as vector.
      * 
      * @param representation Given solution representation
      * @param problem Problem to solve
      */
     Solution(std::vector<int> representation, Problem* problem);
-
-    /**
-     * @brief Returns a copy of the current solution.
-     * 
-     * @return Copy of solution 
-     */
-    Solution copy();
 
     private:
     // Only allow static instance creation, unless created from given vector (above)
