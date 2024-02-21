@@ -5,6 +5,7 @@ set (CMAKE_CXX_STANDARD 14)
 
 # Compile as release
 set (CMAKE_BUILD_TYPE RELEASE)
+set (CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 # Set the project name to INF273
 project(INF273)
