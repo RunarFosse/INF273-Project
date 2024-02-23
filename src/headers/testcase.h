@@ -1,9 +1,9 @@
 #include <cmath>
 #include <string>
 #include <random>
-#include <chrono>
 
 #include "parser.h"
+#include "timer.h"
 #include "debug.h"
 
 class InstanceRunner {

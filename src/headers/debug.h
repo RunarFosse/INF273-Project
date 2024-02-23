@@ -47,9 +47,9 @@ class Debugger {
      * @param averageObjective Average objective over all experiments
      * @param bestObjective Best objective of all experiments
      * @param improvement Percent improvement from the initial solution
-     * @param runningTime Total instance running time
+     * @param averageTime Average instance running time
      */
-    static void printResults(std::string instance, std::string algorithm, double averageObjective, double bestObjective, double improvement, double runningTime, Solution* bestSolution);
+    static void printResults(std::string instance, std::string algorithm, double averageObjective, double bestObjective, double improvement, double averageTime, Solution* bestSolution);
 
     /**
      * @brief Prints a title together with a progress bar to the terminal.

@@ -102,14 +102,14 @@ void Debugger::printSolution(Solution* solution) {
     std::cout << "]" << std::endl;
 };
 
-void Debugger::printResults(std::string instance, std::string algorithm, double averageObjective, double bestObjective, double improvement, double runningTime, Solution* bestSolution) {
+void Debugger::printResults(std::string instance, std::string algorithm, double averageObjective, double bestObjective, double improvement, double averageTime, Solution* bestSolution) {
     std::cout << std::endl;
 
     std::cout << "Instance name     :    " << instance << std::endl;
     std::cout << "Average objective :    " << formatDouble(averageObjective, 2) << std::endl;
     std::cout << "Best objective    :    " << formatDouble(bestObjective, 2) << std::endl;
     std::cout << "Improvement (%)   :    " << std::to_string(improvement) << " %" << std::endl;
-    std::cout << "Running time (s)  :    " << formatDouble(runningTime, 3) << " s" << std::endl;
+    std::cout << "Running time (s)  :    " << formatDouble(averageTime, 3) << " s" << std::endl;
 
     std::cout << "Best solution     :    ";
     Debugger::printSolution(bestSolution);
@@ -119,7 +119,7 @@ void Debugger::printResults(std::string instance, std::string algorithm, double 
     std::cout << formatDouble(averageObjective, 2) << " & ";
     std::cout << formatDouble(bestObjective, 2) << " & ";
     std::cout << std::to_string(improvement) << " \\% & ";
-    std::cout << formatDouble(runningTime, 3) << " s\\\\" << std::endl;
+    std::cout << formatDouble(averageTime, 3) << " s\\\\" << std::endl;
 
     std::cout << std::endl;
 }

@@ -8,9 +8,9 @@ void InstanceRunner::testAlgorithm(std::function<void(std::string, int, int, std
     algorithm("Call_7_Vehicle_3", experiments, iterations, rng);
     algorithm("Call_18_Vehicle_5", experiments, iterations, rng);
     algorithm("Call_35_Vehicle_7", experiments, iterations, rng);
-    algorithm("Call_80_Vehicle_20", experiments, iterations, rng);
-    algorithm("Call_130_Vehicle_40", experiments, iterations, rng);
-    algorithm("Call_300_Vehicle_90", experiments, iterations, rng);
+    //algorithm("Call_80_Vehicle_20", experiments, iterations, rng);
+    //algorithm("Call_130_Vehicle_40", experiments, iterations, rng);
+    //algorithm("Call_300_Vehicle_90", experiments, iterations, rng);
 
     // Show cursor in terminal
     Debugger::displayCursor(true);
@@ -21,20 +21,17 @@ void InstanceRunner::blindRandomSearch(std::string instance, int experiments, in
     Problem problem = Parser::parseProblem("data/" + instance + ".txt");
     std::string algorithm = "Blind Random Search";
 
+    // Create a timer object
+    Timer timer(algorithm + ": " + instance, experiments);
+
     Solution bestSolutionOverall = Solution::initialSolution(&problem);
     double initialObjective = bestSolutionOverall.getCost();
     double averageObjective = 0;
 
-    // Keep track of average running time per experiment
-    double runningTime = 0;
-
     // Run the experiments
     for (int i = 0; i < experiments; i++) {
-        // Print progress bar
-        Debugger::printProgress(algorithm + ": " + instance, i, experiments);
-
-        // Get the time before starting current experiment
-        std::chrono::steady_clock::time_point timeStart = std::chrono::high_resolution_clock::now();
+        // Start timer
+        timer.start();
 
         // Initialize the initial solution as the "current best"
         Solution bestSolution = Solution::initialSolution(&problem);
@@ -49,11 +46,8 @@ void InstanceRunner::blindRandomSearch(std::string instance, int experiments, in
             }
         }
 
-        // Get the time after ending current experiment
-        std::chrono::steady_clock::time_point timeEnd = std::chrono::high_resolution_clock::now();
-
-        // Calculate the running time as the difference between starttime and endtime (in seconds), and add to average running time
-        runningTime += std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count() / (1000.0 * experiments);
+        // Capture current time
+        timer.capture();
 
         // At the end of the experiment, count the current best cost towards the average cost
         averageObjective += (double)bestSolution.getCost() / experiments;
@@ -63,35 +57,33 @@ void InstanceRunner::blindRandomSearch(std::string instance, int experiments, in
         }
     }
 
-    // Fill the progress bar
-    Debugger::printProgress(algorithm + ": " + instance, experiments, experiments);
-
     // Calculate the improvement from the initial solution
     double improvement = 100 * (initialObjective - bestSolutionOverall.getCost()) / initialObjective;
 
+    // Retrieve runtime from timer
+    double averageTime = timer.retrieve();
+
     // Print the results to standard output
-    Debugger::printResults(instance, algorithm, averageObjective, bestSolutionOverall.getCost(), improvement, runningTime, &bestSolutionOverall);
+    Debugger::printResults(instance, algorithm, averageObjective, bestSolutionOverall.getCost(), improvement, averageTime, &bestSolutionOverall);
 }
 
 void InstanceRunner::localSearch(std::string instance, int experiments, int iterations, std::default_random_engine& rng) {
     // Parse the given test instance
     Problem problem = Parser::parseProblem("data/" + instance + ".txt");
     std::string algorithm = "Local Search";
+
+    // Create a timer object
+    Timer timer(algorithm + ": " + instance, experiments);
     
     Solution bestSolutionOverall = Solution::initialSolution(&problem);
     double initialObjective = bestSolutionOverall.getCost();
     double averageObjective = 0;
 
-    // Keep track of average running time per experiment
-    double runningTime = 0;
 
     // Run the experiments
     for (int i = 0; i < experiments; i++) {
-        // Print progress bar
-        Debugger::printProgress(algorithm + ": " + instance, i, experiments);
-
-        // Get the time before starting current experiment
-        std::chrono::steady_clock::time_point timeStart = std::chrono::high_resolution_clock::now();
+        // Start timer
+        timer.start();
 
         // Initialize the initial solution as the "current best"
         Solution bestSolution = Solution::initialSolution(&problem);
@@ -106,11 +98,8 @@ void InstanceRunner::localSearch(std::string instance, int experiments, int iter
             }
         }
 
-        // Get the time after ending current experiment
-        std::chrono::steady_clock::time_point timeEnd = std::chrono::high_resolution_clock::now();
-
-        // Calculate the running time as the difference between starttime and endtime (in seconds), and add to average running time
-        runningTime += std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count() / (1000.0 * experiments);
+        // Capture current time
+        timer.capture();
 
         // At the end of the experiment, count the current best cost towards the average cost
         averageObjective += (double)bestSolution.getCost() / experiments;
@@ -120,20 +109,23 @@ void InstanceRunner::localSearch(std::string instance, int experiments, int iter
         }
     }
 
-    // Fill the progress bar
-    Debugger::printProgress(algorithm + ": " + instance, experiments, experiments);
-
     // Calculate the improvement from the initial solution
     double improvement = 100 * (initialObjective - bestSolutionOverall.getCost()) / initialObjective;
 
+    // Retrieve runtime from timer
+    double averageTime = timer.retrieve();
+
     // Print the results to standard output
-    Debugger::printResults(instance, algorithm, averageObjective, bestSolutionOverall.getCost(), improvement, runningTime, &bestSolutionOverall);
+    Debugger::printResults(instance, algorithm, averageObjective, bestSolutionOverall.getCost(), improvement, averageTime, &bestSolutionOverall);
 }
 
 void InstanceRunner::simulatedAnnealing(std::string instance, int experiments, int iterations, std::default_random_engine& rng) {
     // Parse the given test instance
     Problem problem = Parser::parseProblem("data/" + instance + ".txt");
     std::string algorithm = "Simulated Annealing";
+
+    // Create a timer object
+    Timer timer(algorithm + ": " + instance, experiments);
     
     Solution bestSolutionOverall = Solution::initialSolution(&problem);
     double initialObjective = bestSolutionOverall.getCost();
@@ -143,18 +135,13 @@ void InstanceRunner::simulatedAnnealing(std::string instance, int experiments, i
     double explorationProbability = 0.8;
     int warmupIterations = iterations / 100;
 
+    // Declare uniform [0, 1) distribution
     std::uniform_real_distribution<double> random(0, 1);
-
-    // Keep track of average running time per experiment
-    double runningTime = 0;
 
     // Run the experiments
     for (int i = 0; i < experiments; i++) {
-        // Print progress bar
-        Debugger::printProgress(algorithm + ": " + instance, i, experiments);
-
-        // Get the time before starting current experiment
-        std::chrono::steady_clock::time_point timeStart = std::chrono::high_resolution_clock::now();
+        // Start timer
+        timer.start();
 
         // Initialize the initial solution as the "current best"
         Solution bestSolution = Solution::initialSolution(&problem);
@@ -215,11 +202,8 @@ void InstanceRunner::simulatedAnnealing(std::string instance, int experiments, i
             temperature *= alpha;
         }
 
-        // Get the time after ending current experiment
-        std::chrono::steady_clock::time_point timeEnd = std::chrono::high_resolution_clock::now();
-
-        // Calculate the running time as the difference between starttime and endtime (in seconds), and add to average running time
-        runningTime += std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count() / (1000.0 * experiments);
+        // Capture current time
+        timer.capture();
 
         // At the end of the experiment, count the current best cost towards the average cost
         averageObjective += (double)bestSolution.getCost() / experiments;
@@ -229,12 +213,12 @@ void InstanceRunner::simulatedAnnealing(std::string instance, int experiments, i
         }
     }
 
-    // Fill the progress bar
-    Debugger::printProgress(algorithm + ": " + instance, experiments, experiments);
-
     // Calculate the improvement from the initial solution
     double improvement = 100 * (initialObjective - bestSolutionOverall.getCost()) / initialObjective;
 
+    // Retrieve runtime from timer
+    double averageTime = timer.retrieve();
+
     // Print the results to standard output
-    Debugger::printResults(instance, algorithm, averageObjective, bestSolutionOverall.getCost(), improvement, runningTime, &bestSolutionOverall);
+    Debugger::printResults(instance, algorithm, averageObjective, bestSolutionOverall.getCost(), improvement, averageTime, &bestSolutionOverall);
 }
