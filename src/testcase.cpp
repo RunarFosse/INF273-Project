@@ -1,22 +1,22 @@
 #include "testcase.h"
 
-void InstanceRunner::testAlgorithm(std::function<void(std::string, int, int, std::default_random_engine&)> algorithm, int experiments, int iterations, std::default_random_engine& rng) {
+void InstanceRunner::testAlgorithm(std::function<void(Operator*, std::string, int, int, std::default_random_engine&)> algorithm, Operator* neighbourOperator, int experiments, int iterations, std::default_random_engine& rng) {
     // Hide cursor from terminal
     Debugger::displayCursor(false);
     
     // Run the given algorithm on all different testcases, given experiment and iteration count
-    algorithm("Call_7_Vehicle_3", experiments, iterations, rng);
-    algorithm("Call_18_Vehicle_5", experiments, iterations, rng);
-    algorithm("Call_35_Vehicle_7", experiments, iterations, rng);
-    algorithm("Call_80_Vehicle_20", experiments, iterations, rng);
-    algorithm("Call_130_Vehicle_40", experiments, iterations, rng);
-    algorithm("Call_300_Vehicle_90", experiments, iterations, rng);
+    algorithm(neighbourOperator, "Call_7_Vehicle_3", experiments, iterations, rng);
+    algorithm(neighbourOperator, "Call_18_Vehicle_5", experiments, iterations, rng);
+    algorithm(neighbourOperator, "Call_35_Vehicle_7", experiments, iterations, rng);
+    algorithm(neighbourOperator, "Call_80_Vehicle_20", experiments, iterations, rng);
+    algorithm(neighbourOperator, "Call_130_Vehicle_40", experiments, iterations, rng);
+    algorithm(neighbourOperator, "Call_300_Vehicle_90", experiments, iterations, rng);
 
     // Show cursor in terminal
     Debugger::displayCursor(true);
 }
 
-void InstanceRunner::blindRandomSearch(std::string instance, int experiments, int iterations, std::default_random_engine& rng) {
+void InstanceRunner::blindRandomSearch(Operator* neighbourOperator, std::string instance, int experiments, int iterations, std::default_random_engine& rng) {
     // Parse the given test instance
     Problem problem = Parser::parseProblem("data/" + instance + ".txt");
     std::string algorithm = "Blind Random Search";
@@ -67,7 +67,7 @@ void InstanceRunner::blindRandomSearch(std::string instance, int experiments, in
     Debugger::printResults(instance, algorithm, averageObjective, bestSolutionOverall.getCost(), improvement, averageTime, &bestSolutionOverall);
 }
 
-void InstanceRunner::localSearch(std::string instance, int experiments, int iterations, std::default_random_engine& rng) {
+void InstanceRunner::localSearch(Operator* neighbourOperator, std::string instance, int experiments, int iterations, std::default_random_engine& rng) {
     // Parse the given test instance
     Problem problem = Parser::parseProblem("data/" + instance + ".txt");
     std::string algorithm = "Local Search";
@@ -90,7 +90,7 @@ void InstanceRunner::localSearch(std::string instance, int experiments, int iter
         // Run iterations per experiment
         for (int j = 0; j < iterations; j++) {
             // Generate a new neighbour solution
-            Solution solution = bestSolution.getNeighbour(rng);
+            Solution solution = neighbourOperator->apply(bestSolution, rng);
 
             // Check if the solution is feasible and, if so, check if it is better than the current best
             if (solution.isFeasible() && solution.getCost() < bestSolution.getCost()) {
@@ -119,13 +119,13 @@ void InstanceRunner::localSearch(std::string instance, int experiments, int iter
     Debugger::printResults(instance, algorithm, averageObjective, bestSolutionOverall.getCost(), improvement, averageTime, &bestSolutionOverall);
 }
 
-void InstanceRunner::simulatedAnnealing(std::string instance, int experiments, int iterations, std::default_random_engine& rng) {
+void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string instance, int experiments, int iterations, std::default_random_engine& rng) {
     // Parse the given test instance
     Problem problem = Parser::parseProblem("data/" + instance + ".txt");
     std::string algorithm = "Simulated Annealing";
 
     // Create a timer object
-    Timer timer(algorithm + ": " + instance, experiments);
+    Timer timer = Timer(algorithm + ": " + instance, experiments);
     
     Solution bestSolutionOverall = Solution::initialSolution(&problem);
     double initialObjective = bestSolutionOverall.getCost();
@@ -152,7 +152,7 @@ void InstanceRunner::simulatedAnnealing(std::string instance, int experiments, i
         int updates = 1;
 
         for (int w = 0; w < warmupIterations; w++) {
-            Solution solution = incumbent.getNeighbour(rng);
+            Solution solution = neighbourOperator->apply(incumbent, rng);
 
             if (!solution.isFeasible()) {
                 continue;
@@ -182,7 +182,7 @@ void InstanceRunner::simulatedAnnealing(std::string instance, int experiments, i
         // Run iterations per experiment
         for (int j = 0; j < iterations - warmupIterations; j++) {
             // Generate a new neighbour solution
-            Solution solution = incumbent.getNeighbour(rng);
+            Solution solution = neighbourOperator->apply(incumbent, rng);
 
             if (!solution.isFeasible()) {
                 continue;

@@ -11,7 +11,6 @@
 
 class Solution {
     public:
-    std::vector<int> representation;
 
     /**
      * @brief Constructs the intial solution for the given problem.
@@ -27,17 +26,10 @@ class Solution {
      * @brief Constructs a random solution, spanning the whole solution space.
      * 
      * @param problem Problem to solve
+     * @param rng Random number generator Engine
      * @return Random solution for the given problem 
      */
     static Solution randomSolution(Problem* problem, std::default_random_engine& rng);
-
-    /**
-     * @brief Get a random neighbour following the 1-insert heuristic.
-     * 
-     * @param rng Random number generator engine
-     * @return Neighbour solution 
-     */
-    Solution getNeighbour(std::default_random_engine& rng);
 
     /**
      * @brief Checks if the given solution is feasible.
@@ -75,10 +67,6 @@ class Solution {
      */
     Solution(std::vector<int> representation, Problem* problem);
 
-    private:
-    // Only allow static instance creation, unless created from given vector (above)
-    Solution(Problem* problem);
-
     /**
      * @brief Invalidates the current caches.
      * Call whenever solution is modified.
@@ -86,6 +74,12 @@ class Solution {
     void invalidateCache();
 
     Problem* problem;
+    std::vector<int> representation;
+    
     std::pair<bool, bool> feasibilityCache;
     std::pair<bool, int> costCache;
+
+    private:
+    // Only allow static instance creation, unless created from given vector (above)
+    Solution(Problem* problem);
 };
