@@ -37,9 +37,9 @@ class Timer {
 
 
     private:
+    double average = 0;
     int iterations = 0;
     int experiments;
     std::string title;
-    double average;
     std::chrono::steady_clock::time_point started;
 };

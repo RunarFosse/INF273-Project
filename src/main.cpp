@@ -12,10 +12,7 @@ int main(int argc, char const *argv[])
     Operator* neighbourOperator = new OneInsert();
 
     // Run each test case given
-    Debugger::outputToFile("results_ls.txt");
-    InstanceRunner::testAlgorithm(InstanceRunner::localSearch, neighbourOperator, 10, 10000, rng);
-
-    Debugger::outputToFile("results_sa.txt");
+    Debugger::outputToFile("results.txt");
     InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, neighbourOperator, 10, 10000, rng);
 
     return 0;

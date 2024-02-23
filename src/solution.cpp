@@ -8,6 +8,7 @@ Solution::Solution(Problem* problem) {
 
     // Reserve representation size
     this->representation.reserve(problem->noVehicles + 2 * problem->noCalls);
+    this->seperators.reserve(problem->noVehicles);
 }
 
 Solution::Solution(std::vector<int> representation, Problem* problem) {
@@ -16,10 +17,30 @@ Solution::Solution(std::vector<int> representation, Problem* problem) {
 
     // Set representation to what is given
     this->representation = representation;
+
+    // Find the different seperators in the given solution
+    this->seperators.push_back(-1);
+    std::vector<int>::iterator pointer1 = representation.begin(), pointer2 = std::find(pointer1, representation.end(), 0);
+    while (pointer2 != representation.end()) {
+        this->seperators.push_back(std::distance(representation.begin(), pointer2));
+        pointer1 = pointer2, pointer2 = pointer2 = std::find(pointer1, representation.end(), 0);
+    }
 }
 
 Solution Solution::copy() {
-    return Solution(this->representation, this->problem);
+    // Create a new solution with the same problem
+    Solution solution = Solution(this->problem);
+
+    // Copy over representation and seperator vectors
+    solution.representation = this->representation;
+    solution.seperators = this->seperators;
+
+    // Copy over feasibility and cost
+    solution.feasibilityCache = std::make_pair(true, this->isFeasible());
+    solution.costCache = std::make_pair(true, this->getCost());
+
+    // Return copy
+    return solution;
 }
 
 Solution Solution::initialSolution(Problem* problem) {
@@ -27,8 +48,10 @@ Solution Solution::initialSolution(Problem* problem) {
     Solution solution(problem);
 
     // Outsource all calls
+    solution.seperators.push_back(-1);
     for (int i = 0; i < problem->noVehicles; i++) {
         solution.representation.push_back(0);
+        solution.seperators.push_back(i);
     }
     for (int callIndex = 1; callIndex <= problem->noCalls; callIndex++) {
         solution.representation.push_back(callIndex);
@@ -68,6 +91,7 @@ Solution Solution::randomSolution(Problem* problem, std::default_random_engine& 
     }
 
     // Add the calls to the solution representation
+    solution.seperators.push_back(-1);
     for (int i = 0; i < vehicles.size(); i++) {
         // Then shuffle the order of calls in our vehicles (not the outsourced as that is redundant)
         bool isNotOutsourcing = i < vehicles.size() - 1;
@@ -80,6 +104,7 @@ Solution Solution::randomSolution(Problem* problem, std::default_random_engine& 
 
         // Add a 0 if not finished
         if (isNotOutsourcing) {
+            solution.seperators.push_back(solution.representation.size());
             solution.representation.push_back(0);
         }
     }
@@ -188,6 +213,100 @@ bool Solution::isFeasible() {
     // The solution is feasible!
     this->feasibilityCache = std::make_pair(true, true);
     return this->feasibilityCache.second;
+}
+
+void Solution::updateFeasibility(int vehicleIndex) {
+    // Early return as outsource is always feasible
+    if (vehicleIndex == this->problem->noVehicles+1) {
+        this->feasibilityCache = std::make_pair(true, true);
+        return;
+    }  
+
+    int i = this->seperators[vehicleIndex-1]+1;
+    Vehicle vehicle = this->problem->vehicles[vehicleIndex-1];
+
+    std::unordered_set<int> startedCalls;
+    std::unordered_set<int> possibleCalls(vehicle.possibleCalls.begin(), vehicle.possibleCalls.end());
+
+    int currentTime = vehicle.startTime;
+    int currentCapacity = vehicle.capacity;
+    int currentNode = vehicle.homeNode;
+
+    while (this->representation[i] != 0) {
+        int callIndex = this->representation[i];
+
+        if (possibleCalls.find(callIndex) == possibleCalls.end()) {
+            // Vehicle incompatible with call
+            this->feasibilityCache = std::make_pair(true, false);
+            return;
+        }
+
+        if (startedCalls.find(callIndex) == startedCalls.end()) {
+            startedCalls.insert(callIndex);
+            // Pickup call cargo
+            Call call = this->problem->calls[callIndex-1];
+                
+            // Travel to call origin node
+            currentTime += vehicle.routeTimeCost[currentNode-1][call.originNode-1].time;
+            currentNode = call.originNode;
+
+            // Verify within time window for pickup (inclusive)
+            if (currentTime < call.pickupWindow.start) {
+                // Wait if arrived early
+                currentTime = call.pickupWindow.start;
+            }
+            if (currentTime > call.pickupWindow.end) {
+                // Arrived outside timewindow
+                this->feasibilityCache = std::make_pair(true, false);
+                return;
+            }
+
+            // Pickup cargo at origin node (wait some time)
+            currentTime += vehicle.callTimeCost[callIndex-1].first.time;
+            currentCapacity -= call.size;
+
+            // Verify capacity is not exceeded
+            if (currentCapacity < 0) {
+                // Capacity exceeded
+                this->feasibilityCache = std::make_pair(true, false);
+                return;
+            }
+            
+        } else {
+            // Deliver call cargo
+            Call call = this->problem->calls[callIndex-1];
+
+            // Travel to call destination node
+            currentTime += vehicle.routeTimeCost[currentNode-1][call.destinationNode-1].time;
+            currentNode = call.destinationNode;
+
+            // Verify within time window for delivery (inclusive)
+            if (currentTime < call.deliveryWindow.start) {
+                // Wait if arrived early
+                currentTime = call.deliveryWindow.start;
+            }
+            if (currentTime > call.deliveryWindow.end) {
+                // Arrived outside timewindow
+                this->feasibilityCache = std::make_pair(true, false);
+                return;
+            }
+
+            // Deliver cargo at destination node (wait some time)
+            currentTime += vehicle.callTimeCost[callIndex-1].second.time;
+            currentCapacity += call.size;
+        }
+        i++;
+    }
+
+    // Verify that all picked up calls were delivered (Only validity check as it is efficient to compute)
+    if (currentCapacity != vehicle.capacity) {
+        // Did not finish all started calls
+        this->feasibilityCache = std::make_pair(true, false);
+        return;
+    }
+
+    // The solution is feasible!
+    this->feasibilityCache = std::make_pair(true, true);
 }
 
 int Solution::getCost() {

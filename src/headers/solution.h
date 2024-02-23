@@ -43,6 +43,15 @@ class Solution {
     bool isFeasible();
 
     /**
+     * @brief Calculates feasibility of the solution, given that ONLY a specific vehicleIndex changed.
+     * 
+     * @note Solution is otherwise assumed to already be feasible.
+     * 
+     * @param vehicleIndex Specific vehicle which has changed
+     */
+    void updateFeasibility(int vehicleIndex);
+
+    /**
      * @brief Calculates and returns the cost of the solution.
      * Results are cached to prevent redundant computation.
      * 
@@ -51,6 +60,15 @@ class Solution {
      * @return Total cost of the solution
      */
     int getCost();
+
+    /**
+     * @brief Calculate the cost of the solution, given that ONLY a specific vehicleIndex changed;
+     * 
+     * @note Solutions are assumed feasible. No feasibility check will be ran.
+     * 
+     * @param vehicleIndex Specific vehicle which has changed
+     */
+    void updateCost(int vehicleIndex);
 
     /**
      * @brief Returns a copy of the current solution.
@@ -75,6 +93,9 @@ class Solution {
 
     Problem* problem;
     std::vector<int> representation;
+
+    std::vector<int> seperators;
+    std::vector<int> costs;
     
     std::pair<bool, bool> feasibilityCache;
     std::pair<bool, int> costCache;

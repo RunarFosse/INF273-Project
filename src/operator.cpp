@@ -100,8 +100,16 @@ Solution OneInsert::apply(Solution solution, std::default_random_engine& rng) {
         // Increment current vehicle if seperator is found
         if (solution.representation[i] == 0) {
             currentVehicle++;
+            solution.seperators[currentVehicle-1] = i;
         }
     }
+
+    // Invalidate the caches as we've modified the representation
+    solution.invalidateCache();
+
+    // Then greedily update the feasibility for modified vehicles
+    solution.updateFeasibility(callVehicle);
+    solution.updateFeasibility(vehicleIndex);
 
     // Return the modified neighbour solution
     return solution;
