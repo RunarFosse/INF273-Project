@@ -7,11 +7,12 @@ Timer::Timer(std::string title, int experiments) {
 
 void Timer::start() {
     Debugger::printProgress(this->title, this->iterations++, experiments);
-    this->lastStart = std::chrono::high_resolution_clock::now();
+    this->started = std::chrono::high_resolution_clock::now();
 }
 
 void Timer::capture() {
-    this->average += std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - this->lastStart).count() / (1000.0 * this->experiments);
+    std::chrono::steady_clock::time_point ended = std::chrono::high_resolution_clock::now();
+    this->average += std::chrono::duration_cast<std::chrono::milliseconds>(ended - this->started).count() / (1000.0 * this->experiments);
 }
 
 double Timer::retrieve() {

@@ -41,5 +41,5 @@ class Timer {
     int experiments;
     std::string title;
     double average;
-    std::chrono::steady_clock::time_point lastStart;
+    std::chrono::steady_clock::time_point started;
 };
