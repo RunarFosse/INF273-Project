@@ -9,9 +9,6 @@ int main(int argc, char const *argv[])
     std::default_random_engine rng{std::random_device {}()};
 
     // Run each test case given
-    Debugger::outputToFile("results_brs.txt");
-    InstanceRunner::testAlgorithm(InstanceRunner::blindRandomSearch, 10, 10000, rng);
-
     Debugger::outputToFile("results_ls.txt");
     InstanceRunner::testAlgorithm(InstanceRunner::localSearch, 10, 10000, rng);
 
