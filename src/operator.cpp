@@ -111,6 +111,10 @@ Solution OneInsert::apply(Solution solution, std::default_random_engine& rng) {
     solution.updateFeasibility(callVehicle);
     solution.updateFeasibility(vehicleIndex);
 
+    // Also greedily update the cost for the same vehicles
+    solution.updateCost(callVehicle);
+    solution.updateCost(vehicleIndex);
+
     // Return the modified neighbour solution
     return solution;
 }
