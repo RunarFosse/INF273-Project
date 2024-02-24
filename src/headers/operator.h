@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <random>
 
 #include "solution.h"
@@ -15,6 +16,30 @@ class Operator {
      * @return Neighbour solution
      */
     virtual Solution apply(Solution solution, std::default_random_engine& rng) = 0;
+};
+
+class UniformOperator : public Operator {
+    public:
+    /**
+     * @brief Create a Uniform Operator.
+     * Applying this has a uniform probability of applying any operator it contains.
+     * 
+     * @param operators Operators to apply, with a uniform probability each
+     */
+    UniformOperator(std::vector<Operator*> operators);
+
+    /**
+     * @brief Apply an operator to solution.
+     * Operator is chosen from any it contains with uniform probability.
+     * 
+     * @param solution Solution to apply an operator on
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution solution, std::default_random_engine& rng);
+
+    private:
+    std::vector<Operator*> operators;
 };
 
 class OneInsert : public Operator {

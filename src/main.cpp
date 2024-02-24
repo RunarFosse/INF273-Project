@@ -9,7 +9,10 @@ int main(int argc, char const *argv[])
     std::default_random_engine rng{std::random_device {}()};
 
     // Create a neighbourhood operator
-    Operator* neighbourOperator = new BestInsert();
+    Operator* neighbourOperator = new UniformOperator({
+        new BestInsert(),
+        new OneInsert(),
+    });
 
     // Run each test case given
     Debugger::outputToFile("results.txt");

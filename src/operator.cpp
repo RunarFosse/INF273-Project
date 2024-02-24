@@ -1,6 +1,16 @@
 #include "operator.h"
 
-#include "debug.h"
+UniformOperator::UniformOperator(std::vector<Operator*> operators) {
+    this->operators = operators;
+};
+
+Solution UniformOperator::apply(Solution solution, std::default_random_engine& rng) {
+    // Get a random operator from those this contains
+    int operatorIndex = std::uniform_int_distribution<std::size_t>(0, this->operators.size()-1)(rng);
+
+    // Apply it
+    return this->operators[operatorIndex]->apply(solution, rng);
+}
 
 Solution OneInsert::apply(Solution solution, std::default_random_engine& rng) {
     // Create a copy of the current solution
