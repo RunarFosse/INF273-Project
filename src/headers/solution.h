@@ -32,6 +32,46 @@ class Solution {
     static Solution randomSolution(Problem* problem, std::default_random_engine& rng);
 
     /**
+     * @brief Moves a call from wherever it currently is to index1 and index2.
+     * 
+     * @param callIndex Call to move
+     * @param index1 One position
+     * @param index2 Other position
+     */
+    void move(int callIndex, int index1, int index2);
+
+    /**
+     * @brief Greedily moves a call from wherever it currently is wihin to [from, to), index1 and index2.
+     * 
+     * @note Current occurence of call, index1 and index2 is assumed to be located within [from, to).
+     * 
+     * @param callIndex Call to move
+     * @param from Start index (inclusive)
+     * @param to End index (inclusive)
+     * @param index1 One position
+     * @param index2 Other position
+     */
+    void greedyMove(int callIndex, int from, int to, int index1, int index2);
+
+    /**
+     * @brief Outsource a given call. Everything handled automatically.
+     * 
+     * @param callIndex Call to outsource
+     * @return Resulting indices where call was inserted in solution representation
+     */
+    std::pair<int, int> outsource(int callIndex);
+
+    /**
+     * @brief Return the vehicle currently containing callIndex.
+     * 
+     * @note Solution is assumed to be feasible.
+     * 
+     * @param callIndex Call of which to find current vehicle of
+     * @return Vehicle index
+     */
+    int getVehicleWith(int callIndex);
+
+    /**
      * @brief Checks if the given solution is feasible.
      * Results are cached to prevent redundant computation.
      * 

@@ -24,7 +24,7 @@ Solution::Solution(std::vector<int> representation, Problem* problem) {
     std::vector<int>::iterator pointer1 = representation.begin(), pointer2 = std::find(pointer1, representation.end(), 0);
     while (pointer2 != representation.end()) {
         this->seperators.push_back(std::distance(representation.begin(), pointer2));
-        pointer1 = pointer2, pointer2 = pointer2 = std::find(pointer1, representation.end(), 0);
+        pointer1 = pointer2+1, pointer2 = std::find(pointer1, representation.end(), 0);
     }
 }
 
@@ -119,6 +119,117 @@ Solution Solution::randomSolution(Problem* problem, std::default_random_engine& 
 
     // Return the randomized solution
     return solution;
+}
+
+void Solution::greedyMove(int callIndex, int from, int to, int index1, int index2) {
+    // TODO: Make one-pass algorithm
+
+    int skip = 0;
+    for (int i = from; i+skip <= to; i++) {
+        while (i+skip < this->representation.size() && this->representation[i+skip] == callIndex) {
+            skip++;
+        }
+        if (i+skip < this->representation.size()) {
+            this->representation[i] = this->representation[i+skip];
+        }
+    }
+
+    std::deque<int> buffer;
+    int currentVehicle = 1;
+    for (int i = from; i <= to; i++) {
+        if (i == index1 || i == index2) {
+            buffer.push_back(this->representation[i]);
+            this->representation[i] = callIndex;
+        } else if (!buffer.empty()) {
+            buffer.push_back(this->representation[i]);
+            this->representation[i] = buffer.front();
+            buffer.pop_front();
+        }
+
+        if (this->representation[i] == 0) {
+            currentVehicle++;
+            this->seperators[currentVehicle-1] = i;
+        }
+    }
+
+    // Invalidate the cache
+    this->invalidateCache();
+}
+
+void Solution::move(int callIndex, int index1, int index2) {
+    // TODO: Make one-pass algorithm
+
+    int skip = 0;
+    for (int i = 0; i+skip < this->representation.size(); i++) {
+        while (i+skip < this->representation.size() && this->representation[i+skip] == callIndex) {
+            skip++;
+        }
+        if (i+skip < this->representation.size()) {
+            this->representation[i] = this->representation[i+skip];
+        }
+    }
+
+    std::deque<int> buffer;
+    int currentVehicle = 1;
+    for (int i = 0; i < this->representation.size(); i++) {
+        if (i == index1 || i == index2) {
+            buffer.push_back(this->representation[i]);
+            this->representation[i] = callIndex;
+        } else if (!buffer.empty()) {
+            buffer.push_back(this->representation[i]);
+            this->representation[i] = buffer.front();
+            buffer.pop_front();
+        }
+
+        if (this->representation[i] == 0) {
+            currentVehicle++;
+            this->seperators[currentVehicle-1] = i;
+        }
+    }
+
+    // Invalidate the cache
+    this->invalidateCache();
+}
+
+std::pair<int, int> Solution::outsource(int callIndex) {
+    // First find insertion position
+    int insertion;
+    for (int i = this->representation.size()-1; i >= 0; i--) {
+        if (this->representation[i] <= callIndex) {
+            insertion = i-1;
+            break;
+        }
+    }
+
+    // Then move call to those positions
+    this->move(callIndex, insertion, insertion+1);
+
+    // Return insertion indices
+    return std::make_pair(insertion, insertion+1);
+}
+
+int Solution::getVehicleWith(int callIndex) {
+    // Search all vehicles which can have callIndex
+    for (int vehicleIndex : this->problem->calls[callIndex-1].possibleVehicles) {
+        int startIndex = this->seperators[vehicleIndex-1]+1, endIndex = this->seperators[vehicleIndex];
+        for (int i = startIndex; i < endIndex; i++) {
+            if (this->representation[i] == callIndex) {
+                return vehicleIndex;
+            }
+        }
+    }
+
+    // If not, search outsourced
+    for (int i = this->representation.size()-1; i >= 0; i--) {
+        if (this->representation[i] == callIndex) {
+            return this->problem->noVehicles+1;
+        } else if (this->representation[i] == 0) {
+            break;
+        }
+    }
+
+    // Can't find call in feasible vehicles, throw error
+    assert(false);
 }
 
 bool Solution::isFeasible() {
@@ -224,6 +335,12 @@ bool Solution::isFeasible() {
 }
 
 void Solution::updateFeasibility(int vehicleIndex) {
+    // If previous solution was infeasible, assume this is as well
+    if (!this->feasibilityCache.second) {
+        this->feasibilityCache = std::make_pair(true, false);
+        return;
+    }
+
     // Early return as outsource is always feasible
     if (vehicleIndex == this->problem->noVehicles+1) {
         this->feasibilityCache = std::make_pair(true, true);

@@ -9,11 +9,17 @@ int main(int argc, char const *argv[])
     std::default_random_engine rng{std::random_device {}()};
 
     // Create a neighbourhood operator
-    Operator* neighbourOperator = new OneInsert();
+    Operator* neighbourOperator = new BestInsert();
 
     // Run each test case given
     Debugger::outputToFile("results.txt");
     InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, neighbourOperator, 10, 10000, rng);
+
+    // Verify correct implementation of operator
+    //Problem problem = Parser::parseProblem("data/Call_7_Vehicle_3.txt");
+    //Solution initial = Solution::initialSolution(&problem);
+    //Debugger::printSolution(&initial);
+    //Debugger::printToTerminal("Cost: " + std::to_string(initial.getCost()) + "\n");
 
     return 0;
 }
