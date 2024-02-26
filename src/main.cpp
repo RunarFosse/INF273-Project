@@ -10,8 +10,13 @@ int main(int argc, char const *argv[])
 
     // Create a neighbourhood operator
     Operator* neighbourOperator = new UniformOperator({
-        new BestInsert(),
+        new OneOutsource(),
         new OneInsert(),
+        new OneInsert(),
+        new GreedyInsert(),
+        new GreedyInsert(),
+        new GreedyInsert(),
+        //new BestInsert()
     });
 
     // Run each test case given

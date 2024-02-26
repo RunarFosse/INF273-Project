@@ -135,7 +135,7 @@ void Solution::greedyMove(int callIndex, int from, int to, int index1, int index
     }
 
     std::deque<int> buffer;
-    int currentVehicle = 1;
+    int currentVehicle = std::distance(this->seperators.begin(), std::upper_bound(this->seperators.begin(), this->seperators.end(), from));
     for (int i = from; i <= to; i++) {
         if (i == index1 || i == index2) {
             buffer.push_back(this->representation[i]);
@@ -151,9 +151,6 @@ void Solution::greedyMove(int callIndex, int from, int to, int index1, int index
             this->seperators[currentVehicle-1] = i;
         }
     }
-
-    // Invalidate the cache
-    this->invalidateCache();
 }
 
 void Solution::move(int callIndex, int index1, int index2) {
@@ -186,9 +183,6 @@ void Solution::move(int callIndex, int index1, int index2) {
             this->seperators[currentVehicle-1] = i;
         }
     }
-
-    // Invalidate the cache
-    this->invalidateCache();
 }
 
 std::pair<int, int> Solution::outsource(int callIndex) {
@@ -335,12 +329,6 @@ bool Solution::isFeasible() {
 }
 
 void Solution::updateFeasibility(int vehicleIndex) {
-    // If previous solution was infeasible, assume this is as well
-    if (!this->feasibilityCache.second) {
-        this->feasibilityCache = std::make_pair(true, false);
-        return;
-    }
-
     // Early return as outsource is always feasible
     if (vehicleIndex == this->problem->noVehicles+1) {
         this->feasibilityCache = std::make_pair(true, true);

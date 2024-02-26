@@ -1,5 +1,6 @@
 #pragma once
 
+#include <set>
 #include <vector>
 #include <random>
 
@@ -54,12 +55,42 @@ class OneInsert : public Operator {
     Solution apply(Solution solution, std::default_random_engine& rng);
 };
 
+class GreedyInsert : public Operator {
+    public:
+    /**
+     * @brief Apply greedy-insert heuristic operator to solution.
+     * Greedy-insert moves a random call to a random vehicle,
+     * and places it in the best possible position.
+     * 
+     * @param solution Solution to apply operator on
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution solution, std::default_random_engine& rng);
+};
+
 class BestInsert : public Operator {
     public:
     /**
      * @brief Apply best-insert heuristic operator to solution.
      * Best-insert moves a call to a position such that the new
      * solution is the best possible one could get by doing such a move.
+     * 
+     * @param solution Solution to apply operator on
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution solution, std::default_random_engine& rng);
+};
+
+class OneOutsource : public Operator {
+    public:
+    /**
+     * @brief Apply 1-outsource heuristic operator to solution.
+     * 1-outsource selects a random, not already outsourced call,
+     * and outsources it.
+     * 
+     * @note If all calls are outsourced it returns without modification.
      * 
      * @param solution Solution to apply operator on
      * @param rng Random number generator Engine
