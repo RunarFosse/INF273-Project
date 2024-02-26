@@ -11,10 +11,7 @@ int main(int argc, char const *argv[])
     // Create a neighbourhood operator
     Operator* neighbourOperator = new UniformOperator({
         new OneOutsource(),
-        new OneInsert(),
-        new OneInsert(),
-        new GreedyInsert(),
-        new GreedyInsert(),
+        new FullShuffle(),
         new GreedyInsert(),
         //new BestInsert()
     });

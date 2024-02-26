@@ -98,3 +98,17 @@ class OneOutsource : public Operator {
      */
     Solution apply(Solution solution, std::default_random_engine& rng);
 };
+
+class FullShuffle : public Operator {
+    public:
+    /**
+     * @brief Apply full-shuffle heuristic operator to solution.
+     * Full-shuffle selects up to 1/5 of all vehicles randomly and
+     * shuffles the solution representation part representing said vehicles.
+     * 
+     * @param solution Solution to apply operator on
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution solution, std::default_random_engine& rng);
+};
