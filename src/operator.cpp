@@ -368,21 +368,16 @@ Solution FullShuffle::apply(Solution solution, std::default_random_engine& rng) 
     // Create a copy of the current solution
     solution = solution.copy();
 
-    // Decide how many times to shuffle
-    int shuffles = std::uniform_int_distribution<std::size_t>(1, 1)(rng);
+    // Select a random vehicle
+    int vehicleIndex = std::uniform_int_distribution<std::size_t>(1, solution.problem->noVehicles)(rng);
 
-    for (int i = 0; i < shuffles; i++) {
-        // Select a random vehicle
-        int vehicleIndex = std::uniform_int_distribution<std::size_t>(1, solution.problem->noVehicles)(rng);
+    // Shuffle its solution representation part
+    int startIndex = solution.seperators[vehicleIndex-1]+1, endIndex = solution.seperators[vehicleIndex];
+    std::shuffle(solution.representation.begin() + startIndex, solution.representation.begin() + endIndex, rng);
 
-        // Shuffle its solution representation part
-        int startIndex = solution.seperators[vehicleIndex-1]+1, endIndex = solution.seperators[vehicleIndex];
-        std::shuffle(solution.representation.begin() + startIndex, solution.representation.begin() + endIndex, rng);
-
-        // Clear the caches and update the cost for the shuffled vehicle
-        solution.invalidateCache();
-        solution.updateCost(vehicleIndex);
-    }
+    // Clear the caches and update the cost for the shuffled vehicle
+    solution.invalidateCache();
+    solution.updateCost(vehicleIndex);
 
     return solution;
 }

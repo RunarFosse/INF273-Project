@@ -10,9 +10,11 @@ int main(int argc, char const *argv[])
 
     // Create a neighbourhood operator
     Operator* neighbourOperator = new UniformOperator({
+        new OneOutsource(),
         new GreedyOutsource(),
         new FullShuffle(),
         new GreedyInsert(),
+        new OneInsert()
     });
 
     // Run each test case given

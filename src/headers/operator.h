@@ -133,8 +133,8 @@ class FullShuffle : public Operator {
     public:
     /**
      * @brief Apply full-shuffle heuristic operator to solution.
-     * Full-shuffle selects 1-3 random vehicles and shuffles the
-     * solution representation part representing said vehicles.
+     * Full-shuffle selects a random vehicle and shuffles the
+     * solution representation part representing it.
      * 
      * @param solution Solution to apply operator on
      * @param rng Random number generator Engine
