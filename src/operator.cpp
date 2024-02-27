@@ -292,12 +292,33 @@ Solution OneOutsource::apply(Solution solution, std::default_random_engine& rng)
     return solution;
 }
 
+Solution FullOutsource::apply(Solution solution, std::default_random_engine& rng) {
+    // Create a copy of the current solution
+    solution = solution.copy();
+
+    // Select a random vehicle
+    int vehicleIndex = std::uniform_int_distribution<std::size_t>(1, solution.problem->noVehicles)(rng);
+
+    // Iterate and outsource all its calls
+    int startIndex = solution.seperators[vehicleIndex-1]+1, endIndex = solution.seperators[vehicleIndex];
+    for (int i = startIndex; i < endIndex; i += 2) {
+        solution.outsource(solution.representation[startIndex]);
+    }
+
+    // Invalidate cache and update cost
+    solution.invalidateCache();
+    solution.updateCost(vehicleIndex);
+    solution.updateCost(solution.problem->noVehicles+1);
+
+    return solution;
+}
+
 Solution FullShuffle::apply(Solution solution, std::default_random_engine& rng) {
     // Create a copy of the current solution
     solution = solution.copy();
 
     // Decide how many times to shuffle
-    int shuffles = std::uniform_int_distribution<std::size_t>(1, std::max(solution.problem->noVehicles / 5, 1))(rng);
+    int shuffles = std::uniform_int_distribution<std::size_t>(1, 1)(rng);
 
     for (int i = 0; i < shuffles; i++) {
         // Select a random vehicle

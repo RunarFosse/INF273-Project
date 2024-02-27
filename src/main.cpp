@@ -13,7 +13,6 @@ int main(int argc, char const *argv[])
         new OneOutsource(),
         new FullShuffle(),
         new GreedyInsert(),
-        //new BestInsert()
     });
 
     // Run each test case given
