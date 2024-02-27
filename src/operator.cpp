@@ -190,11 +190,8 @@ Solution BestInsert::apply(Solution solution, std::default_random_engine& rng) {
             // Move call to start of current vehicle as default before starting
             int temporaryStart = current.seperators[vehicleIndex-1];
             current.move(callIndex, temporaryStart+1, temporaryStart+2);
-            current.invalidateCache();
-            if (vehicleIndex == 1) {
+            if (vehicleIndex != vehicleCall) {
                 current.updateCost(vehicleCall);
-            } else {
-                current.updateCost(vehicleIndex-1);
             }
 
             int startIndex = current.seperators[vehicleIndex-1]+1, endIndex = current.seperators[vehicleIndex];

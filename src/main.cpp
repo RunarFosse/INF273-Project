@@ -14,7 +14,8 @@ int main(int argc, char const *argv[])
         new GreedyOutsource(),
         new FullShuffle(),
         new GreedyInsert(),
-        new OneInsert()
+        new OneInsert(),
+        new BestInsert()
     });
 
     // Run each test case given
