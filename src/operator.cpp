@@ -292,6 +292,57 @@ Solution OneOutsource::apply(Solution solution, std::default_random_engine& rng)
     return solution;
 }
 
+Solution GreedyOutsource::apply(Solution solution, std::default_random_engine& rng) {
+    // Create a copy of the current solution
+    solution = solution.copy();
+
+    // Extract all currently outsourced calls
+    std::set<int> outsourcedCalls;
+    for (int i = solution.representation.size()-1; i >= 0; i--) {
+        if (solution.representation[i] == 0) {
+            break;
+        }
+        outsourcedCalls.insert(solution.representation[i]);
+    }
+
+    // Compute all not-outsourced
+    std::vector<int> possibleCalls;
+    for (int callIndex = 1; callIndex <= solution.problem->noCalls; callIndex++) {
+        if (outsourcedCalls.find(callIndex) == outsourcedCalls.end()) {
+            possibleCalls.push_back(callIndex);
+        }
+    }
+
+    // If no call can be outsourced, return current solution
+    if (possibleCalls.empty()) {
+        return solution;
+    }
+
+    // For each call to outsource, find the best
+    int bestCost, bestCall, bestVehicleCall;
+    for (int callIndex : possibleCalls) {
+        Solution current = solution.copy();
+
+        int vehicleCall = current.getVehicleWith(callIndex);
+
+        current.outsource(callIndex);
+        current.updateCost(vehicleCall);
+        current.updateCost(current.problem->noVehicles+1);
+
+        if (current.getCost() < bestCost) {
+            bestCost = current.getCost();
+            bestCall = callIndex;
+            bestVehicleCall = vehicleCall;
+        }
+    }
+
+    // Outsource it and return new solution
+    solution.outsource(bestCall);
+    solution.updateCost(bestVehicleCall);
+    solution.updateCost(solution.problem->noVehicles+1);
+    return solution;
+}
+
 Solution FullOutsource::apply(Solution solution, std::default_random_engine& rng) {
     // Create a copy of the current solution
     solution = solution.copy();

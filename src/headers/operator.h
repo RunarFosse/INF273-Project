@@ -99,6 +99,22 @@ class OneOutsource : public Operator {
     Solution apply(Solution solution, std::default_random_engine& rng);
 };
 
+class GreedyOutsource : public Operator {
+    public:
+    /**
+     * @brief Apply greedy-outsource heuristic operator to solution.
+     * greedy-outsource selects the best, not already outsourced call,
+     * to outsource and outsources it.
+     * 
+     * @note If all calls are outsourced it returns without modification.
+     * 
+     * @param solution Solution to apply operator on
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution solution, std::default_random_engine& rng);
+};
+
 class FullOutsource : public Operator {
     public:
     /**
