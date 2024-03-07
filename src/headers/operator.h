@@ -142,3 +142,27 @@ class FullShuffle : public Operator {
      */
     Solution apply(Solution solution, std::default_random_engine& rng);
 };
+
+/**
+ * @brief Get all feasible insertion points for a given call and vehicle
+ * 
+ * @note Does not support outsourcing.
+ * 
+ * @param callIndex Call to insert
+ * @param vehicleIndex Vehicle to insert into
+ * @param solution Given solution to modify
+ * @return Vector of indices (index1, index2)
+ */
+std::vector<std::pair<int, int>> getFeasibleInsertions(int callIndex, int vehicleIndex, Solution* solution);
+
+/**
+ * @brief Calculate the two best insertion indices together with cost of a given call and vehicle.
+ * 
+ * @note Does not support outsourcing.
+ * 
+ * @param callIndex Call to insert
+ * @param vehicleIndex Vehicle to insert into
+ * @param solution Given solution to modify
+ * @return (bestCost, (index1, index2))
+ */
+std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleIndex, Solution* solution);

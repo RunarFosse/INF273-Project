@@ -111,6 +111,14 @@ class Solution {
     void updateCost(int vehicleIndex);
 
     /**
+     * @brief Get the times and capacities of a given vehicle.
+     * 
+     * @param vehicleIndex Given vehicle
+     * @return Returns the times and capacities as a pair (times, capacities)
+     */
+    std::pair<std::vector<int>, std::vector<int>> getDetails(int vehicleIndex);
+
+    /**
      * @brief Returns a copy of the current solution.
      * 
      * @return Copy of solution 
