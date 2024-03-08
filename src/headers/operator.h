@@ -43,10 +43,51 @@ class UniformOperator : public Operator {
     std::vector<Operator*> operators;
 };
 
+class WeightedOperator : public Operator {
+    public:
+    /**
+     * @brief Create a Weighted Operator.
+     * Applying samples a weighted probability distribution and applies the selected operator it contains.
+     * 
+     * @param operators Operators to apply, with a the given probability weight
+     */
+    WeightedOperator(std::vector<std::pair<Operator*, double>> operators);
+
+    /**
+     * @brief Apply an operator to solution.
+     * Operator is chosen from any it contains with weighted probability.
+     * 
+     * @param solution Solution to apply an operator on
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution solution, std::default_random_engine& rng);
+
+    private:
+    std::vector<Operator*> operators;
+    std::vector<double> weights;
+};
+
 class OneInsert : public Operator {
     public:
     /**
      * @brief Apply 1-insert heuristic operator to solution.
+     * 
+     * @param solution Solution to apply operator on
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution solution, std::default_random_engine& rng);
+};
+
+class NInsert : public Operator {
+    public:
+    /**
+     * @brief Apply n-insert heuristic operator to solution.
+     * n-insert selects n randomly selected calls and inserts
+     * them in a random feasible insertion point.
+     * 
+     * @note n is a random integer between 1 and 3.
      * 
      * @param solution Solution to apply operator on
      * @param rng Random number generator Engine
@@ -75,6 +116,8 @@ class BestInsert : public Operator {
      * @brief Apply best-insert heuristic operator to solution.
      * Best-insert moves a call to a position such that the new
      * solution is the best possible one could get by doing such a move.
+     * 
+     * @note Includes random dropout to speed up computations.
      * 
      * @param solution Solution to apply operator on
      * @param rng Random number generator Engine

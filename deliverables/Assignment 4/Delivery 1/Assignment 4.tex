@@ -1,0 +1,154 @@
+\documentclass[]{article}
+\usepackage{array}
+%opening
+
+\title{\vspace{-2.0cm} Assignment 4}
+\author{Runar Fosse}
+\date{}
+
+\begin{document}
+
+\maketitle
+I've modified 1-insert to only select random feasible indices, and implemented 4 other operators. 1-outsource, greedy-outsource, greedy-insert and best-insert.
+\\[10pt]
+1-outsource selects a random call and outsources it.
+\\[2pt]
+Greedy-outsource outsources the call such that the resulting solution is the cheapest it can be (given this 1 operation).
+\\[2pt]
+Greedy-insert selects a random call and a random vehicle, and inserts the call in the two positions which make the resulting solution the cheapest it can be.
+\\[2pt]
+Best-insert selects a random call and checks every position within every vehicle, and selects the vehicle and positions such that the resulting solution is as cheap as possible.
+
+\begin{table}[ht]
+
+\hskip-1.3cm\begin{tabular}{|m{3.2cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|}
+	\hline
+	\multicolumn{5}{|c|}{Instance: Call\_7\_Vehicle\_3}\\
+	\hline
+	 & Average objective & Best objective & Improvement (\%) & Running time\\
+	\hline
+	Random Search & 1410480.20 & 1134176.00 & 65.022906 \% & 1.646 s\\
+	\hline
+        Local Search 1-insert & 1225532.80 & 1134176.00 & 65.022906 \% & 0.336 s\\
+        \hline
+        Simulated Annealing 1-insert & 1134176.00 & 1134176.00 & 65.022906 \% & 0.267 s\\
+        \hline
+        SA-new operators (equal weights) & 1134176.00 & 1134176.00 & 65.022906 \% & 0.336 s\\
+        \hline
+        SA-new operators (tuned weights) & 1157113.40 & 1134176.00 & 65.022906 \% & 0.467 s\\
+        \hline
+	\multicolumn{5}{|m{14cm}|}{Best solution:  [4, 4, 2, 2, 0, 7, 7, 0, 1, 5, 5, 3, 3, 1, 0, 6, 6]}\\
+	\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+	\hskip-1.3cm\begin{tabular}{|m{3.2cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|}
+		\hline
+		\multicolumn{5}{|c|}{Instance: Call\_18\_Vehicle\_5}\\
+		\hline
+		& Average objective & Best objective & Improvement (\%) & Running time\\
+		\hline
+		Random Search & 5823937.20 & 4813395.00 & 46.277767 \% & 0.992 s\\
+		\hline
+        Local Search 1-insert & 2826767.30 & 2374420.00 & 73.499132 \% & 0.450 s\\
+        \hline
+        Simulated Annealing 1-insert & 2602245.20 & 2374420.00 & 73.499132 \% & 0.441 s\\
+        \hline
+        SA-new operators (equal weights) & 2602997.40 & 2374420.00 & 73.499132 \% & 0.863 s\\
+        \hline
+        SA-new operators (tuned weights) & 2564858.40 & 2382716.00 & 73.406540 \% & 1.348 s\\
+        \hline
+		\multicolumn{5}{|m{14cm}|}{Best solution:  [4, 4, 15, 15, 11, 11, 16, 16, 0, 6, 6, 5, 18, 5, 14, 17, 17, 14, 18, 0, 9, 8, 8, 9, 13, 13, 0, 7, 7, 3, 3, 10, 1, 10, 1, 0, 12, 12, 0, 2, 2]}\\
+		\hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+	\hskip-1.3cm\begin{tabular}{|m{3.2cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|}
+		\hline
+		\multicolumn{5}{|c|}{Instance: Call\_35\_Vehicle\_7}\\
+		\hline
+		& Average objective & Best objective & Improvement (\%) & Running time\\
+		\hline
+		Random Search & 17986369.00 & 14373301.00 & 21.832494 \% & 1.208 s\\
+		\hline
+        Local Search 1-insert & 7181838.70 & 6076993.00 & 66.950989 \% & 0.583 s\\
+        \hline
+        Simulated Annealing 1-insert & 5710323.50 & 5208574.00 & 71.673783 \% & 0.637 s\\
+        \hline
+        SA-new operators (equal weights) & 6043129.40 & 5401153.00 & 70.626465 \% & 1.659 s\\
+        \hline
+        SA-new operators (tuned weights) & 6018714.30 & 5335443.00 & 70.983821 \% & 3.241 s\\
+        \hline
+		\multicolumn{5}{|m{14cm}|}{Best solution: [4, 4, 23, 23, 11, 11, 7, 7, 21, 21, 0, 9, 12, 9, 35, 35, 10, 12, 10, 28, 28, 0, 19, 19, 24, 24, 13, 13, 25, 25, 31, 31, 0, 15, 34, 15, 30, 30, 27, 27, 34, 22, 22, 32, 32, 20, 20, 0, 8, 8, 18, 33, 18, 33, 5, 5, 2, 29, 29, 2, 0, 16, 16, 3, 3, 1, 26, 1, 26, 0, 14, 14, 17, 17, 0, 6, 6]}\\
+		\hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[!ht]
+	\hskip-1.3cm\begin{tabular}{|m{3.2cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|}
+		\hline
+		\multicolumn{5}{|c|}{Instance: Call\_80\_Vehicle\_20}\\
+		\hline
+		& Average objective & Best objective & Improvement (\%) & Running time\\
+		\hline
+		Random Search & 46770347.00 & 46770347.00 & 0.000000 \% & 2.235 s\\
+		\hline
+        Local Search 1-insert & 16717960.80 & 14829767.00 & 68.292373 \% & 2.534 s\\
+        \hline
+        Simulated Annealing 1-insert & 17164938.80 & 14732724.00 & 68.499862 \% & 2.576 s\\
+        \hline
+        SA-new operators (equal weights) & 12546732.50 & 11608524.00 & 75.179735 \% & 4.621 s\\
+        \hline
+        SA-new operators (tuned weights) & 12586355.70 & 11956945.00 & 74.434774 \% & 9.570 s\\
+        \hline
+		\multicolumn{5}{|m{14cm}|}{Best solution: [41, 34, 41, 59, 34, 17, 59, 58, 17, 58, 0, 22, 61, 22, 46, 61, 46, 16, 16, 0, 4, 4, 62, 35, 62, 42, 35, 3, 3, 42, 7, 7, 0, 1, 23, 23, 29, 29, 65, 1, 73, 65, 73, 10, 10, 0, 74, 67, 74, 28, 67, 36, 28, 36, 0, 54, 63, 63, 54, 5, 5, 33, 33, 0, 66, 66, 49, 49, 69, 48, 48, 69, 0, 39, 39, 55, 55, 80, 80, 50, 14, 50, 14, 0, 70, 21, 70, 21, 12, 72, 12, 72, 0, 8, 8, 0, 68, 26, 68, 26, 0, 11, 11, 20, 20, 0, 25, 25, 43, 79, 79, 43, 47, 47, 6, 6, 0, 76, 44, 44, 76, 0, 32, 45, 32, 45, 77, 27, 27, 77, 52, 56, 56, 52, 0, 9, 71, 9, 71, 19, 19, 0, 53, 30, 30, 57, 53, 57, 75, 75, 0, 38, 51, 38, 78, 78, 2, 2, 51, 24, 24, 0, 40, 40, 13, 13, 37, 31, 37, 31, 0, 60, 18, 60, 18, 0, 15, 15, 64, 64]}\\
+		\hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[!ht]
+	\hskip-1.3cm\begin{tabular}{|m{3.2cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|}
+		\hline
+		\multicolumn{5}{|c|}{Instance: Call\_130\_Vehicle\_40}\\
+		\hline
+		& Average objective & Best objective & Improvement (\%) & Running time\\
+		\hline
+		Random Search & 76627567.00 & 76627567.00 & 0.000000 \% & 3.671 s\\
+		\hline
+        Local Search 1-insert & 27005805.00 & 24953712.00 & 67.435072 \% & 7.316 s\\
+        \hline
+        Simulated Annealing 1-insert & 27155019.30 & 24305693.00 & 68.280745 \% & 6.171 s\\
+        \hline
+        SA-new operators (equal weights) & 19140223.00 & 18499049.00 & 75.858494 \% & 9.784 s\\
+        \hline
+        SA-new operators (tuned weights) & 18920781.60 & 18430148.00 & 75.948410 \% & 19.877 s\\
+        \hline
+		\multicolumn{5}{|m{14cm}|}{Best solution: [15, 15, 16, 16, 34, 68, 70, 34, 70, 68, 20, 20, 30, 53, 30, 53, 0, 60, 60, 108, 108, 125, 122, 91, 125, 122, 91, 0, 115, 69, 69, 115, 81, 94, 94, 12, 81, 12, 0, 106, 102, 106, 102, 65, 127, 65, 127, 0, 129, 129, 45, 17, 45, 17, 0, 126, 126, 130, 130, 110, 110, 48, 48, 0, 41, 55, 41, 55, 10, 10, 0, 5, 5, 99, 67, 99, 37, 67, 46, 36, 46, 77, 36, 37, 77, 0, 84, 98, 98, 114, 84, 114, 0, 3, 3, 88, 88, 90, 18, 18, 90, 0, 80, 80, 25, 25, 89, 9, 63, 9, 89, 63, 0, 32, 32, 22, 61, 22, 61, 59, 7, 7, 59, 64, 64, 0, 121, 121, 29, 95, 95, 29, 0, 49, 49, 97, 97, 0, 96, 96, 4, 4, 0, 54, 54, 0, 103, 103, 23, 23, 117, 117, 39, 39, 0, 21, 50, 50, 21, 0, 0, 33, 33, 112, 112, 28, 28, 0, 76, 76, 0, 123, 42, 74, 123, 74, 42, 118, 118, 104, 79, 79, 104, 0, 72, 124, 124, 72, 0, 38, 38, 31, 31, 0, 75, 75, 0, 66, 1, 66, 1, 0, 85, 73, 85, 109, 73, 109, 0, 44, 113, 58, 58, 113, 44, 52, 35, 52, 35, 0, 2, 2, 78, 78, 0, 0, 119, 119, 116, 116, 71, 14, 71, 14, 0, 87, 87, 128, 128, 0, 19, 19, 0, 43, 43, 0, 27, 27, 120, 120, 111, 83, 83, 111, 0, 13, 101, 13, 101, 0, 8, 82, 8, 47, 82, 56, 56, 47, 57, 57, 0, 11, 11, 107, 107, 26, 92, 92, 51, 51, 26, 0, 93, 93, 0, 86, 86, 100, 100, 62, 62, 40, 24, 24, 40, 0, 6, 6, 105, 105]}\\
+		\hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[!ht]
+	\hskip-1.3cm\begin{tabular}{|m{3.2cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|}
+		\hline
+		\multicolumn{5}{|c|}{Instance: Call\_300\_Vehicle\_90}\\
+		\hline
+		& Average objective & Best objective & Improvement (\%) & Running time\\
+		\hline
+		Random Search & 170784643.00 & 170784643.00 & 0.000000 \% & 8.944 s\\
+		\hline
+        Local Search 1-insert & 71054331.20 & 67580835.00 & 60.429208 \% & 24.332 s\\
+        \hline
+        Simulated Annealing 1-insert & 71107759.80 & 67246387.00 & 60.625039 \% & 23.887 s\\
+        \hline
+        SA-new operators (equal weights) & 41700787.80 & 40044181.00 & 76.552821 \% & 45.590 s\\
+        \hline
+        SA-new operators (tuned weights) & 41214511.30 & 39579640.00 & 76.824825 \% & 75.840 s\\
+        \hline
+		\multicolumn{5}{|m{14cm}|}{Best solution: [0, 96, 200, 96, 200, 0, 83, 83, 0, 7, 7, 0, 273, 61, 41, 273, 41, 61, 293, 293, 141, 182, 148, 141, 182, 3, 3, 148, 34, 50, 187, 34, 17, 17, 187, 50, 0, 224, 90, 90, 224, 0, 92, 92, 286, 212, 220, 212, 220, 286, 0, 167, 167, 236, 266, 236, 266, 0, 0, 15, 15, 271, 194, 164, 271, 194, 164, 80, 80, 0, 195, 195, 0, 23, 23, 284, 63, 284, 63, 0, 290, 290, 165, 165, 0, 240, 74, 74, 240, 0, 54, 54, 281, 281, 0, 183, 183, 95, 255, 95, 255, 0, 265, 265, 253, 253, 14, 292, 14, 292, 0, 0, 0, 279, 279, 0, 152, 208, 152, 207, 208, 65, 207, 131, 65, 131, 198, 198, 0, 123, 250, 250, 123, 0, 133, 300, 133, 300, 287, 287, 191, 297, 191, 297, 0, 32, 53, 53, 32, 0, 209, 51, 59, 209, 59, 140, 51, 140, 0, 26, 26, 0, 215, 295, 109, 295, 215, 109, 0, 171, 79, 294, 294, 171, 79, 0, 35, 277, 270, 277, 35, 270, 0, 0, 263, 263, 119, 119, 156, 156, 0, 272, 272, 204, 204, 104, 104, 0, 211, 89, 89, 211, 0, 10, 245, 10, 245, 177, 177, 97, 97, 0, 154, 154, 0, 24, 24, 234, 234, 21, 163, 163, 21, 0, 134, 134, 19, 19, 184, 124, 124, 184, 0, 43, 43, 5, 226, 226, 101, 5, 22, 22, 101, 0, 244, 244, 94, 40, 94, 27, 40, 56, 27, 56, 99, 12, 99, 12, 0, 274, 274, 46, 28, 46, 28, 166, 166, 0, 276, 276, 262, 262, 129, 186, 186, 129, 0, 136, 136, 49, 257, 257, 49, 64, 64, 0, 242, 242, 72, 291, 291, 72, 84, 84, 0, 179, 179, 233, 233, 70, 11, 11, 70, 117, 117, 0, 269, 269, 62, 151, 62, 58, 58, 151, 130, 130, 0, 145, 145, 153, 153, 8, 8, 0, 29, 29, 246, 246, 176, 283, 283, 176, 0, 248, 82, 82, 248, 249, 144, 249, 144, 44, 259, 259, 44, 0, 232, 150, 150, 232, 189, 275, 189, 275, 267, 267, 0, 218, 218, 118, 118, 71, 71, 205, 205, 107, 107, 106, 106, 0, 48, 264, 264, 181, 48, 203, 173, 73, 173, 203, 181, 73, 0, 230, 230, 219, 227, 115, 227, 219, 115, 0, 217, 217, 221, 122, 221, 122, 100, 100, 161, 161, 0, 39, 39, 235, 235, 33, 33, 139, 139, 0, 137, 137, 75, 75, 0, 126, 157, 157, 126, 296, 296, 0, 138, 138, 108, 108, 52, 52, 55, 55, 0, 159, 159, 0, 105, 210, 105, 98, 210, 120, 120, 98, 20, 20, 0, 206, 206, 149, 149, 132, 132, 0, 81, 85, 85, 81, 0, 37, 155, 1, 155, 121, 121, 229, 37, 229, 1, 0, 241, 76, 76, 241, 199, 112, 112, 199, 0, 169, 169, 4, 4, 0, 299, 225, 225, 288, 299, 13, 13, 288, 0, 239, 214, 214, 239, 0, 247, 247, 238, 238, 0, 103, 30, 103, 196, 30, 231, 196, 231, 0, 180, 180, 188, 188, 160, 160, 0, 174, 174, 125, 47, 47, 125, 2, 2, 0, 213, 142, 142, 213, 0, 278, 222, 278, 222, 42, 38, 38, 252, 252, 42, 0, 202, 146, 202, 146, 0, 147, 254, 147, 175, 175, 254, 0, 261, 237, 261, 237, 0, 223, 223, 0, 25, 68, 36, 25, 111, 268, 68, 69, 268, 69, 36, 111, 0, 66, 77, 77, 66, 0, 162, 162, 6, 6, 0, 280, 280, 170, 170, 16, 16, 192, 192, 190, 190, 0, 88, 185, 9, 9, 88, 185, 0, 201, 172, 172, 201, 128, 91, 128, 282, 91, 282, 18, 298, 298, 18, 0, 116, 116, 45, 285, 45, 285, 0, 158, 110, 158, 110, 197, 102, 197, 102, 0, 114, 178, 178, 114, 251, 113, 251, 113, 0, 168, 168, 243, 127, 243, 127, 93, 93, 0, 67, 57, 67, 57, 256, 228, 256, 258, 228, 258, 0, 86, 86, 216, 216, 60, 289, 60, 289, 0, 87, 87, 0, 135, 135, 260, 260, 0, 31, 31, 78, 78, 143, 143, 193, 193]}\\
+		\hline
+	\end{tabular}
+\end{table}
+\end{document}

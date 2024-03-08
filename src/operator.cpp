@@ -4,11 +4,26 @@
 
 UniformOperator::UniformOperator(std::vector<Operator*> operators) {
     this->operators = operators;
-};
+}
 
 Solution UniformOperator::apply(Solution solution, std::default_random_engine& rng) {
     // Get a random operator from those this contains
     int operatorIndex = std::uniform_int_distribution<std::size_t>(0, this->operators.size()-1)(rng);
+
+    // Apply it
+    return this->operators[operatorIndex]->apply(solution, rng);
+}
+
+WeightedOperator::WeightedOperator(std::vector<std::pair<Operator*, double>> operators) {
+    for (std::pair<Operator*, double> op : operators) {
+        this->operators.push_back(op.first);
+        this->weights.push_back(op.second);
+    }
+}
+
+Solution WeightedOperator::apply(Solution solution, std::default_random_engine& rng) {
+    // Get a weighted random operator from those this contains
+    int operatorIndex = std::discrete_distribution<std::size_t>(this->weights.begin(), this->weights.end())(rng);
 
     // Apply it
     return this->operators[operatorIndex]->apply(solution, rng);
@@ -48,6 +63,51 @@ Solution OneInsert::apply(Solution solution, std::default_random_engine& rng) {
     // Also greedily update the cost for the same vehicles
     solution.updateCost(vehicleCall);
     solution.updateCost(vehicleIndex);
+
+    // Return the modified neighbour solution
+    return solution;
+}
+
+Solution NInsert::apply(Solution solution, std::default_random_engine& rng) {
+    // First sample how big n should be
+    int n = std::uniform_int_distribution<std::size_t>(1, 3)(rng);
+
+    // Then, repeat n times
+    while (n-- > 0) {
+        // Create a copy of the current solution
+        Solution current = solution.copy();
+
+        // Select a random call
+        int callIndex = std::uniform_int_distribution<std::size_t>(1, solution.problem->noCalls)(rng);
+        int vehicleIndex = solution.problem->calls[callIndex-1].possibleVehicles[std::uniform_int_distribution<std::size_t>(0, solution.problem->calls[callIndex-1].possibleVehicles.size()-1)(rng)];
+
+        // Find the vehicle which currently has the call
+        int vehicleCall = current.getVehicleWith(callIndex);
+
+        // Get all feasible insertion indices
+        std::vector<std::pair<int, int>> feasibleIndices = getFeasibleInsertions(callIndex, vehicleIndex, &current);
+
+        // If no feasible insertions exist, continue 
+        if (feasibleIndices.empty()) {
+            continue;
+        }
+
+        // Then randomly sample two feasible indices
+        std::pair<int, int> index = feasibleIndices[std::uniform_int_distribution<std::size_t>(0, feasibleIndices.size()-1)(rng)];
+
+        // Insert the callIndex under the new vehicleIndex at random positions
+        solution.move(callIndex, index.first, index.second);
+
+        // Invalidate the caches as we've modified the representation
+        solution.invalidateCache();
+
+        // Then greedily update the feasibility for modified vehicles
+        solution.updateFeasibility(vehicleIndex);
+
+        // Also greedily update the cost for the same vehicles
+        solution.updateCost(vehicleCall);
+        solution.updateCost(vehicleIndex);
+    }
 
     // Return the modified neighbour solution
     return solution;
@@ -93,31 +153,25 @@ Solution BestInsert::apply(Solution solution, std::default_random_engine& rng) {
     int bestCall, bestVehicle, bestVehicleCall;
     std::pair<int, int> bestIndices;
 
-    // Check every call
-    for (int callIndex = 1; callIndex <= solution.problem->noCalls; callIndex++) {
-        // Random dropout, 30%
-        if (std::uniform_real_distribution<double>(0, 1)(rng) > 0.3) {
+    // Sample a random call and get all its feasible vehicles
+    int callIndex = std::uniform_int_distribution<std::size_t>(1, solution.problem->noCalls)(rng);
+    std::set<int> possibleVehicles(solution.problem->calls[callIndex-1].possibleVehicles.begin(), solution.problem->calls[callIndex-1].possibleVehicles.end());
+
+    // Find the current vehicle which has this call
+    int vehicleCall = solution.getVehicleWith(callIndex);
+
+    // Check to place within any (feasible) vehicle (not outsource)
+    for (int vehicleIndex = 1; vehicleIndex <= solution.problem->noVehicles; vehicleIndex++) {
+        if (possibleVehicles.find(vehicleIndex) == possibleVehicles.end()) {
             continue;
         }
+        // Get the best place to insert
+        std::pair<int, std::pair<int, int>> bestInsertion = getBestInsertion(callIndex, vehicleIndex, &solution);
 
-        // Create a copy of the current solution for moving current call
-        Solution current = solution.copy();
-
-        // Find the current vehicle which has this call
-        int vehicleCall = current.getVehicleWith(callIndex);
-
-        // Check to place within any vehicle (not outsource)
-        for (int vehicleIndex = 1; vehicleIndex <= solution.problem->noVehicles; vehicleIndex++) {
-            // Get the best place to insert
-            std::pair<int, std::pair<int, int>> bestInsertion = getBestInsertion(callIndex, vehicleIndex, &solution);
-
-            if (bestInsertion.first < bestCost) {
-                bestCost = bestInsertion.first;
-                bestCall = callIndex;
-                bestVehicle = vehicleIndex;
-                bestVehicleCall = vehicleCall;
-                bestIndices = bestInsertion.second;
-            }
+        if (bestInsertion.first < bestCost) {
+            bestCost = bestInsertion.first;
+            bestVehicle = vehicleIndex;
+            bestIndices = bestInsertion.second;
         }
     }
 
@@ -126,11 +180,11 @@ Solution BestInsert::apply(Solution solution, std::default_random_engine& rng) {
         return solution;
     }
 
-    // At end, move bestCall to bestIndices and return new solution
-    solution.move(bestCall, bestIndices.first, bestIndices.second);
+    // At end, move callIndex to bestIndices and return new solution
+    solution.move(callIndex, bestIndices.first, bestIndices.second);
     solution.updateCost(bestVehicle);
-    if (bestVehicle != bestVehicleCall) {
-        solution.updateCost(bestVehicleCall);
+    if (bestVehicle != vehicleCall) {
+        solution.updateCost(vehicleCall);
     }
 
     return solution;

@@ -9,12 +9,12 @@ int main(int argc, char const *argv[])
     std::default_random_engine rng{std::random_device {}()};
 
     // Create a neighbourhood operator
-    Operator* neighbourOperator = new UniformOperator({
-        new OneOutsource(),
-        //new GreedyOutsource(),
-        new OneInsert(),
-        new GreedyInsert(),
-        new BestInsert(),
+    Operator* neighbourOperator = new WeightedOperator({
+        std::make_pair(new OneOutsource(), 0.05),
+        std::make_pair(new GreedyOutsource(), 0.1),
+        std::make_pair(new OneInsert(), 0.2),
+        std::make_pair(new GreedyInsert(), 0.2),
+        std::make_pair(new BestInsert(), 0.45),
     });
 
     // Run each test case given
