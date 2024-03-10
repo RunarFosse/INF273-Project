@@ -68,51 +68,6 @@ Solution OneInsert::apply(Solution solution, std::default_random_engine& rng) {
     return solution;
 }
 
-Solution NInsert::apply(Solution solution, std::default_random_engine& rng) {
-    // First sample how big n should be
-    int n = std::uniform_int_distribution<std::size_t>(1, 3)(rng);
-
-    // Then, repeat n times
-    while (n-- > 0) {
-        // Create a copy of the current solution
-        Solution current = solution.copy();
-
-        // Select a random call
-        int callIndex = std::uniform_int_distribution<std::size_t>(1, solution.problem->noCalls)(rng);
-        int vehicleIndex = solution.problem->calls[callIndex-1].possibleVehicles[std::uniform_int_distribution<std::size_t>(0, solution.problem->calls[callIndex-1].possibleVehicles.size()-1)(rng)];
-
-        // Find the vehicle which currently has the call
-        int vehicleCall = current.getVehicleWith(callIndex);
-
-        // Get all feasible insertion indices
-        std::vector<std::pair<int, int>> feasibleIndices = getFeasibleInsertions(callIndex, vehicleIndex, &current);
-
-        // If no feasible insertions exist, continue 
-        if (feasibleIndices.empty()) {
-            continue;
-        }
-
-        // Then randomly sample two feasible indices
-        std::pair<int, int> index = feasibleIndices[std::uniform_int_distribution<std::size_t>(0, feasibleIndices.size()-1)(rng)];
-
-        // Insert the callIndex under the new vehicleIndex at random positions
-        solution.move(callIndex, index.first, index.second);
-
-        // Invalidate the caches as we've modified the representation
-        solution.invalidateCache();
-
-        // Then greedily update the feasibility for modified vehicles
-        solution.updateFeasibility(vehicleIndex);
-
-        // Also greedily update the cost for the same vehicles
-        solution.updateCost(vehicleCall);
-        solution.updateCost(vehicleIndex);
-    }
-
-    // Return the modified neighbour solution
-    return solution;
-}
-
 Solution GreedyInsert::apply(Solution solution, std::default_random_engine& rng) {
     // Create a current copy of the solution
     Solution current = solution.copy();
@@ -277,46 +232,6 @@ Solution GreedyOutsource::apply(Solution solution, std::default_random_engine& r
     solution.outsource(bestCall);
     solution.updateCost(bestVehicleCall);
     solution.updateCost(solution.problem->noVehicles+1);
-    return solution;
-}
-
-Solution FullOutsource::apply(Solution solution, std::default_random_engine& rng) {
-    // Create a copy of the current solution
-    solution = solution.copy();
-
-    // Select a random vehicle
-    int vehicleIndex = std::uniform_int_distribution<std::size_t>(1, solution.problem->noVehicles)(rng);
-
-    // Iterate and outsource all its calls
-    int startIndex = solution.seperators[vehicleIndex-1]+1, endIndex = solution.seperators[vehicleIndex];
-    for (int i = startIndex; i < endIndex; i += 2) {
-        solution.outsource(solution.representation[startIndex]);
-    }
-
-    // Invalidate cache and update cost
-    solution.invalidateCache();
-    solution.updateCost(vehicleIndex);
-    solution.updateCost(solution.problem->noVehicles+1);
-
-    return solution;
-}
-
-Solution FullShuffle::apply(Solution solution, std::default_random_engine& rng) {
-    // Create a copy of the current solution
-    solution = solution.copy();
-
-    // Select a random vehicle
-    int vehicleIndex = std::uniform_int_distribution<std::size_t>(1, solution.problem->noVehicles)(rng);
-
-    // Shuffle its solution representation part
-    int startIndex = solution.seperators[vehicleIndex-1]+1, endIndex = solution.seperators[vehicleIndex];
-    std::shuffle(solution.representation.begin() + startIndex, solution.representation.begin() + endIndex, rng);
-
-    // Clear the caches and update the cost for the shuffled vehicle
-    solution.invalidateCache();
-    solution.updateFeasibility(vehicleIndex);
-    solution.updateCost(vehicleIndex);
-
     return solution;
 }
 

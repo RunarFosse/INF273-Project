@@ -80,22 +80,6 @@ class OneInsert : public Operator {
     Solution apply(Solution solution, std::default_random_engine& rng);
 };
 
-class NInsert : public Operator {
-    public:
-    /**
-     * @brief Apply n-insert heuristic operator to solution.
-     * n-insert selects n randomly selected calls and inserts
-     * them in a random feasible insertion point.
-     * 
-     * @note n is a random integer between 1 and 3.
-     * 
-     * @param solution Solution to apply operator on
-     * @param rng Random number generator Engine
-     * @return Neighbour solution
-     */
-    Solution apply(Solution solution, std::default_random_engine& rng);
-};
-
 class GreedyInsert : public Operator {
     public:
     /**
@@ -150,34 +134,6 @@ class GreedyOutsource : public Operator {
      * to outsource and outsources it.
      * 
      * @note If all calls are outsourced it returns without modification.
-     * 
-     * @param solution Solution to apply operator on
-     * @param rng Random number generator Engine
-     * @return Neighbour solution
-     */
-    Solution apply(Solution solution, std::default_random_engine& rng);
-};
-
-class FullOutsource : public Operator {
-    public:
-    /**
-     * @brief Apply full-outsource heuristic operator to solution.
-     * full-outsource selects a random vehicle and outsources
-     * all its calls.
-     * 
-     * @param solution Solution to apply operator on
-     * @param rng Random number generator Engine
-     * @return Neighbour solution
-     */
-    Solution apply(Solution solution, std::default_random_engine& rng);
-};
-
-class FullShuffle : public Operator {
-    public:
-    /**
-     * @brief Apply full-shuffle heuristic operator to solution.
-     * Full-shuffle selects a random vehicle and shuffles the
-     * solution representation part representing it.
      * 
      * @param solution Solution to apply operator on
      * @param rng Random number generator Engine
