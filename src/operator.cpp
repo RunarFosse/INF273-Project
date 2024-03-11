@@ -103,46 +103,71 @@ Solution GreedyInsert::apply(Solution solution, std::default_random_engine& rng)
 }
 
 Solution BestInsert::apply(Solution solution, std::default_random_engine& rng) {
-    // Store best values
-    int bestCost = INT_MAX;
-    int bestCall, bestVehicle, bestVehicleCall;
-    std::pair<int, int> bestIndices;
+    // Create a current copy of the solution
+    Solution current = solution.copy();
 
-    // Sample a random call and get all its feasible vehicles
-    int callIndex = std::uniform_int_distribution<std::size_t>(1, solution.problem->noCalls)(rng);
-    std::set<int> possibleVehicles(solution.problem->calls[callIndex-1].possibleVehicles.begin(), solution.problem->calls[callIndex-1].possibleVehicles.end());
+    // Pick out the calls to move
+    int lowerbound = std::max(solution.problem->noCalls / 6, 1);
+    int upperbound = std::max(2 * solution.problem->noCalls / 3, 1);
+    int callsToMove = std::uniform_int_distribution<std::size_t>(lowerbound, upperbound)(rng);
+    std::vector<int> callIndices, allCalls;
+    for (int callIndex = 1; callIndex <= solution.problem->noCalls; callIndex++) {
+        allCalls.push_back(callIndex);
+    }
+    std::shuffle(allCalls.begin(), allCalls.end(), rng);
+    for (int i = 0; i < callsToMove; i++) {
+        callIndices.push_back(allCalls[i]);
+    }
 
-    // Find the current vehicle which has this call
-    int vehicleCall = solution.getVehicleWith(callIndex);
+    // Temporarily move all to outsource
+    current.outsourceSeveral(callIndices);
 
-    // Check to place within any (feasible) vehicle (not outsource)
-    for (int vehicleIndex = 1; vehicleIndex <= solution.problem->noVehicles; vehicleIndex++) {
-        if (possibleVehicles.find(vehicleIndex) == possibleVehicles.end()) {
+    // Then move each call to the best possible position
+    for (int callIndex : callIndices) {
+        // Store best values
+        int bestCost = INT_MAX;
+        int bestVehicle, bestVehicleCall;
+        std::pair<int, int> bestIndices;
+
+        // Get all possible vehicles to insert callIndex into
+        std::set<int> possibleVehicles(current.problem->calls[callIndex-1].possibleVehicles.begin(), current.problem->calls[callIndex-1].possibleVehicles.end());
+
+        // Find the current vehicle which has this call (in original solution)
+        int vehicleCall = solution.getVehicleWith(callIndex);
+
+        // Check to place within any (feasible) vehicle (not outsource)
+        for (int vehicleIndex = 1; vehicleIndex <= current.problem->noVehicles; vehicleIndex++) {
+            if (possibleVehicles.find(vehicleIndex) == possibleVehicles.end()) {
+                continue;
+            }
+            // Get the best place to insert
+            std::pair<int, std::pair<int, int>> bestInsertion = getBestInsertion(callIndex, vehicleIndex, &current);
+
+            if (bestInsertion.first < bestCost) {
+                bestCost = bestInsertion.first;
+                bestVehicle = vehicleIndex;
+                bestIndices = bestInsertion.second;
+            }
+        }
+
+        // If nothing has been found, keep call outsourced
+        if (bestCost == INT_MAX) {
+            current.updateCost(current.problem->noVehicles+1);
+            if (bestVehicle != vehicleCall) {
+                current.updateCost(vehicleCall);
+            }
             continue;
         }
-        // Get the best place to insert
-        std::pair<int, std::pair<int, int>> bestInsertion = getBestInsertion(callIndex, vehicleIndex, &solution);
 
-        if (bestInsertion.first < bestCost) {
-            bestCost = bestInsertion.first;
-            bestVehicle = vehicleIndex;
-            bestIndices = bestInsertion.second;
+        // At end, move callIndex to bestIndices and return new solution
+        current.move(callIndex, bestIndices.first, bestIndices.second);
+        current.updateCost(bestVehicle);
+        if (bestVehicle != vehicleCall) {
+            current.updateCost(vehicleCall);
         }
     }
 
-    // If nothing has been found, return solution unmodified
-    if (bestCost == INT_MAX) {
-        return solution;
-    }
-
-    // At end, move callIndex to bestIndices and return new solution
-    solution.move(callIndex, bestIndices.first, bestIndices.second);
-    solution.updateCost(bestVehicle);
-    if (bestVehicle != vehicleCall) {
-        solution.updateCost(vehicleCall);
-    }
-
-    return solution;
+    return current;
 }
 
 Solution OneOutsource::apply(Solution solution, std::default_random_engine& rng) {

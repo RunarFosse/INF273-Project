@@ -98,10 +98,7 @@ class BestInsert : public Operator {
     public:
     /**
      * @brief Apply best-insert heuristic operator to solution.
-     * Best-insert moves a call to a position such that the new
-     * solution is the best possible one could get by doing such a move.
-     * 
-     * @note Includes random dropout to speed up computations.
+     * Best-insert moves several calls to the current most optimal positions.
      * 
      * @param solution Solution to apply operator on
      * @param rng Random number generator Engine

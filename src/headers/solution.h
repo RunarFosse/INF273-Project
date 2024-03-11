@@ -1,5 +1,6 @@
 #pragma once
 
+#include <set>
 #include <queue>
 #include <memory>
 #include <vector>
@@ -60,6 +61,13 @@ class Solution {
      * @return Resulting indices where call was inserted in solution representation
      */
     std::pair<int, int> outsource(int callIndex);
+
+    /**
+     * @brief Outsource several given calls in one pass.
+     * 
+     * @param callIndices Calls to outsource
+     */
+    void outsourceSeveral(std::vector<int> callIndices);
 
     /**
      * @brief Return the vehicle currently containing callIndex.

@@ -205,6 +205,41 @@ std::pair<int, int> Solution::outsource(int callIndex) {
     return std::make_pair(insertion, insertion+1);
 }
 
+void Solution::outsourceSeveral(std::vector<int> callIndices) {
+    // Create a set
+    std::set<int> calls(callIndices.begin(), callIndices.end());
+
+    // Then outsource every single one in one pass
+    int currentVehicle = 1, i = 0, skip = 0;
+    while (currentVehicle <= this->problem->noVehicles) {
+        while (calls.find(this->representation[i+skip]) != calls.end()) {
+            skip++;
+        }
+
+        this->representation[i] = this->representation[i+skip];
+
+        // If passed a 0, update seperators
+        if (this->representation[i] == 0) {
+            this->seperators[currentVehicle] = i;
+            currentVehicle++;
+        }
+        i++;
+    }
+    
+    for (int callIndex : calls) {
+        while (i+skip < this->representation.size() && this->representation[i+skip] < callIndex) {
+            this->representation[i] = this->representation[i+skip];
+            i++;
+        }
+        if (i+skip < this->representation.size() && this->representation[i+skip] > callIndex) {
+            skip -= 2;
+        }
+        this->representation[i] = callIndex;
+        this->representation[i+1] = callIndex;
+        i += 2;
+    }
+}
+
 int Solution::getVehicleWith(int callIndex) {
     // Search all vehicles which can have callIndex
     for (int vehicleIndex : this->problem->calls[callIndex-1].possibleVehicles) {
