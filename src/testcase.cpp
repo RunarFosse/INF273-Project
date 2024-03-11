@@ -1,25 +1,25 @@
 #include "testcase.h"
 
-void InstanceRunner::testAlgorithm(std::function<void(Operator*, std::string, int, int, std::default_random_engine&)> algorithm, Operator* neighbourOperator, int experiments, int iterations, std::default_random_engine& rng) {
+void InstanceRunner::testAlgorithm(std::function<void(Operator*, std::string, int, int, std::default_random_engine&, std::string)> algorithm, Operator* neighbourOperator, int experiments, int iterations, std::default_random_engine& rng, std::string title) {
     // Hide cursor from terminal
     Debugger::displayCursor(false);
     
     // Run the given algorithm on all different testcases, given experiment and iteration count
-    algorithm(neighbourOperator, "Call_7_Vehicle_3", experiments, iterations, rng);
-    algorithm(neighbourOperator, "Call_18_Vehicle_5", experiments, iterations, rng);
-    algorithm(neighbourOperator, "Call_35_Vehicle_7", experiments, iterations, rng);
-    algorithm(neighbourOperator, "Call_80_Vehicle_20", experiments, iterations, rng);
-    algorithm(neighbourOperator, "Call_130_Vehicle_40", experiments, iterations, rng);
-    algorithm(neighbourOperator, "Call_300_Vehicle_90", experiments, iterations, rng);
+    algorithm(neighbourOperator, "Call_7_Vehicle_3", experiments, iterations, rng, title);
+    algorithm(neighbourOperator, "Call_18_Vehicle_5", experiments, iterations, rng, title);
+    algorithm(neighbourOperator, "Call_35_Vehicle_7", experiments, iterations, rng, title);
+    algorithm(neighbourOperator, "Call_80_Vehicle_20", experiments, iterations, rng, title);
+    algorithm(neighbourOperator, "Call_130_Vehicle_40", experiments, iterations, rng, title);
+    algorithm(neighbourOperator, "Call_300_Vehicle_90", experiments, iterations, rng, title);
 
     // Show cursor in terminal
     Debugger::displayCursor(true);
 }
 
-void InstanceRunner::blindRandomSearch(Operator* neighbourOperator, std::string instance, int experiments, int iterations, std::default_random_engine& rng) {
+void InstanceRunner::blindRandomSearch(Operator* neighbourOperator, std::string instance, int experiments, int iterations, std::default_random_engine& rng, std::string title = "Blind Random Search") {
     // Parse the given test instance
     Problem problem = Parser::parseProblem("data/" + instance + ".txt");
-    std::string algorithm = "Blind Random Search";
+    std::string algorithm  = title == "" ? "Blind Random Search" : title;
 
     // Create a timer object
     Timer timer(algorithm + ": " + instance, experiments);
@@ -67,10 +67,10 @@ void InstanceRunner::blindRandomSearch(Operator* neighbourOperator, std::string 
     Debugger::printResults(instance, algorithm, averageObjective, bestSolutionOverall.getCost(), improvement, averageTime, &bestSolutionOverall);
 }
 
-void InstanceRunner::localSearch(Operator* neighbourOperator, std::string instance, int experiments, int iterations, std::default_random_engine& rng) {
+void InstanceRunner::localSearch(Operator* neighbourOperator, std::string instance, int experiments, int iterations, std::default_random_engine& rng, std::string title = "Local Search") {
     // Parse the given test instance
     Problem problem = Parser::parseProblem("data/" + instance + ".txt");
-    std::string algorithm = "Local Search";
+    std::string algorithm  = title == "" ? "Local Search" : title;
 
     // Create a timer object
     Timer timer(algorithm + ": " + instance, experiments);
@@ -119,10 +119,10 @@ void InstanceRunner::localSearch(Operator* neighbourOperator, std::string instan
     Debugger::printResults(instance, algorithm, averageObjective, bestSolutionOverall.getCost(), improvement, averageTime, &bestSolutionOverall);
 }
 
-void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string instance, int experiments, int iterations, std::default_random_engine& rng) {
+void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string instance, int experiments, int iterations, std::default_random_engine& rng, std::string title = "Simulated Annealing") {
     // Parse the given test instance
     Problem problem = Parser::parseProblem("data/" + instance + ".txt");
-    std::string algorithm = "Simulated Annealing";
+    std::string algorithm = title == "" ? "Simulated Annealing" : title;
     int infeasible = 0;
 
     // Create a timer object

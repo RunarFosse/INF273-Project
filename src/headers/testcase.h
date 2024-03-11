@@ -20,7 +20,7 @@ class InstanceRunner {
      * @param iterations Number of iterations to run each experiment
      * @param rng Random number generator engine
      */
-    static void testAlgorithm(std::function<void(Operator*, std::string, int, int, std::default_random_engine&)> algorithm, Operator* neighbourOperator, int experiments, int iterations, std::default_random_engine& rng);
+    static void testAlgorithm(std::function<void(Operator*, std::string, int, int, std::default_random_engine&, std::string)> algorithm, Operator* neighbourOperator, int experiments, int iterations, std::default_random_engine& rng, std::string title);
 
     /**
      * @brief Assignment 2. 
@@ -32,7 +32,7 @@ class InstanceRunner {
      * @param iterations Number of iterations per experiment
      * @param rng Random number generator (for randomness)
      */
-    static void blindRandomSearch(Operator* neighbourOperator, std::string instanceName, int experiments, int iterations, std::default_random_engine& rng);
+    static void blindRandomSearch(Operator* neighbourOperator, std::string instanceName, int experiments, int iterations, std::default_random_engine& rng, std::string title);
 
     /**
      * @brief Assignment 3.
@@ -44,7 +44,7 @@ class InstanceRunner {
      * @param iterations Number of iterations per experiment
      * @param rng Random number generator (for randomness)
      */
-    static void localSearch(Operator* neighbourOperator, std::string instanceName, int experiments, int iterations, std::default_random_engine& rng);
+    static void localSearch(Operator* neighbourOperator, std::string instanceName, int experiments, int iterations, std::default_random_engine& rng, std::string title);
 
     /**
      * @brief Assignment 3.
@@ -56,7 +56,7 @@ class InstanceRunner {
      * @param iterations Number of iterations per experiment
      * @param rng Random number generator (for randomness)
      */
-    static void simulatedAnnealing(Operator* neighbourOperator, std::string instanceName, int experiments, int iterations, std::default_random_engine& rng);
+    static void simulatedAnnealing(Operator* neighbourOperator, std::string instanceName, int experiments, int iterations, std::default_random_engine& rng, std::string title);
 
     private:
     // This is a static class, prevent class creation

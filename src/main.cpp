@@ -20,15 +20,10 @@ int main(int argc, char const *argv[])
 
     // Run each test case given
     Debugger::outputToFile("results_uniform.txt");
-    InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, uniformOperator, 10, 10000, rng);
+    InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, uniformOperator, 10, 10000, rng, "SA-new operators (equal weights)");
 
-    // Verify correct implementation of operator
-    //Problem problem = Parser::parseProblem("data/Call_7_Vehicle_3.txt");
-    //Solution initial = Solution::initialSolution(&problem);
-    //Debugger::printSolution(&initial);
-    //Debugger::printToTerminal("Cost: " + std::to_string(initial.getCost()) + "\n");
-
-
+    Debugger::outputToFile("results_weighted.txt");
+    InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, weightedOperator, 10, 10000, rng, "SA-new operators (tuned weights)");
 
     return 0;
 }
