@@ -94,11 +94,24 @@ class GreedyInsert : public Operator {
     Solution apply(Solution solution, std::default_random_engine& rng);
 };
 
-class BestInsert : public Operator {
+class LowBestInsert : public Operator {
     public:
     /**
-     * @brief Apply best-insert heuristic operator to solution.
-     * Best-insert moves several calls to the current most optimal positions.
+     * @brief Apply low-best-insert heuristic operator to solution.
+     * Low-best-insert moves a lower amount of calls to the current most optimal positions.
+     * 
+     * @param solution Solution to apply operator on
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution solution, std::default_random_engine& rng);
+};
+
+class HighBestInsert : public Operator {
+    public:
+    /**
+     * @brief Apply high-best-insert heuristic operator to solution.
+     * High-best-insert moves a higher amount of calls to the current most optimal positions.
      * 
      * @param solution Solution to apply operator on
      * @param rng Random number generator Engine
@@ -161,4 +174,14 @@ std::vector<std::pair<int, int>> getFeasibleInsertions(int callIndex, int vehicl
  * @param solution Given solution to modify
  * @return (bestCost, (index1, index2))
  */
-std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleIndex, Solution* solution);
+std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleIndex, int vehicleCall, Solution* solution);
+
+/**
+ * @brief Performs the best insert operation on several calls on the given solution.
+ * 
+ * @param callsToInsert Number of calls to insert
+ * @param solution The given solution
+ * @param rng Random number generator engine
+ * @return Neighbour solution 
+ */
+Solution* performBestInsert(int callsToInsert, Solution* solution, std::default_random_engine& rng);

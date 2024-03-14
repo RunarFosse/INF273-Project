@@ -110,13 +110,18 @@ class Solution {
     int getCost();
 
     /**
-     * @brief Calculate the cost of the solution, given that ONLY a specific vehicleIndex changed;
+     * @brief Calculate the cost of the solution, given that ONLY a specific vehicleIndex changed.
      * 
      * @note Solutions are assumed feasible. No feasibility check will be ran.
      * 
      * @param vehicleIndex Specific vehicle which has changed
+     * @param callIndex Specific call which was added/removed
+     * @param index1 First changed index
+     * @param index2 Second changed index
+     * @param insertion Decides if change is an insertion or removal
+     * @param previous Previous solution prior to modification
      */
-    void updateCost(int vehicleIndex);
+    void updateCost(int vehicleIndex, int callIndex, int index1, int index2, bool insertion, Solution* previous);
 
     /**
      * @brief Get the times and capacities of a given vehicle.
@@ -152,6 +157,9 @@ class Solution {
 
     std::vector<int> seperators;
     std::vector<int> costs;
+
+    // Store indices of call pickup/deliver
+    std::vector<std::pair<int, int>> callDetails;
     
     std::pair<bool, bool> feasibilityCache;
     std::pair<bool, int> costCache;

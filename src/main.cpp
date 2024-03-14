@@ -11,19 +11,22 @@ int main(int argc, char const *argv[])
     // Create a uniform and weighted neighbourhood operator
     Operator* uniformOperator = new UniformOperator({
         new OneOutsource(),
-        new GreedyOutsource(),
-        new BestInsert()
+        new LowBestInsert(),
+        new HighBestInsert(),
     });
     Operator* weightedOperator = new WeightedOperator({
-        std::make_pair(new OneOutsource(), 0.05)
+        std::make_pair(new OneOutsource(), 0.05),
+        std::make_pair(new GreedyOutsource(), 0.05),
+        std::make_pair(new LowBestInsert(), 0.40),
+        std::make_pair(new HighBestInsert(), 0.50),
     });
 
     // Run each test case given
     Debugger::outputToFile("results_uniform.txt");
     InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, uniformOperator, 10, 10000, rng, "SA-new operators (equal weights)");
 
-    Debugger::outputToFile("results_weighted.txt");
-    InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, weightedOperator, 10, 10000, rng, "SA-new operators (tuned weights)");
+    //Debugger::outputToFile("results_weighted.txt");
+    //InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, weightedOperator, 10, 10000, rng, "SA-new operators (tuned weights)");
 
     return 0;
 }
