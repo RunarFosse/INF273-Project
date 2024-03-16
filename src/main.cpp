@@ -15,8 +15,8 @@ int main(int argc, char const *argv[])
         new HighBestInsert(),
     });
     Operator* weightedOperator = new WeightedOperator({
-        std::make_pair(new OneOutsource(), 0.05),
-        std::make_pair(new GreedyOutsource(), 0.05),
+        std::make_pair(new OneOutsource(), 0.07),
+        std::make_pair(new GreedyOutsource(), 0.03),
         std::make_pair(new LowBestInsert(), 0.40),
         std::make_pair(new HighBestInsert(), 0.50),
     });

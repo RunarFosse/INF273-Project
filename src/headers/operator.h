@@ -3,6 +3,7 @@
 #include <set>
 #include <vector>
 #include <random>
+#include <unordered_map>
 
 #include "solution.h"
 #include "problem.h"

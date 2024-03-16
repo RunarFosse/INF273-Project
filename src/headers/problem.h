@@ -1,5 +1,6 @@
 #pragma once
 
+#include <unordered_set>
 #include <vector>
 
 struct {
@@ -29,6 +30,7 @@ struct {
     Interval pickupWindow;
     Interval deliveryWindow;
     std::vector<int> possibleVehicles;
+    std::unordered_set<int> possibleVehiclesSet;
 } typedef Call;
 
 class Problem {

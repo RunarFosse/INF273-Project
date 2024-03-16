@@ -112,6 +112,7 @@ Problem Parser::parseProblem(std::string path) {
                 for (int possibleCall : problem.vehicles[vehicleIndex-1].possibleCalls) {
                     if (possibleCall == index) {
                         call->possibleVehicles.push_back(vehicleIndex);
+                        call->possibleVehiclesSet.insert(vehicleIndex);
                         break;
                     }
                 }
