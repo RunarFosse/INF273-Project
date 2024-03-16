@@ -134,8 +134,13 @@ Solution Solution::randomSolution(Problem* problem, std::default_random_engine& 
 void Solution::greedyMove(int callIndex, int from, int to, int index1, int index2) {
     // TODO: Make one-pass algorithm
 
+    int start = this->callDetails[callIndex-1].first, end = this->callDetails[callIndex-1].second;
+    if (start == index1 && end == index2) {
+        return;
+    }
+
     int skip = 0;
-    for (int i = from; i+skip <= to; i++) {
+    for (int i = start; i+skip <= std::max(end, index2); i++) {
         while (i+skip < this->representation.size() && this->representation[i+skip] == callIndex) {
             skip++;
         }
@@ -148,7 +153,7 @@ void Solution::greedyMove(int callIndex, int from, int to, int index1, int index
 
     std::deque<int> buffer;
     int currentVehicle = std::distance(this->seperators.begin(), std::upper_bound(this->seperators.begin(), this->seperators.end(), from));
-    for (int i = from; i <= to; i++) {
+    for (int i = from; i <= std::max(end, index2); i++) {
         if (i == index1 || i == index2) {
             buffer.push_back(this->representation[i]);
             this->representation[i] = callIndex;
@@ -175,8 +180,13 @@ void Solution::greedyMove(int callIndex, int from, int to, int index1, int index
 void Solution::move(int callIndex, int index1, int index2) {
     // TODO: Make one-pass algorithm
 
+    int start = this->callDetails[callIndex-1].first, end = this->callDetails[callIndex-1].second;
+    if (start == index1 && end == index2) {
+        return;
+    }
+
     int skip = 0;
-    for (int i = 0; i+skip < this->representation.size(); i++) {
+    for (int i = start; i+skip <= std::max(end, index2); i++) {
         while (i+skip < this->representation.size() && this->representation[i+skip] == callIndex) {
             skip++;
         }
@@ -189,7 +199,7 @@ void Solution::move(int callIndex, int index1, int index2) {
 
     std::deque<int> buffer;
     int currentVehicle = 1;
-    for (int i = 0; i < this->representation.size(); i++) {
+    for (int i = 0; i <= std::max(end, index2); i++) {
         if (i == index1 || i == index2) {
             buffer.push_back(this->representation[i]);
             this->representation[i] = callIndex;
