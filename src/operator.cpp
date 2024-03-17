@@ -119,10 +119,19 @@ Solution LowBestInsert::apply(Solution solution, std::default_random_engine& rng
     return *performBestInsert(callsToInsert, &solution, rng);
 }
 
+Solution MediumBestInsert::apply(Solution solution, std::default_random_engine& rng) {
+    // Pick out the number of calls to move
+    int lowerbound = 1;
+    int upperbound = std::max(solution.problem->noCalls / 6, 1);
+    int callsToInsert = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
+
+    return *performBestInsert(callsToInsert, &solution, rng);
+}
+
 Solution HighBestInsert::apply(Solution solution, std::default_random_engine& rng) {
     // Pick out the number of calls to move
-    int lowerbound = std::max(solution.problem->noCalls / 10, 1);
-    int upperbound = std::max(solution.problem->noCalls / 4, 1);
+    int lowerbound = std::max(solution.problem->noCalls / 8, 1);
+    int upperbound = std::max(solution.problem->noCalls / 5, 1);
     int callsToInsert = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
 
     return *performBestInsert(callsToInsert, &solution, rng);

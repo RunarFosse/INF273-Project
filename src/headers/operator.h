@@ -108,6 +108,19 @@ class LowBestInsert : public Operator {
     Solution apply(Solution solution, std::default_random_engine& rng);
 };
 
+class MediumBestInsert : public Operator {
+    public:
+    /**
+     * @brief Apply medium-best-insert heuristic operator to solution.
+     * Medium-best-insert moves a lower amount of calls to the current most optimal positions.
+     * 
+     * @param solution Solution to apply operator on
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution solution, std::default_random_engine& rng);
+};
+
 class HighBestInsert : public Operator {
     public:
     /**
