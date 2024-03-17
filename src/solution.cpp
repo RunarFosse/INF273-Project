@@ -152,7 +152,7 @@ void Solution::greedyMove(int callIndex, int from, int to, int index1, int index
     std::unordered_set<int> pickedCalls;
 
     std::deque<int> buffer;
-    int currentVehicle = std::distance(this->seperators.begin(), std::upper_bound(this->seperators.begin(), this->seperators.end(), from));
+    int currentVehicle = std::distance(this->seperators.begin(), std::lower_bound(this->seperators.begin(), this->seperators.end(), from));
     for (int i = from; i <= std::max(end, index2); i++) {
         if (i == index1 || i == index2) {
             buffer.push_back(this->representation[i]);
@@ -178,14 +178,65 @@ void Solution::greedyMove(int callIndex, int from, int to, int index1, int index
 }
 
 void Solution::move(int callIndex, int index1, int index2) {
-    // TODO: Make one-pass algorithm
-
     int start = this->callDetails[callIndex-1].first, end = this->callDetails[callIndex-1].second;
     if (start == index1 && end == index2) {
         return;
     }
 
-    int skip = 0;
+    int currentVehicle = std::distance(this->seperators.begin(), std::lower_bound(this->seperators.begin(), this->seperators.end(), std::min(start, index1)));
+    std::unordered_set<int> pickedCalls;
+    if (start < index1) {
+        int skip = 0;
+        for (int i = this->seperators[currentVehicle-1]+1; i <= std::max(end, index2); i++) {
+            while (i+skip < this->representation.size() && this->representation[i+skip] == callIndex) {
+                skip++;
+            }
+            if (i == index1 || i == index2) {
+                this->representation[i] = callIndex;
+                skip--;
+            } else {
+                this->representation[i] = this->representation[i+skip];
+            }
+
+            if (this->representation[i] == 0) {
+                currentVehicle++;
+                this->seperators[currentVehicle-1] = i;
+            } else {
+                if (pickedCalls.find(this->representation[i]) == pickedCalls.end()) {
+                    this->callDetails[this->representation[i]-1].first = i;
+                    pickedCalls.insert(this->representation[i]);
+                } else {
+                    this->callDetails[this->representation[i]-1].second = i;
+                }
+            }
+        }
+    } else {
+        std::deque<int> buffer;
+        for (int i = this->seperators[currentVehicle-1]+1; i <= std::max(end, index2); i++) {
+            if (i == index1 || i == index2) {
+                buffer.push_back(this->representation[i]);
+                this->representation[i] = callIndex;
+            } else if (!buffer.empty()) {
+                buffer.push_back(this->representation[i]);
+                this->representation[i] = buffer.front();
+                buffer.pop_front();
+            }
+
+            if (this->representation[i] == 0) {
+                currentVehicle++;
+                this->seperators[currentVehicle-1] = i;
+            } else {
+                if (pickedCalls.find(this->representation[i]) == pickedCalls.end()) {
+                    this->callDetails[this->representation[i]-1].first = i;
+                    pickedCalls.insert(this->representation[i]);
+                } else {
+                    this->callDetails[this->representation[i]-1].second = i;
+                }
+            }
+        }
+    }
+
+    /*int skip = 0;
     for (int i = start; i+skip <= std::max(end, index2); i++) {
         while (i+skip < this->representation.size() && this->representation[i+skip] == callIndex) {
             skip++;
@@ -220,7 +271,7 @@ void Solution::move(int callIndex, int index1, int index2) {
                 this->callDetails[this->representation[i]-1].second = i;
             }
         }
-    }
+    }*/
 }
 
 std::pair<int, int> Solution::outsource(int callIndex) {
