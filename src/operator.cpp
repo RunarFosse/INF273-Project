@@ -110,19 +110,19 @@ Solution GreedyInsert::apply(Solution solution, std::default_random_engine& rng)
     return current;
 }
 
-Solution LowBestInsert::apply(Solution solution, std::default_random_engine& rng) {
+Solution ConstantBestInsert::apply(Solution solution, std::default_random_engine& rng) {
     // Pick out the number of calls to move
     int lowerbound = 1;
-    int upperbound = std::max(solution.problem->noCalls / 8, 1);
+    int upperbound = std::min(solution.problem->noCalls, 10);
     int callsToInsert = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
 
     return *performBestInsert(callsToInsert, &solution, rng);
 }
 
-Solution MediumBestInsert::apply(Solution solution, std::default_random_engine& rng) {
+Solution LowBestInsert::apply(Solution solution, std::default_random_engine& rng) {
     // Pick out the number of calls to move
     int lowerbound = 1;
-    int upperbound = std::max(solution.problem->noCalls / 6, 1);
+    int upperbound = std::max(solution.problem->noCalls / 10, 1);
     int callsToInsert = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
 
     return *performBestInsert(callsToInsert, &solution, rng);
@@ -130,20 +130,17 @@ Solution MediumBestInsert::apply(Solution solution, std::default_random_engine& 
 
 Solution HighBestInsert::apply(Solution solution, std::default_random_engine& rng) {
     // Pick out the number of calls to move
-    int lowerbound = std::max(solution.problem->noCalls / 8, 1);
+    int lowerbound = std::max(solution.problem->noCalls / 20, 1);
     int upperbound = std::max(solution.problem->noCalls / 5, 1);
     int callsToInsert = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
 
     return *performBestInsert(callsToInsert, &solution, rng);
 }
 
-Solution OneOutsource::apply(Solution solution, std::default_random_engine& rng) {
-    // Create a copy of the current solution
-    Solution current = solution.copy();
-
+Solution MultiOutsource::apply(Solution solution, std::default_random_engine& rng) {
     // Extract all currently outsourced calls
     std::set<int> outsourcedCalls;
-    for (int i = solution.representation.size()-1; i >= 0; i--) {
+    for (int i = solution.representation.size()-1; i >= 0; i -= 2) {
         if (solution.representation[i] == 0) {
             break;
         }
@@ -163,18 +160,37 @@ Solution OneOutsource::apply(Solution solution, std::default_random_engine& rng)
         return solution;
     }
 
-    // Pick a random possible call to outsource
-    int callIndex = possibleCalls[std::uniform_int_distribution<std::size_t>(0, possibleCalls.size()-1)(rng)];
-    int vehicleCall = solution.getVehicleWith(callIndex);
-    std::pair<int, int> indicesCall = solution.callDetails[callIndex-1];
+    // Pick the number random calls to outsource
+    int lowerbound = 1;
+    int upperbound = std::max(std::min((int)possibleCalls.size(), solution.problem->noCalls / 8), 1);
+    int callsToOutsource = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
 
-    std::pair<int, int> indices = current.outsource(callIndex);
-    // Update costs (as new solution is guaranteed to be feasible)
-    current.updateCost(vehicleCall, callIndex, indicesCall.first, indicesCall.second, false, &solution);
-    current.updateCost(solution.problem->noVehicles+1, callIndex, indices.first, indices.second, true, &solution);
+    // Efficient (non-colliding) sampling algorithm "https://stackoverflow.com/a/3724708"
+    std::set<int> callIndices;
+    int total = possibleCalls.size();
+    for (int i = total - callsToOutsource; i < total; i++) {
+        int item = std::uniform_int_distribution<int>(0, i)(rng); 
+        if (callIndices.find(item) == callIndices.end()) {
+            callIndices.insert(possibleCalls[item]);
+        } else {
+            callIndices.insert(possibleCalls[i]);
+        }
+    }
+
+    // Temporarily move all to outsource and update the cost
+    for (int callIndex : callIndices) {
+        // Find the vehicle with call
+        int vehicleCall = solution.getVehicleWith(callIndex);
+
+        // Outsource the call and update costs
+        std::pair<int, int> indicesCall = solution.callDetails[callIndex-1];
+        solution.updateCost(solution.problem->noVehicles+1, callIndex, -1, -1, true, &solution);
+        solution.updateCost(vehicleCall, callIndex, indicesCall.first, indicesCall.second, false, &solution);
+        solution.outsource(callIndex);
+    }
 
     // Return neighbour solution
-    return current;
+    return solution;
 }
 
 Solution GreedyOutsource::apply(Solution solution, std::default_random_engine& rng) {

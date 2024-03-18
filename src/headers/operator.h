@@ -95,11 +95,11 @@ class GreedyInsert : public Operator {
     Solution apply(Solution solution, std::default_random_engine& rng);
 };
 
-class LowBestInsert : public Operator {
+class ConstantBestInsert : public Operator {
     public:
     /**
-     * @brief Apply low-best-insert heuristic operator to solution.
-     * Low-best-insert moves a lower amount of calls to the current most optimal positions.
+     * @brief Apply constant-best-insert heuristic operator to solution.
+     * Constant-best-insert moves between 1 and 10 calls to the current most optimal positions.
      * 
      * @param solution Solution to apply operator on
      * @param rng Random number generator Engine
@@ -108,11 +108,11 @@ class LowBestInsert : public Operator {
     Solution apply(Solution solution, std::default_random_engine& rng);
 };
 
-class MediumBestInsert : public Operator {
+class LowBestInsert : public Operator {
     public:
     /**
-     * @brief Apply medium-best-insert heuristic operator to solution.
-     * Medium-best-insert moves a lower amount of calls to the current most optimal positions.
+     * @brief Apply low-best-insert heuristic operator to solution.
+     * Low-best-insert moves a lower amount of calls to the current most optimal positions.
      * 
      * @param solution Solution to apply operator on
      * @param rng Random number generator Engine
@@ -134,12 +134,12 @@ class HighBestInsert : public Operator {
     Solution apply(Solution solution, std::default_random_engine& rng);
 };
 
-class OneOutsource : public Operator {
+class MultiOutsource : public Operator {
     public:
     /**
-     * @brief Apply 1-outsource heuristic operator to solution.
-     * 1-outsource selects a random, not already outsourced call,
-     * and outsources it.
+     * @brief Apply multi-outsource heuristic operator to solution.
+     * Multi-outsource selects a random number of non-outsourced calls
+     * and outsources them.
      * 
      * @note If all calls are outsourced it returns without modification.
      * 
