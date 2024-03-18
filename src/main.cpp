@@ -23,8 +23,8 @@ int main(int argc, char const *argv[])
     });
 
     // Run each test case given
-    //Debugger::outputToFile("results_uniform.txt");
-    //InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, uniformOperator, 10, 10000, rng, "SA-new operators (equal weights)");
+    Debugger::outputToFile("results_uniform.txt");
+    InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, uniformOperator, 10, 10000, rng, "SA-new operators (equal weights)");
 
     Debugger::outputToFile("results_weighted.txt");
     InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, weightedOperator, 10, 10000, rng, "SA-new operators (tuned weights)");
