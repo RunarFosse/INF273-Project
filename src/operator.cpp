@@ -91,7 +91,7 @@ Solution GreedyInsert::apply(Solution solution, std::default_random_engine& rng)
     std::pair<int, int> indicesCall = current.callDetails[callIndex-1];
 
     // Get the best values
-    std::pair<int, std::pair<int, int>> bestInsertion = getBestInsertion(callIndex, vehicleIndex, vehicleCall, &solution);
+    std::pair<int, std::pair<int, int>> bestInsertion = getBestInsertion(callIndex, vehicleIndex, vehicleCall, &solution, rng);
     int bestCost = bestInsertion.first;
     std::pair<int, int> bestIndices = bestInsertion.second;
 
@@ -317,7 +317,7 @@ std::vector<std::pair<int, int>> getFeasibleInsertions(int callIndex, int vehicl
     return feasibleIndices;
 }
 
-std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleIndex, int vehicleCall, Solution* solution) {
+std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleIndex, int vehicleCall, Solution* solution, std::default_random_engine& rng) {
     // Create a current copy of the solution
     Solution current = solution->copy();
 
@@ -389,21 +389,27 @@ std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleI
 
 Solution* performBestInsert(int callsToInsert, Solution* solution, std::default_random_engine& rng) {
     // Efficient (non-colliding) sampling algorithm "https://stackoverflow.com/a/3724708"
-    std::set<int> callIndices;
+    std::set<int> callIndicesSet;
+    std::vector<int> callIndices;
     int total = solution->problem->noCalls+1;
     for (int i = total - callsToInsert; i < total; i++) {
         int item = std::uniform_int_distribution<int>(1, i)(rng); 
-        if (callIndices.find(item) == callIndices.end()) {
-            callIndices.insert(item);
+        if (callIndicesSet.find(item) == callIndicesSet.end()) {
+            callIndicesSet.insert(item);
+            callIndices.push_back(item);
         } else {
-            callIndices.insert(i);
+            callIndicesSet.insert(i);
+            callIndices.push_back(i);
         }
     }
 
     // Temporarily move all to outsource and update the cost
+    //Debugger::printToTerminal("Moving ");
     for (int callIndex : callIndices) {
         // Find the vehicle with call
         int vehicleCall = solution->getVehicleWith(callIndex);
+
+        //Debugger::printToTerminal(std::to_string(callIndex) + ", ");
 
         // Outsource the call and update costs
         std::pair<int, int> indicesCall = solution->callDetails[callIndex-1];
@@ -411,6 +417,7 @@ Solution* performBestInsert(int callsToInsert, Solution* solution, std::default_
         solution->updateCost(vehicleCall, callIndex, indicesCall.first, indicesCall.second, false, solution);
         solution->outsource(callIndex);
     }
+    //Debugger::printToTerminal("\n");
 
     // Then move each call to the best possible position
     for (int callIndex : callIndices) {
@@ -431,7 +438,7 @@ Solution* performBestInsert(int callsToInsert, Solution* solution, std::default_
                 continue;
             }
             // Get the best place to insert
-            std::pair<int, std::pair<int, int>> bestInsertion = getBestInsertion(callIndex, vehicleIndex, vehicleCall, solution);
+            std::pair<int, std::pair<int, int>> bestInsertion = getBestInsertion(callIndex, vehicleIndex, vehicleCall, solution, rng);
 
             if (bestInsertion.first < bestCost) {
                 bestCost = bestInsertion.first;

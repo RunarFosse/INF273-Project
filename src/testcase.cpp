@@ -193,6 +193,7 @@ void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string
 
             double deltaE = solution.getCost() - incumbent.getCost();
             if (deltaE < 0) {
+                //Debugger::printSolution(&solution);
                 incumbent = solution;
                 if (incumbent.getCost() < bestSolution.getCost()) {
                     bestSolution = incumbent;

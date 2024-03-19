@@ -188,7 +188,7 @@ std::vector<std::pair<int, int>> getFeasibleInsertions(int callIndex, int vehicl
  * @param solution Given solution to modify
  * @return (bestCost, (index1, index2))
  */
-std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleIndex, int vehicleCall, Solution* solution);
+std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleIndex, int vehicleCall, Solution* solution, std::default_random_engine& rng);
 
 /**
  * @brief Performs the best insert operation on several calls on the given solution.
