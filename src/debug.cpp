@@ -89,12 +89,14 @@ void Debugger::printProblem(Problem* problem, bool printMap) {
     }
 };
 
-void Debugger::printSolution(ObsoleteSolution* solution) {
+void Debugger::printSolution(Solution* solution) {
     std::cout << "[";
 
-    for (int i = 0; i < solution->representation.size(); i++) {
-        std::cout << std::to_string(solution->representation[i]);
-        if (i < solution->representation.size()-1) {
+    for (int vehicleIndex = 1; vehicleIndex <= solution->outsourceVehicle; vehicleIndex++) {
+        for (int callIndex : solution->representation[vehicleIndex-1]) {
+            std::cout << std::to_string(callIndex);
+        }
+        if (vehicleIndex < solution->outsourceVehicle) {
             std::cout << ", ";
         }
     }
@@ -102,7 +104,7 @@ void Debugger::printSolution(ObsoleteSolution* solution) {
     std::cout << "]" << std::endl;
 };
 
-void Debugger::printResults(std::string instance, std::string algorithm, double averageObjective, double bestObjective, double improvement, double averageTime, ObsoleteSolution* bestSolution) {
+void Debugger::printResults(std::string instance, std::string algorithm, double averageObjective, double bestObjective, double improvement, double averageTime, Solution* bestSolution) {
     std::cout << std::endl;
 
     std::cout << "Instance name     :    " << instance << std::endl;
