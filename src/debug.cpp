@@ -93,11 +93,14 @@ void Debugger::printSolution(Solution* solution) {
     std::cout << "[";
 
     for (int vehicleIndex = 1; vehicleIndex <= solution->outsourceVehicle; vehicleIndex++) {
-        for (int callIndex : solution->representation[vehicleIndex-1]) {
-            std::cout << std::to_string(callIndex);
+        for (int i = 0; i < solution->representation[vehicleIndex-1].size(); i++) {
+            std::cout << std::to_string(solution->representation[vehicleIndex-1][i]);
+            if (!(vehicleIndex == solution->outsourceVehicle && i == solution->representation[vehicleIndex-1].size()-1)) {
+                std::cout << ", ";
+            }
         }
         if (vehicleIndex < solution->outsourceVehicle) {
-            std::cout << ", ";
+            std::cout << "0, ";
         }
     }
 

@@ -112,12 +112,26 @@ class Solution {
      * 
      * @param vehicleIndex Specific vehicle which has changed
      * @param callIndex Specific call which was added/removed
-     * @param index1 First changed index
-     * @param index2 Second changed index
+     * @param indices Modified indices
      * @param insertion Decides if change is an insertion or removal
      * @param previous Previous solution prior to modification
      */
-    void updateCost(int vehicleIndex, int callIndex, int index1, int index2, bool insertion, Solution* previous);
+    void updateCost(int vehicleIndex, int callIndex, std::pair<int, int> indices, bool insertion, Solution* previous);
+
+    /**
+     * @brief Get the times and capacities of a given vehicle.
+     * 
+     * @param vehicleIndex Given vehicle
+     * @return Returns the times and capacities as a pair (times, capacities)
+     */
+    std::pair<std::vector<int>, std::vector<int>> getDetails(int vehicleIndex);
+
+    /**
+     * @brief Returns a copy of the current solution.
+     * 
+     * @return Copy of solution 
+     */
+    Solution copy();
 
     /**
      * @brief Construct a new Solution given representation as vector.
@@ -133,9 +147,9 @@ class Solution {
      */
     void invalidateCache();
     
-    const Problem* problem;
-    const int outsourceVehicle;
+    int outsourceVehicle;
 
+    Problem* problem;
     std::vector<std::vector<int>> representation;
     std::vector<CallDetails> callDetails;
 

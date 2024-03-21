@@ -5,7 +5,7 @@
 #include <random>
 #include <unordered_map>
 
-#include "obsolete_solution.h"
+#include "solution.h"
 #include "problem.h"
 
 class Operator {
@@ -17,7 +17,7 @@ class Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    virtual ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng) = 0;
+    virtual Solution apply(Solution solution, std::default_random_engine& rng) = 0;
 };
 
 class UniformOperator : public Operator {
@@ -38,7 +38,7 @@ class UniformOperator : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng);
+    Solution apply(Solution solution, std::default_random_engine& rng);
 
     private:
     std::vector<Operator*> operators;
@@ -62,76 +62,25 @@ class WeightedOperator : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng);
+    Solution apply(Solution solution, std::default_random_engine& rng);
 
     private:
     std::vector<Operator*> operators;
     std::vector<double> weights;
 };
 
-class OneInsert : public Operator {
+class BestInsert : public Operator {
     public:
     /**
-     * @brief Apply 1-insert heuristic operator to solution.
+     * @brief Apply best-insert heuristic operator to solution.
+     * Best-insert moves a random amount of calls to the current
+     * most optimal positions in a greedy fashion.
      * 
      * @param solution Solution to apply operator on
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng);
-};
-
-class GreedyInsert : public Operator {
-    public:
-    /**
-     * @brief Apply greedy-insert heuristic operator to solution.
-     * Greedy-insert moves a random call to a random vehicle,
-     * and places it in the best possible position.
-     * 
-     * @param solution Solution to apply operator on
-     * @param rng Random number generator Engine
-     * @return Neighbour solution
-     */
-    ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng);
-};
-
-class ConstantBestInsert : public Operator {
-    public:
-    /**
-     * @brief Apply constant-best-insert heuristic operator to solution.
-     * Constant-best-insert moves between 1 and 10 calls to the current most optimal positions.
-     * 
-     * @param solution Solution to apply operator on
-     * @param rng Random number generator Engine
-     * @return Neighbour solution
-     */
-    ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng);
-};
-
-class LowBestInsert : public Operator {
-    public:
-    /**
-     * @brief Apply low-best-insert heuristic operator to solution.
-     * Low-best-insert moves a lower amount of calls to the current most optimal positions.
-     * 
-     * @param solution Solution to apply operator on
-     * @param rng Random number generator Engine
-     * @return Neighbour solution
-     */
-    ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng);
-};
-
-class HighBestInsert : public Operator {
-    public:
-    /**
-     * @brief Apply high-best-insert heuristic operator to solution.
-     * High-best-insert moves a higher amount of calls to the current most optimal positions.
-     * 
-     * @param solution Solution to apply operator on
-     * @param rng Random number generator Engine
-     * @return Neighbour solution
-     */
-    ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng);
+    Solution apply(Solution solution, std::default_random_engine& rng);
 };
 
 class MultiOutsource : public Operator {
@@ -147,48 +96,20 @@ class MultiOutsource : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng);
+    Solution apply(Solution solution, std::default_random_engine& rng);
 };
-
-class GreedyOutsource : public Operator {
-    public:
-    /**
-     * @brief Apply greedy-outsource heuristic operator to solution.
-     * greedy-outsource selects the best, not already outsourced call,
-     * to outsource and outsources it.
-     * 
-     * @note If all calls are outsourced it returns without modification.
-     * 
-     * @param solution Solution to apply operator on
-     * @param rng Random number generator Engine
-     * @return Neighbour solution
-     */
-    ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng);
-};
-
-/**
- * @brief Get all feasible insertion points for a given call and vehicle
- * 
- * @note Does not support outsourcing.
- * 
- * @param callIndex Call to insert
- * @param vehicleIndex Vehicle to insert into
- * @param solution Given solution to modify
- * @return Vector of indices (index1, index2)
- */
-std::vector<std::pair<int, int>> getFeasibleInsertions(int callIndex, int vehicleIndex, ObsoleteSolution* solution);
 
 /**
  * @brief Calculate the two best insertion indices together with cost of a given call and vehicle.
  * 
- * @note Does not support outsourcing.
+ * @note Does not outsource.
  * 
  * @param callIndex Call to insert
  * @param vehicleIndex Vehicle to insert into
  * @param solution Given solution to modify
  * @return (bestCost, (index1, index2))
  */
-std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleIndex, int vehicleCall, ObsoleteSolution* solution, std::default_random_engine& rng);
+std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleIndex, int vehicleCall, Solution* solution, std::default_random_engine& rng);
 
 /**
  * @brief Performs the best insert operation on several calls on the given solution.
@@ -198,4 +119,4 @@ std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleI
  * @param rng Random number generator engine
  * @return Neighbour solution 
  */
-ObsoleteSolution* performBestInsert(int callsToInsert, ObsoleteSolution* solution, std::default_random_engine& rng);
+Solution* performBestInsert(int callsToInsert, Solution* solution, std::default_random_engine& rng);
