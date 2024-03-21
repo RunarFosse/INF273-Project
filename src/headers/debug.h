@@ -5,7 +5,7 @@
 #include <string>
 
 #include "problem.h"
-#include "solution.h"
+#include "obsolete_solution.h"
 
 class Debugger {
     public:

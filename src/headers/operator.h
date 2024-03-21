@@ -5,7 +5,7 @@
 #include <random>
 #include <unordered_map>
 
-#include "solution.h"
+#include "obsolete_solution.h"
 #include "problem.h"
 
 class Operator {

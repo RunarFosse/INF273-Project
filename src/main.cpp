@@ -1,5 +1,5 @@
 #include "testcase.h"
-#include "solution.h"
+#include "obsolete_solution.h"
 #include "parser.h"
 #include "debug.h"
 
