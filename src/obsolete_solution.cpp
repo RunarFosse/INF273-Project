@@ -1,4 +1,4 @@
-#include "solution.h"
+#include "obsolete_solution.h"
 
 #include "debug.h"
 
