@@ -6,7 +6,7 @@ UniformOperator::UniformOperator(std::vector<Operator*> operators) {
     this->operators = operators;
 }
 
-Solution UniformOperator::apply(Solution solution, std::default_random_engine& rng) {
+ObsoleteSolution UniformOperator::apply(ObsoleteSolution solution, std::default_random_engine& rng) {
     // Get a random operator from those this contains
     int operatorIndex = std::uniform_int_distribution<std::size_t>(0, this->operators.size()-1)(rng);
 
@@ -21,7 +21,7 @@ WeightedOperator::WeightedOperator(std::vector<std::pair<Operator*, double>> ope
     }
 }
 
-Solution WeightedOperator::apply(Solution solution, std::default_random_engine& rng) {
+ObsoleteSolution WeightedOperator::apply(ObsoleteSolution solution, std::default_random_engine& rng) {
     // Get a weighted random operator from those this contains
     int operatorIndex = std::discrete_distribution<std::size_t>(this->weights.begin(), this->weights.end())(rng);
 
@@ -29,9 +29,9 @@ Solution WeightedOperator::apply(Solution solution, std::default_random_engine& 
     return this->operators[operatorIndex]->apply(solution, rng);
 }
 
-Solution OneInsert::apply(Solution solution, std::default_random_engine& rng) {
+ObsoleteSolution OneInsert::apply(ObsoleteSolution solution, std::default_random_engine& rng) {
     // Create a copy of the current solution
-    Solution current = solution.copy();
+    ObsoleteSolution current = solution.copy();
 
     // Select a random call
     int callIndex = std::uniform_int_distribution<std::size_t>(1, solution.problem->noCalls)(rng);
@@ -78,9 +78,9 @@ Solution OneInsert::apply(Solution solution, std::default_random_engine& rng) {
     return current;
 }
 
-Solution GreedyInsert::apply(Solution solution, std::default_random_engine& rng) {
+ObsoleteSolution GreedyInsert::apply(ObsoleteSolution solution, std::default_random_engine& rng) {
     // Create a current copy of the solution
-    Solution current = solution.copy();
+    ObsoleteSolution current = solution.copy();
 
     // Select a random call and feasible vehicle
     int callIndex = std::uniform_int_distribution<std::size_t>(1, solution.problem->noCalls)(rng);
@@ -110,7 +110,7 @@ Solution GreedyInsert::apply(Solution solution, std::default_random_engine& rng)
     return current;
 }
 
-Solution ConstantBestInsert::apply(Solution solution, std::default_random_engine& rng) {
+ObsoleteSolution ConstantBestInsert::apply(ObsoleteSolution solution, std::default_random_engine& rng) {
     // Pick out the number of calls to move
     int lowerbound = 1;
     int upperbound = std::min(solution.problem->noCalls, 10);
@@ -119,7 +119,7 @@ Solution ConstantBestInsert::apply(Solution solution, std::default_random_engine
     return *performBestInsert(callsToInsert, &solution, rng);
 }
 
-Solution LowBestInsert::apply(Solution solution, std::default_random_engine& rng) {
+ObsoleteSolution LowBestInsert::apply(ObsoleteSolution solution, std::default_random_engine& rng) {
     // Pick out the number of calls to move
     int lowerbound = 1;
     int upperbound = std::max(solution.problem->noCalls / 10, 1);
@@ -128,7 +128,7 @@ Solution LowBestInsert::apply(Solution solution, std::default_random_engine& rng
     return *performBestInsert(callsToInsert, &solution, rng);
 }
 
-Solution HighBestInsert::apply(Solution solution, std::default_random_engine& rng) {
+ObsoleteSolution HighBestInsert::apply(ObsoleteSolution solution, std::default_random_engine& rng) {
     // Pick out the number of calls to move
     int lowerbound = std::max(solution.problem->noCalls / 20, 1);
     int upperbound = std::max(solution.problem->noCalls / 5, 1);
@@ -137,7 +137,7 @@ Solution HighBestInsert::apply(Solution solution, std::default_random_engine& rn
     return *performBestInsert(callsToInsert, &solution, rng);
 }
 
-Solution MultiOutsource::apply(Solution solution, std::default_random_engine& rng) {
+ObsoleteSolution MultiOutsource::apply(ObsoleteSolution solution, std::default_random_engine& rng) {
     // Extract all currently outsourced calls
     std::set<int> outsourcedCalls;
     for (int i = solution.representation.size()-1; i >= 0; i -= 2) {
@@ -193,7 +193,7 @@ Solution MultiOutsource::apply(Solution solution, std::default_random_engine& rn
     return solution;
 }
 
-Solution GreedyOutsource::apply(Solution solution, std::default_random_engine& rng) {
+ObsoleteSolution GreedyOutsource::apply(ObsoleteSolution solution, std::default_random_engine& rng) {
     // Extract all currently outsourced calls
     std::set<int> outsourcedCalls;
     for (int i = solution.representation.size()-1; i >= 0; i--) {
@@ -241,16 +241,16 @@ Solution GreedyOutsource::apply(Solution solution, std::default_random_engine& r
     }
 
     // Outsource it and return new solution
-    Solution current = solution.copy();
+    ObsoleteSolution current = solution.copy();
     std::pair<int, int> bestIndices = current.outsource(bestCall);
     current.updateCost(bestVehicleCall, bestCall, bestIndicesCall.first, bestIndicesCall.second, false, &solution);
     current.updateCost(solution.problem->noVehicles+1, bestCall, bestIndices.first, bestIndices.second, true, &solution);
     return current;
 }
 
-std::vector<std::pair<int, int>> getFeasibleInsertions(int callIndex, int vehicleIndex, Solution* solution) {
+std::vector<std::pair<int, int>> getFeasibleInsertions(int callIndex, int vehicleIndex, ObsoleteSolution* solution) {
     // Create a copy of the current solution
-    Solution current = solution->copy();
+    ObsoleteSolution current = solution->copy();
 
     // Find the call and vehicle which currently has the call
     Call call = solution->problem->calls[callIndex-1];
@@ -317,9 +317,9 @@ std::vector<std::pair<int, int>> getFeasibleInsertions(int callIndex, int vehicl
     return feasibleIndices;
 }
 
-std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleIndex, int vehicleCall, Solution* solution, std::default_random_engine& rng) {
+std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleIndex, int vehicleCall, ObsoleteSolution* solution, std::default_random_engine& rng) {
     // Create a current copy of the solution
-    Solution current = solution->copy();
+    ObsoleteSolution current = solution->copy();
 
     // Store best values
     int bestCost = INT_MAX;
@@ -387,7 +387,7 @@ std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleI
     return std::make_pair(bestCost, bestIndices);
 }
 
-Solution* performBestInsert(int callsToInsert, Solution* solution, std::default_random_engine& rng) {
+ObsoleteSolution* performBestInsert(int callsToInsert, ObsoleteSolution* solution, std::default_random_engine& rng) {
     // Efficient (non-colliding) sampling algorithm "https://stackoverflow.com/a/3724708"
     std::set<int> callIndicesSet;
     std::vector<int> callIndices;

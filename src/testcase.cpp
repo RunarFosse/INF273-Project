@@ -24,7 +24,7 @@ void InstanceRunner::blindRandomSearch(Operator* neighbourOperator, std::string 
     // Create a timer object
     Timer timer(algorithm + ": " + instance, experiments);
 
-    Solution bestSolutionOverall = Solution::initialSolution(&problem);
+    ObsoleteSolution bestSolutionOverall = ObsoleteSolution::initialSolution(&problem);
     double initialObjective = bestSolutionOverall.getCost();
     double averageObjective = 0;
 
@@ -34,11 +34,11 @@ void InstanceRunner::blindRandomSearch(Operator* neighbourOperator, std::string 
         timer.start();
 
         // Initialize the initial solution as the "current best"
-        Solution bestSolution = Solution::initialSolution(&problem);
+        ObsoleteSolution bestSolution = ObsoleteSolution::initialSolution(&problem);
         // Run iterations per experiment
         for (int j = 0; j < iterations; j++) {
             // Generate a new random solution
-            Solution solution = Solution::randomSolution(&problem, rng);
+            ObsoleteSolution solution = ObsoleteSolution::randomSolution(&problem, rng);
 
             // Check if the solution is feasible and, if so, check if it is better than the current best
             if (solution.isFeasible() && solution.getCost() < bestSolution.getCost()) {
@@ -75,7 +75,7 @@ void InstanceRunner::localSearch(Operator* neighbourOperator, std::string instan
     // Create a timer object
     Timer timer(algorithm + ": " + instance, experiments);
     
-    Solution bestSolutionOverall = Solution::initialSolution(&problem);
+    ObsoleteSolution bestSolutionOverall = ObsoleteSolution::initialSolution(&problem);
     double initialObjective = bestSolutionOverall.getCost();
     double averageObjective = 0;
 
@@ -86,11 +86,11 @@ void InstanceRunner::localSearch(Operator* neighbourOperator, std::string instan
         timer.start();
 
         // Initialize the initial solution as the "current best"
-        Solution bestSolution = Solution::initialSolution(&problem);
+        ObsoleteSolution bestSolution = ObsoleteSolution::initialSolution(&problem);
         // Run iterations per experiment
         for (int j = 0; j < iterations; j++) {
             // Generate a new neighbour solution
-            Solution solution = neighbourOperator->apply(bestSolution, rng);
+            ObsoleteSolution solution = neighbourOperator->apply(bestSolution, rng);
 
             // Check if the solution is feasible and, if so, check if it is better than the current best
             if (solution.isFeasible() && solution.getCost() < bestSolution.getCost()) {
@@ -128,7 +128,7 @@ void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string
     // Create a timer object
     Timer timer = Timer(algorithm + ": " + instance, experiments);
     
-    Solution bestSolutionOverall = Solution::initialSolution(&problem);
+    ObsoleteSolution bestSolutionOverall = ObsoleteSolution::initialSolution(&problem);
     double initialObjective = bestSolutionOverall.getCost();
     double averageObjective = 0;
 
@@ -145,8 +145,8 @@ void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string
         timer.start();
 
         // Initialize the initial solution as the "current best"
-        Solution bestSolution = Solution::initialSolution(&problem);
-        Solution incumbent = Solution::initialSolution(&problem);
+        ObsoleteSolution bestSolution = ObsoleteSolution::initialSolution(&problem);
+        ObsoleteSolution incumbent = ObsoleteSolution::initialSolution(&problem);
 
         // Declare final temperature (end condition)
         double temperature_f = 0.1, deltaAverage = 0.0;
@@ -154,7 +154,7 @@ void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string
 
         for (int w = 0; w < warmupIterations; w++) {
             //Debugger::printSolution(&incumbent);
-            Solution solution = neighbourOperator->apply(incumbent, rng);
+            ObsoleteSolution solution = neighbourOperator->apply(incumbent, rng);
 
             if (!solution.isFeasible()) {
                 continue;
@@ -184,7 +184,7 @@ void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string
         // Run iterations per experiment
         for (int j = 0; j < iterations - warmupIterations; j++) {
             // Generate a new neighbour solution
-            Solution solution = neighbourOperator->apply(incumbent, rng);
+            ObsoleteSolution solution = neighbourOperator->apply(incumbent, rng);
 
             if (!solution.isFeasible()) {
                 infeasible++;

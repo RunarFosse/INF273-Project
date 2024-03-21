@@ -17,7 +17,7 @@ class Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    virtual Solution apply(Solution solution, std::default_random_engine& rng) = 0;
+    virtual ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng) = 0;
 };
 
 class UniformOperator : public Operator {
@@ -38,7 +38,7 @@ class UniformOperator : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    Solution apply(Solution solution, std::default_random_engine& rng);
+    ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng);
 
     private:
     std::vector<Operator*> operators;
@@ -62,7 +62,7 @@ class WeightedOperator : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    Solution apply(Solution solution, std::default_random_engine& rng);
+    ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng);
 
     private:
     std::vector<Operator*> operators;
@@ -78,7 +78,7 @@ class OneInsert : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    Solution apply(Solution solution, std::default_random_engine& rng);
+    ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng);
 };
 
 class GreedyInsert : public Operator {
@@ -92,7 +92,7 @@ class GreedyInsert : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    Solution apply(Solution solution, std::default_random_engine& rng);
+    ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng);
 };
 
 class ConstantBestInsert : public Operator {
@@ -105,7 +105,7 @@ class ConstantBestInsert : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    Solution apply(Solution solution, std::default_random_engine& rng);
+    ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng);
 };
 
 class LowBestInsert : public Operator {
@@ -118,7 +118,7 @@ class LowBestInsert : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    Solution apply(Solution solution, std::default_random_engine& rng);
+    ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng);
 };
 
 class HighBestInsert : public Operator {
@@ -131,7 +131,7 @@ class HighBestInsert : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    Solution apply(Solution solution, std::default_random_engine& rng);
+    ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng);
 };
 
 class MultiOutsource : public Operator {
@@ -147,7 +147,7 @@ class MultiOutsource : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    Solution apply(Solution solution, std::default_random_engine& rng);
+    ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng);
 };
 
 class GreedyOutsource : public Operator {
@@ -163,7 +163,7 @@ class GreedyOutsource : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    Solution apply(Solution solution, std::default_random_engine& rng);
+    ObsoleteSolution apply(ObsoleteSolution solution, std::default_random_engine& rng);
 };
 
 /**
@@ -176,7 +176,7 @@ class GreedyOutsource : public Operator {
  * @param solution Given solution to modify
  * @return Vector of indices (index1, index2)
  */
-std::vector<std::pair<int, int>> getFeasibleInsertions(int callIndex, int vehicleIndex, Solution* solution);
+std::vector<std::pair<int, int>> getFeasibleInsertions(int callIndex, int vehicleIndex, ObsoleteSolution* solution);
 
 /**
  * @brief Calculate the two best insertion indices together with cost of a given call and vehicle.
@@ -188,7 +188,7 @@ std::vector<std::pair<int, int>> getFeasibleInsertions(int callIndex, int vehicl
  * @param solution Given solution to modify
  * @return (bestCost, (index1, index2))
  */
-std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleIndex, int vehicleCall, Solution* solution, std::default_random_engine& rng);
+std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleIndex, int vehicleCall, ObsoleteSolution* solution, std::default_random_engine& rng);
 
 /**
  * @brief Performs the best insert operation on several calls on the given solution.
@@ -198,4 +198,4 @@ std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleI
  * @param rng Random number generator engine
  * @return Neighbour solution 
  */
-Solution* performBestInsert(int callsToInsert, Solution* solution, std::default_random_engine& rng);
+ObsoleteSolution* performBestInsert(int callsToInsert, ObsoleteSolution* solution, std::default_random_engine& rng);

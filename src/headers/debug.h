@@ -37,7 +37,7 @@ class Debugger {
      * 
      * @param solution Pointer to the solution instance
      */
-    static void printSolution(Solution* solution);
+    static void printSolution(ObsoleteSolution* solution);
 
     /**
      * @brief Print the results of running a test instance.
@@ -49,7 +49,7 @@ class Debugger {
      * @param improvement Percent improvement from the initial solution
      * @param averageTime Average instance running time
      */
-    static void printResults(std::string instance, std::string algorithm, double averageObjective, double bestObjective, double improvement, double averageTime, Solution* bestSolution);
+    static void printResults(std::string instance, std::string algorithm, double averageObjective, double bestObjective, double improvement, double averageTime, ObsoleteSolution* bestSolution);
 
     /**
      * @brief Prints a title together with a progress bar to the terminal.

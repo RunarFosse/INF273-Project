@@ -89,7 +89,7 @@ void Debugger::printProblem(Problem* problem, bool printMap) {
     }
 };
 
-void Debugger::printSolution(Solution* solution) {
+void Debugger::printSolution(ObsoleteSolution* solution) {
     std::cout << "[";
 
     for (int i = 0; i < solution->representation.size(); i++) {
@@ -102,7 +102,7 @@ void Debugger::printSolution(Solution* solution) {
     std::cout << "]" << std::endl;
 };
 
-void Debugger::printResults(std::string instance, std::string algorithm, double averageObjective, double bestObjective, double improvement, double averageTime, Solution* bestSolution) {
+void Debugger::printResults(std::string instance, std::string algorithm, double averageObjective, double bestObjective, double improvement, double averageTime, ObsoleteSolution* bestSolution) {
     std::cout << std::endl;
 
     std::cout << "Instance name     :    " << instance << std::endl;

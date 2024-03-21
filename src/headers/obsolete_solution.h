@@ -10,7 +10,7 @@
 
 #include "problem.h"
 
-class Solution {
+class ObsoleteSolution {
     public:
 
     /**
@@ -21,7 +21,7 @@ class Solution {
      * @param problem Problem to solve
      * @return Initial solution for the given problem
      */
-    static Solution initialSolution(Problem* problem);
+    static ObsoleteSolution initialSolution(Problem* problem);
 
     /**
      * @brief Constructs a random solution, spanning the whole solution space.
@@ -30,7 +30,7 @@ class Solution {
      * @param rng Random number generator Engine
      * @return Random solution for the given problem 
      */
-    static Solution randomSolution(Problem* problem, std::default_random_engine& rng);
+    static ObsoleteSolution randomSolution(Problem* problem, std::default_random_engine& rng);
 
     /**
      * @brief Moves a call from wherever it currently is to index1 and index2.
@@ -121,7 +121,7 @@ class Solution {
      * @param insertion Decides if change is an insertion or removal
      * @param previous Previous solution prior to modification
      */
-    void updateCost(int vehicleIndex, int callIndex, int index1, int index2, bool insertion, Solution* previous);
+    void updateCost(int vehicleIndex, int callIndex, int index1, int index2, bool insertion, ObsoleteSolution* previous);
 
     /**
      * @brief Get the times and capacities of a given vehicle.
@@ -136,7 +136,7 @@ class Solution {
      * 
      * @return Copy of solution 
      */
-    Solution copy();
+    ObsoleteSolution copy();
 
     /**
      * @brief Construct a new Solution given representation as vector.
@@ -144,7 +144,7 @@ class Solution {
      * @param representation Given solution representation
      * @param problem Problem to solve
      */
-    Solution(std::vector<int> representation, Problem* problem);
+    ObsoleteSolution(std::vector<int> representation, Problem* problem);
 
     /**
      * @brief Invalidates the current caches.
@@ -166,5 +166,5 @@ class Solution {
 
     private:
     // Only allow static instance creation, unless created from given vector (above)
-    Solution(Problem* problem);
+    ObsoleteSolution(Problem* problem);
 };

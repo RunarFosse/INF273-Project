@@ -2,7 +2,7 @@
 
 #include "debug.h"
 
-Solution::Solution(Problem* problem) {
+ObsoleteSolution::ObsoleteSolution(Problem* problem) {
     // Link problem to solution
     this->problem = problem;
 
@@ -14,7 +14,7 @@ Solution::Solution(Problem* problem) {
     this->callDetails.resize(problem->noCalls);
 }
 
-Solution::Solution(std::vector<int> representation, Problem* problem) {
+ObsoleteSolution::ObsoleteSolution(std::vector<int> representation, Problem* problem) {
     // Link problem to solution
     this->problem = problem;
 
@@ -33,9 +33,9 @@ Solution::Solution(std::vector<int> representation, Problem* problem) {
     this->isFeasible();
 }
 
-Solution Solution::copy() {
+ObsoleteSolution ObsoleteSolution::copy() {
     // Create a new solution with the same problem
-    Solution solution = Solution(this->problem);
+    ObsoleteSolution solution = ObsoleteSolution(this->problem);
 
     // Copy over representation, seperator and cost vectors
     solution.representation = this->representation;
@@ -51,9 +51,9 @@ Solution Solution::copy() {
     return solution;
 }
 
-Solution Solution::initialSolution(Problem* problem) {
+ObsoleteSolution ObsoleteSolution::initialSolution(Problem* problem) {
     // Create an empty solution
-    Solution solution(problem);
+    ObsoleteSolution solution(problem);
 
     // Outsource all calls
     solution.seperators.push_back(-1);
@@ -76,9 +76,9 @@ Solution Solution::initialSolution(Problem* problem) {
     return solution;
 }
 
-Solution Solution::randomSolution(Problem* problem, std::default_random_engine& rng) {
+ObsoleteSolution ObsoleteSolution::randomSolution(Problem* problem, std::default_random_engine& rng) {
     // Create an empty initial solution
-    Solution solution(problem);
+    ObsoleteSolution solution(problem);
 
     // For each vehicle + outsource, initialize a vector
     std::vector<std::vector<int>> vehicles(problem->noVehicles + 1);
@@ -131,7 +131,7 @@ Solution Solution::randomSolution(Problem* problem, std::default_random_engine& 
     return solution;
 }
 
-void Solution::greedyMove(int callIndex, int from, int to, int index1, int index2) {
+void ObsoleteSolution::greedyMove(int callIndex, int from, int to, int index1, int index2) {
     // TODO: Make one-pass algorithm
 
     int start = this->callDetails[callIndex-1].first, end = this->callDetails[callIndex-1].second;
@@ -177,7 +177,7 @@ void Solution::greedyMove(int callIndex, int from, int to, int index1, int index
     }
 }
 
-void Solution::move(int callIndex, int index1, int index2) {
+void ObsoleteSolution::move(int callIndex, int index1, int index2) {
     int start = this->callDetails[callIndex-1].first, end = this->callDetails[callIndex-1].second;
     if (start == index1 && end == index2) {
         return;
@@ -274,7 +274,7 @@ void Solution::move(int callIndex, int index1, int index2) {
     }*/
 }
 
-std::pair<int, int> Solution::outsource(int callIndex) {
+std::pair<int, int> ObsoleteSolution::outsource(int callIndex) {
     // First find insertion position
     int insertion;
     for (int i = this->representation.size()-1; i >= 0; i--) {
@@ -291,7 +291,7 @@ std::pair<int, int> Solution::outsource(int callIndex) {
     return std::make_pair(insertion, insertion+1);
 }
 
-void Solution::outsourceSeveral(std::vector<int> callIndices) {
+void ObsoleteSolution::outsourceSeveral(std::vector<int> callIndices) {
     // Create a set
     std::set<int> calls(callIndices.begin(), callIndices.end());
 
@@ -327,7 +327,7 @@ void Solution::outsourceSeveral(std::vector<int> callIndices) {
     }
 }
 
-int Solution::getVehicleWith(int callIndex) {
+int ObsoleteSolution::getVehicleWith(int callIndex) {
     // Binary search vehicle containing position of callIndex
     int firstOccurence = this->callDetails[callIndex-1].first;
 
@@ -358,7 +358,7 @@ int Solution::getVehicleWith(int callIndex) {
     assert(false);
 }
 
-bool Solution::isFeasible() {
+bool ObsoleteSolution::isFeasible() {
     // Check if value is cached
     if (this->feasibilityCache.first) {
         return this->feasibilityCache.second;
@@ -469,7 +469,7 @@ bool Solution::isFeasible() {
     return this->feasibilityCache.second;
 }
 
-void Solution::updateFeasibility(int vehicleIndex) {
+void ObsoleteSolution::updateFeasibility(int vehicleIndex) {
     // Early return as outsource is always feasible
     if (vehicleIndex == this->problem->noVehicles+1) {
         this->feasibilityCache = std::make_pair(true, true);
@@ -569,7 +569,7 @@ void Solution::updateFeasibility(int vehicleIndex) {
     this->feasibilityCache = std::make_pair(true, true);
 }
 
-int Solution::getCost() {
+int ObsoleteSolution::getCost() {
     // Check if value is cached
     if (this->costCache.first) {
         return this->costCache.second;
@@ -646,7 +646,7 @@ int Solution::getCost() {
     return this->costCache.second;
 }
 
-void Solution::updateCost(int vehicleIndex, int callIndex, int index1, int index2, bool insertion, Solution* previous) {
+void ObsoleteSolution::updateCost(int vehicleIndex, int callIndex, int index1, int index2, bool insertion, ObsoleteSolution* previous) {
     // Operations are negated if removal compared to insertion
     int operationMultiplier = insertion ? 1 : -1;
 
@@ -750,7 +750,7 @@ void Solution::updateCost(int vehicleIndex, int callIndex, int index1, int index
     this->costCache = std::make_pair(true, newCost);
 }
 
-std::pair<std::vector<int>, std::vector<int>> Solution::getDetails(int vehicleIndex) {
+std::pair<std::vector<int>, std::vector<int>> ObsoleteSolution::getDetails(int vehicleIndex) {
     std::vector<int> times, capacities;
 
     int i = this->seperators[vehicleIndex-1]+1;
@@ -815,7 +815,7 @@ std::pair<std::vector<int>, std::vector<int>> Solution::getDetails(int vehicleIn
     return std::make_pair(times, capacities);
 }
 
-void Solution::invalidateCache() {
+void ObsoleteSolution::invalidateCache() {
     this->feasibilityCache.first = false;
     this->costCache.first = false;
 }
