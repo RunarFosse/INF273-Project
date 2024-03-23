@@ -10,12 +10,15 @@ int main(int argc, char const *argv[])
 
     // Create a uniform and weighted neighbourhood operator
     Operator* uniformOperator = new UniformOperator({
-        new MultiOutsource(),
-        new BestInsert(),
+        //new MultiOutsource(),
+        new OneInsert(),
+        //new ConstantBestInsert(),
+        //new LowBestInsert(),
+        //new HighBestInsert(),
     });
     Operator* weightedOperator = new WeightedOperator({
         std::make_pair(new MultiOutsource(), 0.40),
-        std::make_pair(new BestInsert(), 0.60),
+        std::make_pair(new HighBestInsert(), 0.60),
     });
 
     // Run each test case given

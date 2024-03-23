@@ -36,6 +36,9 @@ Solution::Solution(std::vector<int> representation, Problem* problem) : outsourc
 
     // Precompute feasibility
     this->isFeasible();
+
+    // And then precalcuate cost
+    this->getCost();
 }
 
 Solution Solution::copy() {
@@ -163,16 +166,9 @@ void Solution::add(int vehicleIndex, int callIndex, std::pair<int, int> indices)
 
     // Update callDetails for inserted call
     this->callDetails[callIndex-1].vehicle = vehicleIndex;
-
-    // Update cost
-    this->updateCost(vehicleIndex, callIndex, indices, true, this);
 }
 
 void Solution::remove(int vehicleIndex, int callIndex) {
-    // Update cost
-    std::pair<int, int> callIndices = this->callDetails[callIndex-1].indices;
-    this->updateCost(vehicleIndex, callIndex, callIndices, false, this);
-
     // Remove call from representation
     int skip = 0;
     std::unordered_set<int> pickedCalls;
@@ -210,6 +206,11 @@ void Solution::move(int vehicleIndex, int callIndex, std::pair<int, int> indices
     // If not, remove call from where it currently is and add to wanted position
     this->remove(vehicleCall, callIndex);
     this->add(vehicleIndex, callIndex, indices);
+
+    if (vehicleCall != vehicleIndex) {
+        this->updateCost(vehicleCall, callIndex, indices, true, this);
+    }
+    this->updateCost(vehicleIndex, callIndex, indices, true, this);
 }
 
 std::pair<int, int> Solution::outsource(int callIndex) {
@@ -323,6 +324,8 @@ void Solution::updateFeasibility(int vehicleIndex) {
     Vehicle vehicle = this->problem->vehicles[vehicleIndex-1];
 
     std::unordered_set<int> startedCalls;
+
+    // TODO: Store as set
     std::unordered_set<int> possibleCalls(vehicle.possibleCalls.begin(), vehicle.possibleCalls.end());
 
     int currentTime = vehicle.startTime;
@@ -470,109 +473,64 @@ int Solution::getCost() {
 }
 
 void Solution::updateCost(int vehicleIndex, int callIndex, std::pair<int, int> indices, bool insertion, Solution* previous) {
-    // First retrieve the correct representation to look at
-    std::vector<int> representation = insertion ? this->representation[vehicleIndex-1] : previous->representation[vehicleIndex-1];
+    // TODO: Correctly implement ultra greedy cost 
 
-    // Extract indices
-    int index1 = indices.first, index2 = indices.second;
-    
-    // Operations are negated if removal compared to insertion
-    int operationMultiplier = insertion ? 1 : -1;
-
-    // Store previous cost temporarily
     int previousCost = this->costs[vehicleIndex-1];
 
-    // Get information about the call
-    Call call = this->problem->calls[callIndex-1];
-
-    // If outsource, calculation is simple
     if (vehicleIndex == this->outsourceVehicle) {
-        // Add/remove cost depending on operation
-        this->costs[vehicleIndex-1] += call.costOfNotTransporting * operationMultiplier;
+        std::unordered_set<int> outsourcedCalls;
+        this->costs[this->outsourceVehicle-1] = 0;
+        for (int callIndex : this->representation[this->outsourceVehicle-1]) {
 
+            // Only count outsourced calls once (for effiency)
+            if (outsourcedCalls.find(callIndex) == outsourcedCalls.end()) {
+                // Outsource the call
+                Call call = this->problem->calls[callIndex-1];
+                this->costs[this->outsourceVehicle-1] += call.costOfNotTransporting;
+
+                outsourcedCalls.insert(callIndex);
+            }
+        }
         // Update and cache the new cost
         int newCost = this->costCache.second - previousCost + this->costs[vehicleIndex-1];
         this->costCache = std::make_pair(true, newCost);
         return;
     }
 
-    // Now we also need the vehicle
+
+    // Reset cost before computing
+    this->costs[vehicleIndex-1] = 0;
+
     Vehicle vehicle = this->problem->vehicles[vehicleIndex-1];
 
-    // If not outsourcing, handle pickup/delivery costs here
-    this->costs[vehicleIndex-1] += vehicle.callTimeCost[callIndex-1].first.cost * operationMultiplier;
-    this->costs[vehicleIndex-1] += vehicle.callTimeCost[callIndex-1].second.cost * operationMultiplier;
+    int currentNode = vehicle.homeNode;
+    std::unordered_set<int> startedCalls;
 
-    // Ensure that index1 < index2
-    if (index1 > index2) {
-        int temp = index2;
-        index2 = index1;
-        index1 = temp;
-    }
+    for (int callIndex : this->representation[vehicleIndex-1]) {
+        if (startedCalls.find(callIndex) == startedCalls.end()) {
+            // Pickup call cargo
+            Call call = this->problem->calls[callIndex-1];
 
-    // If indices are close, cost calculation is way easier
-    if (index1 == index2-1) {
-        int startCallIndex = (index1 == 0) ? 0 : representation[index1-1];
-        int endCallIndex = (index2 < representation.size()-1) ? representation[index2+1] : 0;
-        int startNode = vehicle.homeNode;
-        if (startCallIndex != 0) {
-            Call startCall = this->problem->calls[startCallIndex-1];
-            startNode = ((insertion ? this->callDetails[startCallIndex-1].indices.first : previous->callDetails[startCallIndex-1].indices.first) == index1-1 ? startCall.originNode : startCall.destinationNode);
-        }
+            // Travel to call origin node
+            this->costs[vehicleIndex-1] += vehicle.routeTimeCost[currentNode-1][call.originNode-1].cost;
+            currentNode = call.originNode;
 
-        // If call was added to the back, adding/removing the call is very easy
-        if (endCallIndex == 0) {
-            this->costs[vehicleIndex-1] += vehicle.routeTimeCost[startNode-1][call.originNode-1].cost * operationMultiplier;
-            this->costs[vehicleIndex-1] += vehicle.routeTimeCost[call.originNode-1][call.destinationNode-1].cost * operationMultiplier;
+            // Pickup cargo at origin node (wait some time)
+            this->costs[vehicleIndex-1] += vehicle.callTimeCost[callIndex-1].first.cost;
 
+            startedCalls.insert(callIndex);
         } else {
-            Call endCall = this->problem->calls[endCallIndex-1];
-            int endNode = ((insertion ? this->callDetails[endCallIndex-1].indices.first : previous->callDetails[endCallIndex-1].indices.first) == index2+1 ? endCall.originNode : endCall.destinationNode);
+            // Deliver call cargo
+            Call call = this->problem->calls[callIndex-1];
 
-            // Remove old travel costs
-            this->costs[vehicleIndex-1] -= vehicle.routeTimeCost[startNode-1][endNode-1].cost * operationMultiplier;
+            // Travel to call destination node
+            this->costs[vehicleIndex-1] += vehicle.routeTimeCost[currentNode-1][call.destinationNode-1].cost;
+            currentNode = call.destinationNode;
 
-            // And add the new travel costs
-            this->costs[vehicleIndex-1] += vehicle.routeTimeCost[startNode-1][call.originNode-1].cost * operationMultiplier;
-            this->costs[vehicleIndex-1] += vehicle.routeTimeCost[call.originNode-1][call.destinationNode-1].cost * operationMultiplier;
-            this->costs[vehicleIndex-1] += vehicle.routeTimeCost[call.destinationNode-1][endNode-1].cost * operationMultiplier;
-        }
-    } else {
-        // First handle index1
-        int startCallIndex1 = (index1 == 0) ? 0 : (insertion ? representation[index1-1] : representation[index1-1]);
-        int endCallIndex1 = representation[index1+1];
-        int startNode1 = vehicle.homeNode, endNode1;
-        if (startCallIndex1 != 0) {
-            Call startCall1 = this->problem->calls[startCallIndex1-1];
-            startNode1 = ((insertion ? this->callDetails[startCallIndex1-1].indices.first : previous->callDetails[startCallIndex1-1].indices.first) == index1-1 ? startCall1.originNode : startCall1.destinationNode);
-        }
-        Call endCall1 = this->problem->calls[endCallIndex1-1];
-        endNode1 = ((insertion ? this->callDetails[endCallIndex1-1].indices.first : previous->callDetails[endCallIndex1-1].indices.first) == index1+1 ? endCall1.originNode : endCall1.destinationNode);
-
-        // Then index2
-        int startCallIndex2 = representation[index2-1];
-        int endCallIndex2 = (index2 < representation.size()-1) ? representation[index2+1] : 0;
-        Call startCall2 = this->problem->calls[startCallIndex2-1];
-        int startNode2 = ((insertion ? this->callDetails[startCallIndex2-1].indices.first : previous->callDetails[startCallIndex2-1].indices.first) == index2-1 ? startCall2.originNode : startCall2.destinationNode);
-        int endNode2 = startNode2;
-        if (endCallIndex2 != 0) {
-            Call endCall2 = this->problem->calls[endCallIndex2-1];
-            endNode2 = ((insertion ? this->callDetails[endCallIndex2-1].indices.first : previous->callDetails[endCallIndex2-1].indices.first) == index2+1 ? endCall2.originNode : endCall2.destinationNode);
-        }
-
-        // Remove old travel costs
-        this->costs[vehicleIndex-1] -= vehicle.routeTimeCost[startNode1-1][endNode1-1].cost * operationMultiplier;
-        this->costs[vehicleIndex-1] -= vehicle.routeTimeCost[startNode2-1][endNode2-1].cost * operationMultiplier;
-
-        // And add the new travel costs
-        this->costs[vehicleIndex-1] += vehicle.routeTimeCost[startNode1-1][call.originNode-1].cost * operationMultiplier; 
-        this->costs[vehicleIndex-1] += vehicle.routeTimeCost[call.originNode-1][endNode1-1].cost * operationMultiplier; 
-        this->costs[vehicleIndex-1] += vehicle.routeTimeCost[startNode2-1][call.destinationNode-1].cost * operationMultiplier; 
-        if (endCallIndex2 != 0) {
-            this->costs[vehicleIndex-1] += vehicle.routeTimeCost[call.destinationNode-1][endNode2-1].cost * operationMultiplier; 
+            // Deliver cargo at destination node (wait some time)
+            this->costs[vehicleIndex-1] += vehicle.callTimeCost[callIndex-1].second.cost;
         }
     }
-
 
     // Update and cache the new cost
     int newCost = this->costCache.second - previousCost + this->costs[vehicleIndex-1];
@@ -635,13 +593,6 @@ std::pair<std::vector<int>, std::vector<int>> Solution::getDetails(int vehicleIn
         times.push_back(currentTime);
         capacities.push_back(currentCapacity);
     }
-
-    // Extend with at least two
-    //times.push_back(currentTime);
-    //times.push_back(currentTime);
-    //capacities.push_back(currentCapacity);
-    //capacities.push_back(currentCapacity);
-
 
     // Return the details
     return std::make_pair(times, capacities);

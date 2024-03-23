@@ -123,7 +123,7 @@ void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string
     // Parse the given test instance
     Problem problem = Parser::parseProblem("data/" + instance + ".txt");
     std::string algorithm = title == "" ? "Simulated Annealing" : title;
-    int infeasible = 0;
+    int infeasible = 0, iterfound = 0;
 
     // Create a timer object
     Timer timer = Timer(algorithm + ": " + instance, experiments);
@@ -165,6 +165,7 @@ void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string
                 incumbent = solution;
                 if (incumbent.getCost() < bestSolution.getCost()) {
                     bestSolution = incumbent;
+                    iterfound = w;
                 }
             } else {
                 if (random(rng) < explorationProbability) {
@@ -196,6 +197,7 @@ void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string
                 incumbent = solution;
                 if (incumbent.getCost() < bestSolution.getCost()) {
                     bestSolution = incumbent;
+                    iterfound = j + warmupIterations;
                 }
             } else if (random(rng) < exp(-deltaE / temperature)) {
                 incumbent = solution;
@@ -213,6 +215,12 @@ void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string
         // and check if it is better than the current best overall solution
         if (bestSolution.getCost() < bestSolutionOverall.getCost()) {
             bestSolutionOverall = bestSolution;
+        }
+        if (false) {
+            Debugger::printSolution(&bestSolution);
+            std::cout << "Cost: " << std::to_string(bestSolution.getCost());
+            bestSolution.invalidateCache();
+            std::cout << " Actual: " << std::to_string(bestSolution.getCost()) << ", found after iteration " << std::to_string(iterfound) << std::endl;
         }
     }
 

@@ -69,7 +69,47 @@ class WeightedOperator : public Operator {
     std::vector<double> weights;
 };
 
-class BestInsert : public Operator {
+class OneInsert : public Operator {
+    public:
+    /**
+     * @brief Apply 1-insert heuristic operator to solution.
+     * 
+     * @param solution Solution to apply operator on
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution solution, std::default_random_engine& rng);
+};
+
+class ConstantBestInsert : public Operator {
+    public:
+    /**
+     * @brief Apply best-insert heuristic operator to solution.
+     * Best-insert moves a random amount of calls to the current
+     * most optimal positions in a greedy fashion.
+     * 
+     * @param solution Solution to apply operator on
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution solution, std::default_random_engine& rng);
+};
+
+class LowBestInsert : public Operator {
+    public:
+    /**
+     * @brief Apply best-insert heuristic operator to solution.
+     * Best-insert moves a random amount of calls to the current
+     * most optimal positions in a greedy fashion.
+     * 
+     * @param solution Solution to apply operator on
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution solution, std::default_random_engine& rng);
+};
+
+class HighBestInsert : public Operator {
     public:
     /**
      * @brief Apply best-insert heuristic operator to solution.

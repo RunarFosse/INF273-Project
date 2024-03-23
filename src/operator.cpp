@@ -29,9 +29,61 @@ Solution WeightedOperator::apply(Solution solution, std::default_random_engine& 
     return this->operators[operatorIndex]->apply(solution, rng);
 }
 
-Solution BestInsert::apply(Solution solution, std::default_random_engine& rng) {
+Solution OneInsert::apply(Solution solution, std::default_random_engine& rng) {
+    // Create a copy of the current solution
+    Solution current = solution.copy();
+
+    // Select a random call
+    int callIndex = std::uniform_int_distribution<std::size_t>(1, solution.problem->noCalls)(rng);
+    int vehicleIndex = solution.problem->calls[callIndex-1].possibleVehicles[std::uniform_int_distribution<std::size_t>(0, solution.problem->calls[callIndex-1].possibleVehicles.size()-1)(rng)];
+
+    // Find the vehicle which currently has the call, and its current indices
+    int vehicleCall = current.callDetails[callIndex-1].vehicle;
+    std::pair<int, int> indicesCall = current.callDetails[callIndex-1].indices;
+
+    // Then randomly sample two feasible indices
+    std::pair<int, int> indices;
+    indices.first = std::uniform_int_distribution<std::size_t>(0, current.representation[vehicleIndex-1].size() + ((vehicleCall == vehicleIndex) ? -2 : 0))(rng);
+    indices.second = std::uniform_int_distribution<int>(indices.first+1, current.representation[vehicleIndex-1].size() + ((vehicleCall == vehicleIndex) ? -1 : 1))(rng);
+
+    // Insert the callIndex under the new vehicleIndex at random positions
+    current.move(vehicleIndex, callIndex, indices);
+
+    // Invalidate the caches as we've modified the representation
+    current.invalidateCache();
+
+    // Then greedily update the feasibility for modified vehicles
+    current.updateFeasibility(vehicleIndex);
+
+    //Debugger::printToTerminal("\nRemove in: " + std::to_string(vehicleCall) + ", " + std::to_string(indicesCall.first) + " - " + std::to_string(indicesCall.second) + "\n");
+    //Debugger::printToTerminal("Insert in: " + std::to_string(vehicleIndex) + ", " + std::to_string(indices.first) + " - " + std::to_string(indices.second) + "\n");
+    //Debugger::printSolution(&current);
+
+    // Return the modified neighbour solution
+    return current;
+}
+
+Solution ConstantBestInsert::apply(Solution solution, std::default_random_engine& rng) {
     // Pick out the number of calls to move
     int lowerbound = 1;
+    int upperbound = std::min(solution.problem->noCalls, 4);
+    int callsToInsert = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
+
+    return *performBestInsert(callsToInsert, &solution, rng);
+}
+
+Solution LowBestInsert::apply(Solution solution, std::default_random_engine& rng) {
+    // Pick out the number of calls to move
+    int lowerbound = 1;
+    int upperbound = std::max(solution.problem->noCalls / 8, 1);
+    int callsToInsert = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
+
+    return *performBestInsert(callsToInsert, &solution, rng);
+}
+
+Solution HighBestInsert::apply(Solution solution, std::default_random_engine& rng) {
+    // Pick out the number of calls to move
+    int lowerbound = std::max(solution.problem->noCalls / 10, 1);
     int upperbound = std::max(solution.problem->noCalls / 5, 1);
     int callsToInsert = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
 
@@ -60,7 +112,7 @@ Solution MultiOutsource::apply(Solution solution, std::default_random_engine& rn
 
     // Pick the number random calls to outsource
     int lowerbound = 1;
-    int upperbound = std::max(std::min((int)possibleCalls.size(), solution.problem->noCalls / 15), 1);
+    int upperbound = std::max(std::min((int)possibleCalls.size(), solution.problem->noCalls / 20), 1);
     int callsToOutsource = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
 
     // Efficient (non-colliding) sampling algorithm "https://stackoverflow.com/a/3724708"
@@ -130,8 +182,6 @@ std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleI
 
             // Move call
             current.move(vehicleIndex, callIndex, std::make_pair(pointer1, pointer2));
-            current.invalidateCache();
-
 
             // Check feasibility
             current.updateFeasibility(vehicleIndex);
