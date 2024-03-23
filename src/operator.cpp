@@ -231,14 +231,14 @@ Solution* performBestInsert(int callsToInsert, Solution* solution, std::default_
         std::pair<int, int> bestIndices;
 
         // Get all possible vehicles to insert callIndex into
-        std::unordered_set<int>* possibleVehicles = &(solution->problem->calls[callIndex-1].possibleVehiclesSet);
+        std::unordered_set<int> possibleVehicles(solution->problem->calls[callIndex-1].possibleVehicles.begin(), solution->problem->calls[callIndex-1].possibleVehicles.end());
 
         // Get the vehicle which currently has the call (currently all are outsourced so this is easy)
         int vehicleCall = solution->problem->noVehicles+1;
 
         // Check to place within any (feasible) vehicle (not outsource)
         for (int vehicleIndex = 1; vehicleIndex <= solution->problem->noVehicles; vehicleIndex++) {
-            if (possibleVehicles->find(vehicleIndex) == possibleVehicles->end()) {
+            if (possibleVehicles.find(vehicleIndex) == possibleVehicles.end()) {
                 continue;
             }
             // Get the best place to insert
