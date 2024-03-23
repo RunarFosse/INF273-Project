@@ -90,7 +90,7 @@ void InstanceRunner::localSearch(Operator* neighbourOperator, std::string instan
         // Run iterations per experiment
         for (int j = 0; j < iterations; j++) {
             // Generate a new neighbour solution
-            Solution solution = neighbourOperator->apply(bestSolution, rng);
+            Solution solution = neighbourOperator->apply(&bestSolution, rng);
 
             // Check if the solution is feasible and, if so, check if it is better than the current best
             if (solution.isFeasible() && solution.getCost() < bestSolution.getCost()) {
@@ -154,7 +154,7 @@ void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string
 
         for (int w = 0; w < warmupIterations; w++) {
             //Debugger::printSolution(&incumbent);
-            Solution solution = neighbourOperator->apply(incumbent, rng);
+            Solution solution = neighbourOperator->apply(&incumbent, rng);
 
             if (!solution.isFeasible()) {
                 continue;
@@ -185,7 +185,7 @@ void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string
         // Run iterations per experiment
         for (int j = 0; j < iterations - warmupIterations; j++) {
             // Generate a new neighbour solution
-            Solution solution = neighbourOperator->apply(incumbent, rng);
+            Solution solution = neighbourOperator->apply(&incumbent, rng);
 
             if (!solution.isFeasible()) {
                 infeasible++;

@@ -17,7 +17,7 @@ class Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    virtual Solution apply(Solution solution, std::default_random_engine& rng) = 0;
+    virtual Solution apply(Solution* solution, std::default_random_engine& rng) = 0;
 };
 
 class UniformOperator : public Operator {
@@ -38,7 +38,7 @@ class UniformOperator : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    Solution apply(Solution solution, std::default_random_engine& rng);
+    Solution apply(Solution* solution, std::default_random_engine& rng);
 
     private:
     std::vector<Operator*> operators;
@@ -62,7 +62,7 @@ class WeightedOperator : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    Solution apply(Solution solution, std::default_random_engine& rng);
+    Solution apply(Solution* solution, std::default_random_engine& rng);
 
     private:
     std::vector<Operator*> operators;
@@ -78,7 +78,7 @@ class OneInsert : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    Solution apply(Solution solution, std::default_random_engine& rng);
+    Solution apply(Solution* solution, std::default_random_engine& rng);
 };
 
 class ConstantBestInsert : public Operator {
@@ -92,7 +92,7 @@ class ConstantBestInsert : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    Solution apply(Solution solution, std::default_random_engine& rng);
+    Solution apply(Solution* solution, std::default_random_engine& rng);
 };
 
 class LowBestInsert : public Operator {
@@ -106,7 +106,7 @@ class LowBestInsert : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    Solution apply(Solution solution, std::default_random_engine& rng);
+    Solution apply(Solution* solution, std::default_random_engine& rng);
 };
 
 class HighBestInsert : public Operator {
@@ -120,7 +120,7 @@ class HighBestInsert : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    Solution apply(Solution solution, std::default_random_engine& rng);
+    Solution apply(Solution* solution, std::default_random_engine& rng);
 };
 
 class MultiOutsource : public Operator {
@@ -136,7 +136,7 @@ class MultiOutsource : public Operator {
      * @param rng Random number generator Engine
      * @return Neighbour solution
      */
-    Solution apply(Solution solution, std::default_random_engine& rng);
+    Solution apply(Solution* solution, std::default_random_engine& rng);
 };
 
 /**

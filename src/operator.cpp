@@ -6,7 +6,7 @@ UniformOperator::UniformOperator(std::vector<Operator*> operators) {
     this->operators = operators;
 }
 
-Solution UniformOperator::apply(Solution solution, std::default_random_engine& rng) {
+Solution UniformOperator::apply(Solution* solution, std::default_random_engine& rng) {
     // Get a random operator from those this contains
     int operatorIndex = std::uniform_int_distribution<std::size_t>(0, this->operators.size()-1)(rng);
 
@@ -21,7 +21,7 @@ WeightedOperator::WeightedOperator(std::vector<std::pair<Operator*, double>> ope
     }
 }
 
-Solution WeightedOperator::apply(Solution solution, std::default_random_engine& rng) {
+Solution WeightedOperator::apply(Solution* solution, std::default_random_engine& rng) {
     // Get a weighted random operator from those this contains
     int operatorIndex = std::discrete_distribution<std::size_t>(this->weights.begin(), this->weights.end())(rng);
 
@@ -29,13 +29,13 @@ Solution WeightedOperator::apply(Solution solution, std::default_random_engine& 
     return this->operators[operatorIndex]->apply(solution, rng);
 }
 
-Solution OneInsert::apply(Solution solution, std::default_random_engine& rng) {
+Solution OneInsert::apply(Solution* solution, std::default_random_engine& rng) {
     // Create a copy of the current solution
-    Solution current = solution.copy();
+    Solution current = solution->copy();
 
     // Select a random call
-    int callIndex = std::uniform_int_distribution<std::size_t>(1, solution.problem->noCalls)(rng);
-    int vehicleIndex = solution.problem->calls[callIndex-1].possibleVehicles[std::uniform_int_distribution<std::size_t>(0, solution.problem->calls[callIndex-1].possibleVehicles.size()-1)(rng)];
+    int callIndex = std::uniform_int_distribution<std::size_t>(1, solution->problem->noCalls)(rng);
+    int vehicleIndex = solution->problem->calls[callIndex-1].possibleVehicles[std::uniform_int_distribution<std::size_t>(0, solution->problem->calls[callIndex-1].possibleVehicles.size()-1)(rng)];
 
     // Find the vehicle which currently has the call, and its current indices
     int vehicleCall = current.callDetails[callIndex-1].vehicle;
@@ -63,43 +63,46 @@ Solution OneInsert::apply(Solution solution, std::default_random_engine& rng) {
     return current;
 }
 
-Solution ConstantBestInsert::apply(Solution solution, std::default_random_engine& rng) {
+Solution ConstantBestInsert::apply(Solution* solution, std::default_random_engine& rng) {
     // Pick out the number of calls to move
     int lowerbound = 1;
-    int upperbound = std::min(solution.problem->noCalls, 4);
+    int upperbound = std::min(solution->problem->noCalls, 4);
     int callsToInsert = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
 
-    return *performBestInsert(callsToInsert, &solution, rng);
+    return *performBestInsert(callsToInsert, solution, rng);
 }
 
-Solution LowBestInsert::apply(Solution solution, std::default_random_engine& rng) {
+Solution LowBestInsert::apply(Solution* solution, std::default_random_engine& rng) {
     // Pick out the number of calls to move
     int lowerbound = 1;
-    int upperbound = std::max(solution.problem->noCalls / 8, 1);
+    int upperbound = std::max(solution->problem->noCalls / 8, 1);
     int callsToInsert = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
 
-    return *performBestInsert(callsToInsert, &solution, rng);
+    return *performBestInsert(callsToInsert, solution, rng);
 }
 
-Solution HighBestInsert::apply(Solution solution, std::default_random_engine& rng) {
+Solution HighBestInsert::apply(Solution* solution, std::default_random_engine& rng) {
     // Pick out the number of calls to move
-    int lowerbound = std::max(solution.problem->noCalls / 10, 1);
-    int upperbound = std::max(solution.problem->noCalls / 5, 1);
+    int lowerbound = std::max(solution->problem->noCalls / 10, 1);
+    int upperbound = std::max(solution->problem->noCalls / 5, 1);
     int callsToInsert = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
 
-    return *performBestInsert(callsToInsert, &solution, rng);
+    return *performBestInsert(callsToInsert, solution, rng);
 }
 
-Solution MultiOutsource::apply(Solution solution, std::default_random_engine& rng) {
+Solution MultiOutsource::apply(Solution* solution, std::default_random_engine& rng) {
+    // Create a copy of the solution
+    Solution current = solution->copy();
+
     // Extract all currently outsourced calls
     std::set<int> outsourcedCalls;
-    for (int callIndex : solution.representation[solution.outsourceVehicle-1]) {
+    for (int callIndex : solution->representation[solution->outsourceVehicle-1]) {
         outsourcedCalls.insert(callIndex);
     }
 
     // Compute all not-outsourced
     std::vector<int> possibleCalls;
-    for (int callIndex = 1; callIndex <= solution.problem->noCalls; callIndex++) {
+    for (int callIndex = 1; callIndex <= solution->problem->noCalls; callIndex++) {
         if (outsourcedCalls.find(callIndex) == outsourcedCalls.end()) {
             possibleCalls.push_back(callIndex);
         }
@@ -107,12 +110,12 @@ Solution MultiOutsource::apply(Solution solution, std::default_random_engine& rn
 
     // If no call can be outsourced, return current solution
     if (possibleCalls.empty()) {
-        return solution;
+        return current;
     }
 
     // Pick the number random calls to outsource
     int lowerbound = 1;
-    int upperbound = std::max(std::min((int)possibleCalls.size(), solution.problem->noCalls / 20), 1);
+    int upperbound = std::max(std::min((int)possibleCalls.size(), current.problem->noCalls / 20), 1);
     int callsToOutsource = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
 
     // Efficient (non-colliding) sampling algorithm "https://stackoverflow.com/a/3724708"
@@ -129,11 +132,11 @@ Solution MultiOutsource::apply(Solution solution, std::default_random_engine& rn
 
     // Outsource all of them
     for (int callIndex : callIndices) {
-        solution.outsource(callIndex);
+        current.outsource(callIndex);
     }
 
     // Return neighbour solution
-    return solution;
+    return current;
 }
 
 std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleIndex, int vehicleCall, Solution* solution, std::default_random_engine& rng) {
