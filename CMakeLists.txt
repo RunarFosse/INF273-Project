@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.27)
 
-# Compile with C++14
-set (CMAKE_CXX_STANDARD 14)
+# Compile with C++17
+set (CMAKE_CXX_STANDARD 17)
 
 # Compile as release
 set (CMAKE_BUILD_TYPE RELEASE)
