@@ -64,30 +64,39 @@ Solution OneInsert::apply(Solution* solution, std::default_random_engine& rng) {
 }
 
 Solution ConstantBestInsert::apply(Solution* solution, std::default_random_engine& rng) {
+    // Create a copy of the solution
+    Solution current = solution->copy();
+
     // Pick out the number of calls to move
     int lowerbound = 1;
     int upperbound = std::min(solution->problem->noCalls, 4);
     int callsToInsert = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
 
-    return *performBestInsert(callsToInsert, solution, rng);
+    return *performBestInsert(callsToInsert, &current, rng);
 }
 
 Solution LowBestInsert::apply(Solution* solution, std::default_random_engine& rng) {
+    // Create a copy of the solution
+    Solution current = solution->copy();
+
     // Pick out the number of calls to move
     int lowerbound = 1;
     int upperbound = std::max(solution->problem->noCalls / 8, 1);
     int callsToInsert = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
 
-    return *performBestInsert(callsToInsert, solution, rng);
+    return *performBestInsert(callsToInsert, &current, rng);
 }
 
 Solution HighBestInsert::apply(Solution* solution, std::default_random_engine& rng) {
+    // Create a copy of the solution
+    Solution current = solution->copy();
+
     // Pick out the number of calls to move
     int lowerbound = std::max(solution->problem->noCalls / 10, 1);
     int upperbound = std::max(solution->problem->noCalls / 5, 1);
     int callsToInsert = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
 
-    return *performBestInsert(callsToInsert, solution, rng);
+    return *performBestInsert(callsToInsert, &current, rng);
 }
 
 Solution MultiOutsource::apply(Solution* solution, std::default_random_engine& rng) {
@@ -117,18 +126,9 @@ Solution MultiOutsource::apply(Solution* solution, std::default_random_engine& r
     int lowerbound = 1;
     int upperbound = std::max(std::min((int)possibleCalls.size(), current.problem->noCalls / 20), 1);
     int callsToOutsource = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
-
-    // Efficient (non-colliding) sampling algorithm "https://stackoverflow.com/a/3724708"
-    std::set<int> callIndices;
-    int total = possibleCalls.size();
-    for (int i = total - callsToOutsource; i < total; i++) {
-        int item = std::uniform_int_distribution<int>(0, i)(rng); 
-        if (callIndices.find(item) == callIndices.end()) {
-            callIndices.insert(possibleCalls[item]);
-        } else {
-            callIndices.insert(possibleCalls[i]);
-        }
-    }
+    
+    std::vector<int> callIndices;
+    std::sample(possibleCalls.begin(), possibleCalls.end(), std::back_inserter(callIndices), callsToOutsource, rng);
 
     // Outsource all of them
     for (int callIndex : callIndices) {
