@@ -23,12 +23,29 @@ Solution::Solution(std::vector<int> representation, Problem* problem) : outsourc
     // Denote outsource vehicleIndex
     this->outsourceVehicle = problem->noVehicles+1;
 
+    // Reserve representation size
+    this->representation.resize(problem->noVehicles+1);
+    this->costs.resize(problem->noVehicles+1);
+
+    this->callDetails.resize(problem->noCalls);
+
     // Infer representation from what is given
-    int currentVehicle = 1;
-    for (int callIndex : representation) {
+    int currentVehicle = 1, lastSeperator = -1;
+    std::unordered_set<int> pickedCalls;
+    for (int i = 0; i < representation.size(); i++) {
+        int callIndex = representation[i];
         if (callIndex == 0) {
+            lastSeperator = i;
             currentVehicle++;
             continue;
+        }
+
+        if (pickedCalls.find(callIndex) == pickedCalls.end()) {
+            this->callDetails[callIndex-1].vehicle = currentVehicle;
+            this->callDetails[callIndex-1].indices.first = i - lastSeperator+1;
+            pickedCalls.insert(callIndex);
+        } else {
+            this->callDetails[callIndex-1].indices.second = i - lastSeperator+1;
         }
 
         this->representation[currentVehicle-1].push_back(callIndex);

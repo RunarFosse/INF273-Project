@@ -216,7 +216,7 @@ void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string
         if (bestSolution.getCost() < bestSolutionOverall.getCost()) {
             bestSolutionOverall = bestSolution;
         }
-        if (false) {
+        if (true) {
             Debugger::printSolution(&bestSolution);
             std::cout << "Cost: " << std::to_string(bestSolution.getCost());
             bestSolution.invalidateCache();

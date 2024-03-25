@@ -161,3 +161,5 @@ std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleI
  * @return Neighbour solution 
  */
 Solution* performBestInsert(int callsToInsert, Solution* solution, std::default_random_engine& rng);
+
+std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callIndex, Solution* solution);
