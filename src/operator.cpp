@@ -37,7 +37,7 @@ Solution OneInsert::apply(Solution* solution, std::default_random_engine& rng) {
     int callIndex = std::uniform_int_distribution<std::size_t>(1, solution->problem->noCalls)(rng);
 
     // Find all feasible insertions sorted from best-to-worst
-    std::vector<std::pair<int, CallDetails>> feasibleInsertions = calculateFeasibleInsertions(callIndex, &current);
+    std::vector<std::pair<int, CallDetails>> feasibleInsertions = calculateFeasibleInsertions(callIndex, &current, false);
     // If no feasible position has been found, keep call outsourced
     if (feasibleInsertions.empty()) {
         return current;
@@ -143,10 +143,6 @@ Solution* performBestInsert(int callsToInsert, Solution* solution, std::default_
     std::sample(allCalls.begin(), allCalls.end(), std::back_inserter(callIndices), callsToInsert, rng);
     std::shuffle(callIndices.begin(), callIndices.end(), rng);
 
-    //for (int call : callIndices)
-    //    Debugger::printToTerminal(std::to_string(call) + ", ");
-    //Debugger::printToTerminal("\n");
-
     // Temporarily move all to outsource and update the cost
     for (int callIndex : callIndices) {
         CallDetails details = solution->callDetails[callIndex-1];
@@ -159,7 +155,7 @@ Solution* performBestInsert(int callsToInsert, Solution* solution, std::default_
     // Then move each call to the best possible position
     for (int callIndex : callIndices) {
         // Find all feasible insertions sorted from best-to-worst
-        std::vector<std::pair<int, CallDetails>> feasibleInsertions = calculateFeasibleInsertions(callIndex, solution);
+        std::vector<std::pair<int, CallDetails>> feasibleInsertions = calculateFeasibleInsertions(callIndex, solution, true);
 
         // If no feasible position has been found, keep call outsourced
         if (feasibleInsertions.empty()) {
@@ -175,7 +171,7 @@ Solution* performBestInsert(int callsToInsert, Solution* solution, std::default_
     return solution;
 }
 
-std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callIndex, Solution* solution) {
+std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callIndex, Solution* solution, bool sort) {
     // Create a copy of the solution
     Solution current = solution->copy();
 
@@ -237,8 +233,10 @@ std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callInd
     }
 
     // After all insertions, sort the vector by cost in ascending order and return
-    std::sort(feasibleInsertions.begin(), feasibleInsertions.end(), [](const std::pair<int, CallDetails>& a, const std::pair<int, CallDetails>& b) -> bool {
-        return a.first < b.first;
-    });
+    if (sort) {
+        std::sort(feasibleInsertions.begin(), feasibleInsertions.end(), [](const std::pair<int, CallDetails>& a, const std::pair<int, CallDetails>& b) -> bool {
+            return a.first < b.first;
+        });
+    }
     return feasibleInsertions;
 }
