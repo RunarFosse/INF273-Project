@@ -61,6 +61,8 @@ class Solution {
     /**
      * @brief Moves a call from wherever it currently is to index1 and index2.
      * 
+     * @note Updates cost for you!
+     * 
      * @param vehicleIndex Vehicle to move call into
      * @param callIndex Call to move
      * @param indices Insertion indices
@@ -110,13 +112,10 @@ class Solution {
      * 
      * @note Solutions are assumed feasible. No feasibility check will be ran.
      * 
-     * @param vehicleIndex Specific vehicle which has changed
      * @param callIndex Specific call which was added/removed
-     * @param indices Modified indices
      * @param insertion Decides if change is an insertion or removal
-     * @param previous Previous solution prior to modification
      */
-    void updateCost(int vehicleIndex, int callIndex, std::pair<int, int> indices, bool insertion, Solution* previous);
+    void updateCost(int callIndex, bool insertion);
 
     /**
      * @brief Get the times and capacities of a given vehicle.

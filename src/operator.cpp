@@ -49,9 +49,6 @@ Solution OneInsert::apply(Solution* solution, std::default_random_engine& rng) {
     // Insert the callIndex under the new vehicleIndex at random positions
     current.move(insertion.vehicle, callIndex, insertion.indices);
 
-    // And update the cost
-    current.updateCost(insertion.vehicle, callIndex, insertion.indices, true, solution);
-
     // Return the modified neighbour solution
     return current;
 }
@@ -145,11 +142,7 @@ Solution* performBestInsert(int callsToInsert, Solution* solution, std::default_
 
     // Temporarily move all to outsource and update the cost
     for (int callIndex : callIndices) {
-        CallDetails details = solution->callDetails[callIndex-1];
-        solution->updateCost(details.vehicle, callIndex, details.indices, false, solution);
-
-        std::pair<int, int> indices = solution->outsource(callIndex);
-        solution->updateCost(solution->outsourceVehicle, callIndex, indices, true, solution);
+        solution->outsource(callIndex);
     }
 
     // Then move each call to the best possible position
@@ -164,8 +157,6 @@ Solution* performBestInsert(int callsToInsert, Solution* solution, std::default_
 
         // At end, move callIndex to bestIndices and return new solution
         solution->move(feasibleInsertions[0].second.vehicle, callIndex, feasibleInsertions[0].second.indices);
-        solution->updateCost(feasibleInsertions[0].second.vehicle, callIndex, feasibleInsertions[0].second.indices, true, solution);
-        solution->updateCost(solution->outsourceVehicle, callIndex, std::make_pair(-1, -1), false, solution);
     }
 
     return solution;
@@ -176,12 +167,11 @@ std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callInd
     Solution current = solution->copy();
 
     // Get the call and its feasible vehicles
-    Call call = current.problem->calls[callIndex-1];
+    Call& call = current.problem->calls[callIndex-1];
     std::vector<int>& possibleVehicles = call.possibleVehicles;
 
     // Initialize a vector for storing feasible insertions
     std::vector<std::pair<int, CallDetails>> feasibleInsertions;
-
 
     for (int vehicleIndex : possibleVehicles) {
         // Store vehicle details
@@ -189,10 +179,7 @@ std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callInd
         std::vector<int>& times = details.first, capacities = details.second;
 
         // Remove the call from wherever it is, and add it to start of current vehicle
-        int vehicleCall = current.callDetails[callIndex-1].vehicle;
-        current.remove(vehicleCall, callIndex);
-        current.add(vehicleIndex, callIndex, std::make_pair(0, 1));
-        current.updateCost(vehicleCall, callIndex, current.callDetails[callIndex-1].indices, false, &current);
+        current.move(vehicleIndex, callIndex, std::make_pair(0, 1));
 
         // Store previous cost for easy updates
         int previousCost = current.costs[vehicleIndex-1];
@@ -225,7 +212,6 @@ std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callInd
                 }
 
                 // If it is feasible, store it
-                current.updateCost(vehicleIndex, callIndex, indices, true, solution);
                 CallDetails callDetail = {vehicleIndex, indices};
                 feasibleInsertions.push_back(std::make_pair(current.getCost(), callDetail));
             }
@@ -234,7 +220,7 @@ std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callInd
 
     // After all insertions, sort the vector by cost in ascending order and return
     if (sort) {
-        std::sort(feasibleInsertions.begin(), feasibleInsertions.end(), [](const std::pair<int, CallDetails>& a, const std::pair<int, CallDetails>& b) -> bool {
+        std::sort(feasibleInsertions.begin(), feasibleInsertions.end(), [](const std::pair<int, CallDetails>& a, const std::pair<int, CallDetails>& b) {
             return a.first < b.first;
         });
     }

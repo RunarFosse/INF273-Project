@@ -11,7 +11,7 @@ int main(int argc, char const *argv[])
 
     // Create a uniform and weighted neighbourhood operator
     Operator* uniformOperator = new UniformOperator({
-        //new MultiOutsource(),
+        new MultiOutsource(),
         new OneInsert(),
         new ConstantBestInsert(),
         new LowBestInsert(),
@@ -38,6 +38,7 @@ int main(int argc, char const *argv[])
     //Solution solution = Solution({4, 4, 7, 7, 0, 5, 5, 2, 2, 0, 1, 3, 3, 1, 0, 6, 6}, &problem);
     //Debugger::printSolution(&solution);
     //Debugger::printToTerminal("Cost: " + std::to_string(solution.getCost()) + "\n");
+
 
     //std::vector<std::pair<int, CallDetails>> ins = calculateFeasibleInsertions(5, &solution);
 

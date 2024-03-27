@@ -156,28 +156,30 @@ Solution Solution::randomSolution(Problem* problem, std::default_random_engine& 
 }
 
 void Solution::add(int vehicleIndex, int callIndex, std::pair<int, int> indices) {
+    std::vector<int>& representation = this->representation[vehicleIndex-1];
+
     // Resize the vector up
-    this->representation[vehicleIndex-1].resize(this->representation[vehicleIndex-1].size()+2);
+    representation.resize(representation.size()+2);
     
     // Add call to representation
     std::deque<int> buffer;
     std::unordered_set<int> pickedCalls;
-    for (int i = 0; i < this->representation[vehicleIndex-1].size(); i++) {
+    for (int i = 0; i < representation.size(); i++) {
         if (i == indices.first || i == indices.second) {
-            buffer.push_back(this->representation[vehicleIndex-1][i]);
-            this->representation[vehicleIndex-1][i] = callIndex;
+            buffer.push_back(representation[i]);
+            representation[i] = callIndex;
         } else {
-            buffer.push_back(this->representation[vehicleIndex-1][i]);
-            this->representation[vehicleIndex-1][i] = buffer.front();
+            buffer.push_back(representation[i]);
+            representation[i] = buffer.front();
             buffer.pop_front();
         }
 
         // Update any callDetails indices
-        if (pickedCalls.find(this->representation[vehicleIndex-1][i]) == pickedCalls.end()) {
-            this->callDetails[this->representation[vehicleIndex-1][i]-1].indices.first = i;
-            pickedCalls.insert(this->representation[vehicleIndex-1][i]);
+        if (pickedCalls.find(representation[i]) == pickedCalls.end()) {
+            this->callDetails[representation[i]-1].indices.first = i;
+            pickedCalls.insert(representation[i]);
         } else {
-            this->callDetails[this->representation[vehicleIndex-1][i]-1].indices.second = i;
+            this->callDetails[representation[i]-1].indices.second = i;
         }
     }
 
@@ -186,29 +188,31 @@ void Solution::add(int vehicleIndex, int callIndex, std::pair<int, int> indices)
 }
 
 void Solution::remove(int vehicleIndex, int callIndex) {
+    std::vector<int>& representation = this->representation[vehicleIndex-1];
+
     // Remove call from representation
     int skip = 0;
     std::unordered_set<int> pickedCalls;
-    for (int i = 0; i+skip < this->representation[vehicleIndex-1].size(); i++) {
-        while (i+skip < this->representation[vehicleIndex-1].size() && this->representation[vehicleIndex-1][i+skip] == callIndex) {
+    for (int i = 0; i+skip < representation.size(); i++) {
+        while (i+skip < representation.size() && representation[i+skip] == callIndex) {
             skip++;
         }
 
-        if (i+skip < this->representation[vehicleIndex-1].size()) {
-            this->representation[vehicleIndex-1][i] = this->representation[vehicleIndex-1][i+skip];
-        }
-
-        // Update any callDetails indices
-        if (pickedCalls.find(this->representation[vehicleIndex-1][i]) == pickedCalls.end()) {
-            this->callDetails[this->representation[vehicleIndex-1][i]-1].indices.first = i;
-            pickedCalls.insert(this->representation[vehicleIndex-1][i]);
-        } else {
-            this->callDetails[this->representation[vehicleIndex-1][i]-1].indices.second = i;
+        if (i+skip < representation.size()) {
+            representation[i] = representation[i+skip];
+            
+            // Update any callDetails indices
+            if (pickedCalls.find(representation[i]) == pickedCalls.end()) {
+                this->callDetails[representation[i]-1].indices.first = i;
+                pickedCalls.insert(representation[i]);
+            } else {
+                this->callDetails[representation[i]-1].indices.second = i;
+            }
         }
     }
 
     // Resize the vector down
-    this->representation[vehicleIndex-1].resize(this->representation[vehicleIndex-1].size()-2);
+    representation.resize(representation.size()-2);
 }
 
 void Solution::move(int vehicleIndex, int callIndex, std::pair<int, int> indices) {
@@ -222,12 +226,10 @@ void Solution::move(int vehicleIndex, int callIndex, std::pair<int, int> indices
 
     // If not, remove call from where it currently is and add to wanted position
     this->remove(vehicleCall, callIndex);
-    this->add(vehicleIndex, callIndex, indices);
+    this->updateCost(callIndex, false);
 
-    if (vehicleCall != vehicleIndex) {
-        this->updateCost(vehicleCall, callIndex, indices, true, this);
-    }
-    this->updateCost(vehicleIndex, callIndex, indices, true, this);
+    this->add(vehicleIndex, callIndex, indices);
+    this->updateCost(callIndex, true);
 }
 
 std::pair<int, int> Solution::outsource(int callIndex) {
@@ -481,77 +483,101 @@ int Solution::getCost() {
     }
     totalCost += this->costs[this->outsourceVehicle-1];
 
-    //Debugger::printSolution(this);
-    //std::cout << "Cost: " << std::to_string(totalCost) << "\n";
-
     // Cache and return the computed cost
     this->costCache = std::make_pair(true, totalCost);
     return this->costCache.second;
 }
 
-void Solution::updateCost(int vehicleIndex, int callIndex, std::pair<int, int> indices, bool insertion, Solution* previous) {
-    // TODO: Correctly implement ultra greedy cost 
-
-    int previousCost = this->costs[vehicleIndex-1];
-
-    if (vehicleIndex == this->outsourceVehicle) {
-        std::unordered_set<int> outsourcedCalls;
-        this->costs[this->outsourceVehicle-1] = 0;
-        for (int callIndex : this->representation[this->outsourceVehicle-1]) {
-
-            // Only count outsourced calls once (for effiency)
-            if (outsourcedCalls.find(callIndex) == outsourcedCalls.end()) {
-                // Outsource the call
-                Call call = this->problem->calls[callIndex-1];
-                this->costs[this->outsourceVehicle-1] += call.costOfNotTransporting;
-
-                outsourcedCalls.insert(callIndex);
-            }
-        }
-        // Update and cache the new cost
-        int newCost = this->costCache.second - previousCost + this->costs[vehicleIndex-1];
-        this->costCache = std::make_pair(true, newCost);
+void Solution::updateCost(int callIndex, bool insertion) {
+    // If cost has not been computed, fully compute
+    if (!this->costCache.first) {
+        this->getCost();
         return;
     }
 
+    // Unpack details
+    auto [vehicleIndex, indices] = this->callDetails[callIndex-1];
+    auto [index1, index2] = indices;
 
-    // Reset cost before computing
-    this->costs[vehicleIndex-1] = 0;
+    // Keep a multiplier deciding if we should add or remove cost
+    int operationMultiplier = insertion ? 1 : -1;
 
-    Vehicle vehicle = this->problem->vehicles[vehicleIndex-1];
+    // Store previous cost
+    int previousCost = this->costs[vehicleIndex-1];
+    int newCost = previousCost;
 
-    int currentNode = vehicle.homeNode;
-    std::unordered_set<int> startedCalls;
+    // Get information about the call
+    Call& call = this->problem->calls[callIndex-1];
 
-    for (int callIndex : this->representation[vehicleIndex-1]) {
-        if (startedCalls.find(callIndex) == startedCalls.end()) {
-            // Pickup call cargo
-            Call call = this->problem->calls[callIndex-1];
+    // If we are dealing with the outsource vehicle, computation is trivial!
+    if (vehicleIndex == this->outsourceVehicle) {
+        newCost += call.costOfNotTransporting * operationMultiplier;
+        this->costs[vehicleIndex-1] = newCost;
 
-            // Travel to call origin node
-            this->costs[vehicleIndex-1] += vehicle.routeTimeCost[currentNode-1][call.originNode-1].cost;
-            currentNode = call.originNode;
+        // Update cost cache to new cost and return
+        this->costCache.second += newCost - previousCost;
+        return;
+    }
 
-            // Pickup cargo at origin node (wait some time)
-            this->costs[vehicleIndex-1] += vehicle.callTimeCost[callIndex-1].first.cost;
+    // Get information about the vehicle
+    Vehicle& vehicle = this->problem->vehicles[vehicleIndex-1];
 
-            startedCalls.insert(callIndex);
-        } else {
-            // Deliver call cargo
-            Call call = this->problem->calls[callIndex-1];
+    // Shortcut current vehicles representation
+    std::vector<int>& representation = this->representation[vehicleIndex-1];
 
-            // Travel to call destination node
-            this->costs[vehicleIndex-1] += vehicle.routeTimeCost[currentNode-1][call.destinationNode-1].cost;
-            currentNode = call.destinationNode;
+    // Declare start/end indices for each insertion/removal point
+    int startIndex1 = index1-1;
+    int endIndex1 = insertion ? index1+1 : index1;
+    int startIndex2 = insertion ? index2-1 : index2-2;
+    int endIndex2 = insertion ? index2+1 : index2-1;
 
-            // Deliver cargo at destination node (wait some time)
-            this->costs[vehicleIndex-1] += vehicle.callTimeCost[callIndex-1].second.cost;
+    // Declare lambda to easily get node of a given call's index
+    auto getNodeOf = [this](int callIndex, int index) {
+        return (this->callDetails[callIndex-1].indices.first == index) ? this->problem->calls[callIndex-1].originNode : this->problem->calls[callIndex-1].destinationNode;
+    };
+
+    // If insertions/removals are next to eachother, computations are a tiny bit different
+    bool close = (index1 == index2-1);
+
+
+    // Then add/remove cost of picking up and delivering the selected call
+    newCost += (vehicle.callTimeCost[callIndex-1].first.cost + vehicle.callTimeCost[callIndex-1].second.cost) * operationMultiplier;
+   
+    // If insertions/removals are close together, computation becomes easier
+    if (close) {
+        int startNode = (startIndex1 == -1) ? vehicle.homeNode : getNodeOf(representation[startIndex1], startIndex1);
+       
+        newCost += vehicle.routeTimeCost[startNode-1][call.originNode-1].cost * operationMultiplier;
+        newCost += vehicle.routeTimeCost[call.originNode-1][call.destinationNode-1].cost * operationMultiplier;
+        if (endIndex2 < representation.size()) {
+            int endNode = getNodeOf(representation[endIndex2], endIndex2);
+
+            newCost += vehicle.routeTimeCost[call.destinationNode-1][endNode-1].cost * operationMultiplier;
+            newCost -= vehicle.routeTimeCost[startNode-1][endNode-1].cost * operationMultiplier;
+        }
+    } else {
+        int startNode1 = (startIndex1 == -1) ? vehicle.homeNode : getNodeOf(representation[startIndex1], startIndex1);
+        int endNode1 = getNodeOf(representation[endIndex1], endIndex1);
+
+        newCost += vehicle.routeTimeCost[startNode1-1][call.originNode-1].cost * operationMultiplier;
+        newCost += vehicle.routeTimeCost[call.originNode-1][endNode1-1].cost * operationMultiplier;
+        newCost -= vehicle.routeTimeCost[startNode1-1][endNode1-1].cost * operationMultiplier;
+
+        int startNode2 = getNodeOf(representation[startIndex2], startIndex2);
+
+        newCost += vehicle.routeTimeCost[startNode2-1][call.destinationNode-1].cost * operationMultiplier;
+        if (endIndex2 < representation.size()) {
+            int endNode2 = getNodeOf(representation[endIndex2], endIndex2);
+
+            newCost += vehicle.routeTimeCost[call.destinationNode-1][endNode2-1].cost * operationMultiplier;
+            newCost -= vehicle.routeTimeCost[startNode2-1][endNode2-1].cost * operationMultiplier;
         }
     }
 
-    // Update and cache the new cost
-    int newCost = this->costCache.second - previousCost + this->costs[vehicleIndex-1];
-    this->costCache = std::make_pair(true, newCost);
+    // Update cost cache to new cost and return
+    this->costs[vehicleIndex-1] = newCost;
+    this->costCache.second += newCost - previousCost;
+    return;
 }
 
 std::pair<std::vector<int>, std::vector<int>> Solution::getDetails(int vehicleIndex) {
