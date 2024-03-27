@@ -70,7 +70,7 @@ class WeightedOperator : public Operator {
     std::vector<double> weights;
 };
 
-class OneInsert : public Operator {
+class RandomInsert : public Operator {
     public:
     /**
      * @brief Apply 1-insert heuristic operator to solution.
@@ -82,35 +82,7 @@ class OneInsert : public Operator {
     Solution apply(Solution* solution, std::default_random_engine& rng);
 };
 
-class ConstantBestInsert : public Operator {
-    public:
-    /**
-     * @brief Apply best-insert heuristic operator to solution.
-     * Best-insert moves a random amount of calls to the current
-     * most optimal positions in a greedy fashion.
-     * 
-     * @param solution Solution to apply operator on
-     * @param rng Random number generator Engine
-     * @return Neighbour solution
-     */
-    Solution apply(Solution* solution, std::default_random_engine& rng);
-};
-
-class LowBestInsert : public Operator {
-    public:
-    /**
-     * @brief Apply best-insert heuristic operator to solution.
-     * Best-insert moves a random amount of calls to the current
-     * most optimal positions in a greedy fashion.
-     * 
-     * @param solution Solution to apply operator on
-     * @param rng Random number generator Engine
-     * @return Neighbour solution
-     */
-    Solution apply(Solution* solution, std::default_random_engine& rng);
-};
-
-class HighBestInsert : public Operator {
+class BestInsert : public Operator {
     public:
     /**
      * @brief Apply best-insert heuristic operator to solution.
@@ -141,16 +113,14 @@ class MultiOutsource : public Operator {
 };
 
 /**
- * @brief Calculate the two best insertion indices together with cost of a given call and vehicle.
+ * @brief Performs the random insert operation on several calls on the given solution.
  * 
- * @note Does not outsource.
- * 
- * @param callIndex Call to insert
- * @param vehicleIndex Vehicle to insert into
- * @param solution Given solution to modify
- * @return (bestCost, (index1, index2))
+ * @param callsToInsert Number of calls to insert
+ * @param solution The given solution
+ * @param rng Random number generator engine
+ * @return Neighbour solution 
  */
-std::pair<int, std::pair<int, int>> getBestInsertion(int callIndex, int vehicleIndex, int vehicleCall, Solution* solution, std::default_random_engine& rng);
+Solution* performRandomInsert(int callsToInsert, Solution* solution, std::default_random_engine& rng);
 
 /**
  * @brief Performs the best insert operation on several calls on the given solution.

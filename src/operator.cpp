@@ -29,62 +29,28 @@ Solution WeightedOperator::apply(Solution* solution, std::default_random_engine&
     return this->operators[operatorIndex]->apply(solution, rng);
 }
 
-Solution OneInsert::apply(Solution* solution, std::default_random_engine& rng) {
+Solution RandomInsert::apply(Solution* solution, std::default_random_engine& rng) {
     // Create a copy of the current solution
     Solution current = solution->copy();
 
-    // Select a random call
-    int callIndex = std::uniform_int_distribution<std::size_t>(1, solution->problem->noCalls)(rng);
+    // Pick out the number of calls to move
+    int lowerbound = 1, upperbound = solution->problem->noCalls;
 
-    // Find all feasible insertions sorted from best-to-worst
-    std::vector<std::pair<int, CallDetails>> feasibleInsertions = calculateFeasibleInsertions(callIndex, &current, false);
-    // If no feasible position has been found, keep call outsourced
-    if (feasibleInsertions.empty()) {
-        return current;
-    }
+    double mean = solution->problem->noCalls * 0.2, std = solution->problem->noCalls * 0.075;
+    int callsToInsert = std::clamp((int)std::ceil(std::normal_distribution<double>(mean, std)(rng)), lowerbound, upperbound);
 
-    // Then randomly sample a feasible insertion
-    CallDetails insertion = feasibleInsertions[std::uniform_int_distribution<int>(0, feasibleInsertions.size()-1)(rng)].second;
-
-    // Insert the callIndex under the new vehicleIndex at random positions
-    current.move(insertion.vehicle, callIndex, insertion.indices);
-
-    // Return the modified neighbour solution
-    return current;
+    return *performRandomInsert(callsToInsert, &current, rng);
 }
 
-Solution ConstantBestInsert::apply(Solution* solution, std::default_random_engine& rng) {
+Solution BestInsert::apply(Solution* solution, std::default_random_engine& rng) {
     // Create a copy of the solution
     Solution current = solution->copy();
 
     // Pick out the number of calls to move
-    int lowerbound = 1;
-    int upperbound = std::min(solution->problem->noCalls, 4);
-    int callsToInsert = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
+    int lowerbound = 1, upperbound = solution->problem->noCalls;
 
-    return *performBestInsert(callsToInsert, &current, rng);
-}
-
-Solution LowBestInsert::apply(Solution* solution, std::default_random_engine& rng) {
-    // Create a copy of the solution
-    Solution current = solution->copy();
-
-    // Pick out the number of calls to move
-    int lowerbound = 1;
-    int upperbound = std::max(solution->problem->noCalls / 8, 1);
-    int callsToInsert = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
-
-    return *performBestInsert(callsToInsert, &current, rng);
-}
-
-Solution HighBestInsert::apply(Solution* solution, std::default_random_engine& rng) {
-    // Create a copy of the solution
-    Solution current = solution->copy();
-
-    // Pick out the number of calls to move
-    int lowerbound = std::max(solution->problem->noCalls / 10, 1);
-    int upperbound = std::max(solution->problem->noCalls / 5, 1);
-    int callsToInsert = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
+    double mean = solution->problem->noCalls * 0.2, std = solution->problem->noCalls * 0.1;
+    int callsToInsert = std::clamp((int)std::ceil(std::normal_distribution<double>(mean, std)(rng)), lowerbound, upperbound);
 
     return *performBestInsert(callsToInsert, &current, rng);
 }
@@ -129,16 +95,51 @@ Solution MultiOutsource::apply(Solution* solution, std::default_random_engine& r
     return current;
 }
 
+Solution* performRandomInsert(int callsToInsert, Solution* solution, std::default_random_engine& rng) {
+    // Efficient (non-colliding) sampling algorithm "https://stackoverflow.com/a/3724708"
+    std::set<int> callIndices;
+    int total = solution->problem->noCalls+1;
+    for (int i = total - callsToInsert; i < total; i++) {
+        int item = std::uniform_int_distribution<int>(1, i)(rng); 
+        if (callIndices.find(item) == callIndices.end()) {
+            callIndices.insert(item);
+        } else {
+            callIndices.insert(i);
+        }
+    }
+
+    for (int callIndex : callIndices) {
+        // Find all feasible insertions sorted from best-to-worst
+        std::vector<std::pair<int, CallDetails>> feasibleInsertions = calculateFeasibleInsertions(callIndex, solution, false);
+
+        // If no feasible position has been found, don't move call
+        if (feasibleInsertions.empty()) {
+            continue;
+        }
+
+        // Then randomly sample a feasible insertion
+        CallDetails insertion = feasibleInsertions[std::uniform_int_distribution<int>(0, feasibleInsertions.size()-1)(rng)].second;
+
+        // Insert the callIndex under the new vehicleIndex at random positions
+        solution->move(insertion.vehicle, callIndex, insertion.indices);
+    }
+
+    // Return the modified neighbour solution
+    return solution;
+}
 
 Solution* performBestInsert(int callsToInsert, Solution* solution, std::default_random_engine& rng) {
     // Efficient (non-colliding) sampling algorithm "https://stackoverflow.com/a/3724708"
-    std::vector<int> callIndices, allCalls;
-    allCalls.reserve(solution->problem->noCalls);
-    for (int callIndex = 1; callIndex <= solution->problem->noCalls; callIndex++) {
-        allCalls.push_back(callIndex);
+    std::set<int> callIndices;
+    int total = solution->problem->noCalls+1;
+    for (int i = total - callsToInsert; i < total; i++) {
+        int item = std::uniform_int_distribution<int>(1, i)(rng); 
+        if (callIndices.find(item) == callIndices.end()) {
+            callIndices.insert(item);
+        } else {
+            callIndices.insert(i);
+        }
     }
-    std::sample(allCalls.begin(), allCalls.end(), std::back_inserter(callIndices), callsToInsert, rng);
-    std::shuffle(callIndices.begin(), callIndices.end(), rng);
 
     // Temporarily move all to outsource and update the cost
     for (int callIndex : callIndices) {
