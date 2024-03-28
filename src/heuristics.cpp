@@ -20,3 +20,36 @@ std::vector<int> removeSimilar(int callsToRemove, Solution* solution, std::defau
     // Return all removed calls
     return callIndices;
 }
+
+std::vector<int> removeCostly(int callsToRemove, Solution* solution, std::default_random_engine& rng) {
+    // Create a copy of the current solution
+    Solution current = solution->copy();
+
+    // First calculate the cost of each call
+    std::vector<std::pair<int, int>> costlyCalls;
+    costlyCalls.reserve(solution->problem->noCalls);
+    for (int callIndex = 1; callIndex <= solution->problem->noCalls; callIndex++) {
+        int vehicleCall = solution->callDetails[callIndex-1].vehicle;
+        current.updateCost(callIndex, false);
+
+        int cost = solution->costs[vehicleCall-1] - current.costs[vehicleCall-1];
+        costlyCalls.push_back(std::make_pair(cost, callIndex));
+    }
+
+    // And sort them from most-costly to least-costly
+    std::sort(costlyCalls.begin(), costlyCalls.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+        return a.first > b.first;
+    });
+
+    // Then sample the most costly, remove them and return
+    std::vector<int> callIndices;
+    callIndices.reserve(callsToRemove);
+    for (int i = 0; i < callsToRemove; i++) {
+        int callIndex = costlyCalls[i].second;
+        solution->remove(callIndex);
+        callIndices.push_back(callIndex);
+    }
+
+    // Return all removed calls
+    return callIndices;
+}
