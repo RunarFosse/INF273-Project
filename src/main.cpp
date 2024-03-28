@@ -22,35 +22,22 @@ int main(int argc, char const *argv[])
     });
 
     // Run each test case given
-    Debugger::outputToFile("results_uniform.txt");
-    InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, uniformOperator, 10, 10000, rng, "SA-new operators (equal weights)");
+    //Debugger::outputToFile("results_uniform.txt");
+    //InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, uniformOperator, 10, 10000, rng, "SA-new operators (equal weights)");
 
     //Debugger::outputToFile("results_weighted.txt");
     //InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, weightedOperator, 10, 10000, rng, "SA-new operators (tuned weights)");
 
     // Verify correct implementation of operator
-    //Problem problem = Parser::parseProblem("data/Call_7_Vehicle_3.txt");
+    Problem problem = Parser::parseProblem("data/Call_7_Vehicle_3.txt");
     //Solution initial = Solution::initialSolution(&problem);
     //Solution solution = uniformOperator->apply(&initial, rng);
     //Debugger::printSolution(&initial);
     //Debugger::printToTerminal("Cost: " + std::to_string(initial.getCost()) + "\n");
-    //Solution solution = Solution({4, 4, 7, 7, 0, 5, 5, 2, 2, 0, 1, 3, 3, 1, 0, 6, 6}, &problem);
-    //Debugger::printSolution(&solution);
-    //Debugger::printToTerminal("Cost: " + std::to_string(solution.getCost()) + "\n");
 
-
-    //std::vector<std::pair<int, CallDetails>> ins = calculateFeasibleInsertions(5, &solution);
-
-    //solution.move(3, 5, std::make_pair(1, 2));
-    //solution.updateFeasibility(3);
-    //solution.updateCost(3, 5, std::make_pair(1, 2), true, &solution);
-    //solution.updateCost(2, 5, std::make_pair(0, 1), false, &solution);
-    //Debugger::printSolution(&solution);
-    //Debugger::printToTerminal("Cost: " + std::to_string(solution.getCost()) + "\n");
-
-    //for (std::pair<int, CallDetails> det : ins) {
-    //    Debugger::printToTerminal(std::to_string(det.first) + ", v:" + std::to_string(det.second.vehicle) + "(" + std::to_string(det.second.indices.first) + ", " +std::to_string(det.second.indices.second) + ")\n");
-    //}
+    for (auto [callIndex, relatedness] : problem.calls[2-1].similarities) {
+        Debugger::printToTerminal("(" + std::to_string(callIndex) + ", " + std::to_string(relatedness) + ")\n");
+    }
 
     return 0;
 }

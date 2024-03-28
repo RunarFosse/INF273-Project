@@ -174,6 +174,40 @@ Problem Parser::parseProblem(std::string path) {
         std::cerr << "ERROR: Couldn't open data file '" << path << "'" << std::endl;
     }
 
+    // Lambda to easily average distance between calls over all vehicles
+    auto calculateMeanDistance = [problem](int node1, int node2) {
+        double distance = 0;
+        for (int vehicleIndex = 1; vehicleIndex <= problem.noVehicles; vehicleIndex++) {
+            distance += problem.vehicles[vehicleIndex-1].routeTimeCost[node1-1][node2-1].time / (double)problem.noVehicles;
+        }
+        return distance;
+    };
+
+    // At last, calculate similarity per call
+    double phi = 3.0, chi = 1.5, psi = 0.1, omega = 1000.0;
+    for (int callIndex = 1; callIndex <= problem.noCalls; callIndex++) {
+        Call& call = problem.calls[callIndex-1];
+        for (int otherCallIndex = 1; otherCallIndex <= problem.noCalls; otherCallIndex++) {
+            if (otherCallIndex == callIndex) {
+                continue;
+            }
+            
+            Call& otherCall = problem.calls[otherCallIndex-1];
+
+            std::vector<int> sharedVehicles;
+            std::set_intersection(call.possibleVehicles.begin(), call.possibleVehicles.end(), otherCall.possibleVehicles.begin(), otherCall.possibleVehicles.end(), std::back_inserter(sharedVehicles));
+
+            Similarity similarity;
+            similarity.callIndex = otherCallIndex;
+            similarity.relatedness = phi * (calculateMeanDistance(call.originNode, otherCall.originNode) + calculateMeanDistance(call.destinationNode, otherCall.destinationNode))
+            + chi * (std::abs(call.pickupWindow.end - otherCall.pickupWindow.end) + std::abs(call.deliveryWindow.end - otherCall.deliveryWindow.end))
+            + psi * std::abs(call.size  - otherCall.size)
+            + omega * (1 - sharedVehicles.size() / std::min(call.possibleVehicles.size(), otherCall.possibleVehicles.size()));
+
+            problem.calls[callIndex-1].similarities.push_back(similarity);
+        }
+    }
+
     // Return the problem instance
     return problem;
 }

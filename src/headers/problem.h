@@ -14,6 +14,11 @@ struct {
 } typedef Interval;
 
 struct {
+    int callIndex;
+    double relatedness;
+} typedef Similarity;
+
+struct {
     int homeNode;
     int startTime;
     int capacity;
@@ -30,6 +35,7 @@ struct {
     Interval pickupWindow;
     Interval deliveryWindow;
     std::vector<int> possibleVehicles;
+    std::vector<Similarity> similarities;
 } typedef Call;
 
 class Problem {
