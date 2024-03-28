@@ -193,7 +193,8 @@ void Solution::add(int vehicleIndex, int callIndex, std::pair<int, int> indices)
     this->updateCost(callIndex, true);
 }
 
-void Solution::remove(int vehicleIndex, int callIndex) {
+void Solution::remove(int callIndex) {
+    int vehicleIndex = this->callDetails[callIndex-1].vehicle;
     std::vector<int>& representation = this->representation[vehicleIndex-1];
 
     // Denote start of iteration
@@ -231,17 +232,9 @@ void Solution::remove(int vehicleIndex, int callIndex) {
 }
 
 void Solution::move(int vehicleIndex, int callIndex, std::pair<int, int> indices) {
-    // Find vehicle which currently has call
-    int vehicleCall = this->callDetails[callIndex-1].vehicle;
-
-    // If call is at the exact position already, do nothing
-    if (vehicleIndex == vehicleCall && indices == this->callDetails[callIndex-1].indices && !this->callDetails[callIndex-1].removed) {
-        return;
-    }
-
-    // If not, remove call from where it currently is (if not already) and add to wanted position
+    // Remove call from where it currently is (if not already) and add to wanted position
     if (!this->callDetails[callIndex-1].removed) {
-        this->remove(vehicleCall, callIndex);
+        this->remove(callIndex);
     }
     this->add(vehicleIndex, callIndex, indices);
 }

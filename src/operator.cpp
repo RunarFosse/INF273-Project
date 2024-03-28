@@ -126,7 +126,7 @@ Solution* performRandomInsert(int callsToInsert, Solution* solution, std::defaul
         callIndices.insert(callIndex);
 
         // And temporarily remove them
-        solution->remove(solution->callDetails[callIndex-1].vehicle, callIndex);
+        solution->remove(callIndex);
     }
 
     for (int callIndex : callIndices) {
@@ -156,7 +156,7 @@ Solution* performBestInsert(int callsToInsert, bool greedy, Solution* solution, 
         callIndices.insert(callIndex);
 
         // And temporarily remove them
-        solution->remove(solution->callDetails[callIndex-1].vehicle, callIndex);
+        solution->remove(callIndex);
     }
 
     // Then move each call to the best possible position
@@ -240,7 +240,7 @@ std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callInd
                 }
 
                 // Then remove the call again
-                current.remove(vehicleIndex, callIndex);
+                current.remove(callIndex);
             }
         }
     }

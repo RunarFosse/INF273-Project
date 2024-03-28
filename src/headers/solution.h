@@ -50,14 +50,13 @@ class Solution {
     void add(int vehicleIndex, int callIndex, std::pair<int, int> indices);
 
     /**
-     * @brief Strictly remove call from vehicle.
+     * @brief Strictly remove call from representation.
      * 
      * @note Temporary function which will make solution invalid.
      * 
-     * @param vehicleIndex Vehicle to remove call from
      * @param callIndex Call to remove
      */
-    void remove(int vehicleIndex, int callIndex);
+    void remove(int callIndex);
 
     /**
      * @brief Moves a call from wherever it currently is to index1 and index2.
