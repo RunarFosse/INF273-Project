@@ -51,3 +51,13 @@ void insertGreedy(std::vector<int> callIndices, Solution* solution);
  * @param k Regret-k parameter
  */
 void insertRegret(std::vector<int> callIndices, Solution* solution, int k);
+
+/**
+ * @brief Calculate all different insertion positions for a given call.
+ * 
+ * @param callIndex Given call to find insertions for
+ * @param solution Solution to find insertion positions in
+ * @param sort Sort the positions by cost in an ascending order 
+ * @return Vector of (cost, callDetail) for each insertion position
+ */
+std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callIndex, Solution* solution, bool sort);

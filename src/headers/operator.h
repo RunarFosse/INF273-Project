@@ -8,6 +8,7 @@
 
 #include "solution.h"
 #include "problem.h"
+#include "heuristics.h"
 
 class Operator {
     public:
@@ -152,5 +153,3 @@ Solution* performRandomInsert(int callsToInsert, Solution* solution, std::defaul
  * @return Neighbour solution 
  */
 Solution* performBestInsert(int callsToInsert, bool greedy, Solution* solution, std::default_random_engine& rng);
-
-std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callIndex, Solution* solution, bool sort);
