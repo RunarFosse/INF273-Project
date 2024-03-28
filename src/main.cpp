@@ -2,7 +2,7 @@
 #include "solution.h"
 #include "parser.h"
 #include "debug.h"
-
+#include "heuristics.h"
 
 int main(int argc, char const *argv[])
 {
@@ -22,20 +22,25 @@ int main(int argc, char const *argv[])
     });
 
     // Run each test case given
-    Debugger::outputToFile("results_uniform.txt");
-    InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, uniformOperator, 10, 10000, rng, "SA-new operators (equal weights)");
+    //Debugger::outputToFile("results_uniform.txt");
+    //InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, uniformOperator, 10, 10000, rng, "SA-new operators (equal weights)");
 
     //Debugger::outputToFile("results_weighted.txt");
     //InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, weightedOperator, 10, 10000, rng, "SA-new operators (tuned weights)");
 
     // Verify correct implementation of operator
-    //Problem problem = Parser::parseProblem("data/Call_7_Vehicle_3.txt");
-    //Solution initial = Solution::initialSolution(&problem);
+    Problem problem = Parser::parseProblem("data/Call_7_Vehicle_3.txt");
+    Solution initial = Solution::initialSolution(&problem);
     //Solution solution = uniformOperator->apply(&initial, rng);
-    //Debugger::printSolution(&initial);
-    //Debugger::printToTerminal("Cost: " + std::to_string(initial.getCost()) + "\n");
+    Debugger::printSolution(&initial);
+    Debugger::printToTerminal("Cost: " + std::to_string(initial.getCost()) + "\n");
 
-    //for (auto [callIndex, relatedness] : problem.calls[4-1].similarities) {
+
+    removeSimilar(2, &initial, rng);
+    Debugger::printSolution(&initial);
+    Debugger::printToTerminal("Cost: " + std::to_string(initial.getCost()) + "\n");
+
+    //for (auto [callIndex, relatedness] : problem.calls[5-1].similarities) {
     //    Debugger::printToTerminal("(" + std::to_string(callIndex) + ", " + std::to_string(relatedness) + ")\n");
     //}
 
