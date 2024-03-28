@@ -37,12 +37,14 @@ Solution RandomInsert::apply(Solution* solution, std::default_random_engine& rng
     int lowerbound = 1, upperbound = solution->problem->noCalls;
 
     double mean = solution->problem->noCalls * 0.2, std = solution->problem->noCalls * 0.075;
+    mean = 2.0;
+    std = 2.0;
     int callsToInsert = std::clamp((int)std::ceil(std::normal_distribution<double>(mean, std)(rng)), lowerbound, upperbound);
 
     return *performRandomInsert(callsToInsert, &current, rng);
 }
 
-Solution BestInsert::apply(Solution* solution, std::default_random_engine& rng) {
+Solution RandomBestInsert::apply(Solution* solution, std::default_random_engine& rng) {
     // Create a copy of the solution
     Solution current = solution->copy();
 
@@ -50,9 +52,26 @@ Solution BestInsert::apply(Solution* solution, std::default_random_engine& rng) 
     int lowerbound = 1, upperbound = solution->problem->noCalls;
 
     double mean = solution->problem->noCalls * 0.2, std = solution->problem->noCalls * 0.1;
+    mean = 2.0;
+    std = 2.0;
     int callsToInsert = std::clamp((int)std::ceil(std::normal_distribution<double>(mean, std)(rng)), lowerbound, upperbound);
 
-    return *performBestInsert(callsToInsert, &current, rng);
+    return *performBestInsert(callsToInsert, false, &current, rng);
+}
+
+Solution GreedyBestInsert::apply(Solution* solution, std::default_random_engine& rng) {
+    // Create a copy of the solution
+    Solution current = solution->copy();
+
+    // Pick out the number of calls to move
+    int lowerbound = 1, upperbound = solution->problem->noCalls;
+
+    double mean = solution->problem->noCalls * 0.2, std = solution->problem->noCalls * 0.1;
+    mean = 3.0;
+    std = 2.0;
+    int callsToInsert = std::clamp((int)std::ceil(std::normal_distribution<double>(mean, std)(rng)), lowerbound, upperbound);
+
+    return *performBestInsert(callsToInsert, true, &current, rng);
 }
 
 Solution MultiOutsource::apply(Solution* solution, std::default_random_engine& rng) {
@@ -80,7 +99,7 @@ Solution MultiOutsource::apply(Solution* solution, std::default_random_engine& r
 
     // Pick the number random calls to outsource
     int lowerbound = 1;
-    int upperbound = std::max(std::min((int)possibleCalls.size(), current.problem->noCalls / 20), 1);
+    int upperbound = 3;//std::max(std::min((int)possibleCalls.size(), current.problem->noCalls / 20), 1);
     int callsToOutsource = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
     
     std::vector<int> callIndices;
@@ -100,64 +119,73 @@ Solution* performRandomInsert(int callsToInsert, Solution* solution, std::defaul
     std::set<int> callIndices;
     int total = solution->problem->noCalls+1;
     for (int i = total - callsToInsert; i < total; i++) {
-        int item = std::uniform_int_distribution<int>(1, i)(rng); 
-        if (callIndices.find(item) == callIndices.end()) {
-            callIndices.insert(item);
-        } else {
-            callIndices.insert(i);
+        int callIndex = std::uniform_int_distribution<int>(1, i)(rng); 
+        if (callIndices.find(callIndex) != callIndices.end()) {
+            callIndex = i;
         }
+        callIndices.insert(callIndex);
+
+        // And temporarily remove them
+        solution->remove(solution->callDetails[callIndex-1].vehicle, callIndex);
     }
 
     for (int callIndex : callIndices) {
-        // Find all feasible insertions sorted from best-to-worst
+        // Find all feasible insertions
         std::vector<std::pair<int, CallDetails>> feasibleInsertions = calculateFeasibleInsertions(callIndex, solution, false);
-
-        // If no feasible position has been found, don't move call
-        if (feasibleInsertions.empty()) {
-            continue;
-        }
 
         // Then randomly sample a feasible insertion
         CallDetails insertion = feasibleInsertions[std::uniform_int_distribution<int>(0, feasibleInsertions.size()-1)(rng)].second;
 
         // Insert the callIndex under the new vehicleIndex at random positions
-        solution->move(insertion.vehicle, callIndex, insertion.indices);
+        solution->add(insertion.vehicle, callIndex, insertion.indices);
     }
 
     // Return the modified neighbour solution
     return solution;
 }
 
-Solution* performBestInsert(int callsToInsert, Solution* solution, std::default_random_engine& rng) {
+Solution* performBestInsert(int callsToInsert, bool greedy, Solution* solution, std::default_random_engine& rng) {
     // Efficient (non-colliding) sampling algorithm "https://stackoverflow.com/a/3724708"
     std::set<int> callIndices;
     int total = solution->problem->noCalls+1;
     for (int i = total - callsToInsert; i < total; i++) {
-        int item = std::uniform_int_distribution<int>(1, i)(rng); 
-        if (callIndices.find(item) == callIndices.end()) {
-            callIndices.insert(item);
-        } else {
-            callIndices.insert(i);
+        int callIndex = std::uniform_int_distribution<int>(1, i)(rng); 
+        if (callIndices.find(callIndex) != callIndices.end()) {
+            callIndex = i;
         }
-    }
+        callIndices.insert(callIndex);
 
-    // Temporarily move all to outsource and update the cost
-    for (int callIndex : callIndices) {
-        solution->outsource(callIndex);
+        // And temporarily remove them
+        solution->remove(solution->callDetails[callIndex-1].vehicle, callIndex);
     }
 
     // Then move each call to the best possible position
-    for (int callIndex : callIndices) {
-        // Find all feasible insertions sorted from best-to-worst
-        std::vector<std::pair<int, CallDetails>> feasibleInsertions = calculateFeasibleInsertions(callIndex, solution, true);
+    while (!callIndices.empty()) {
+        int bestCost = INT_MAX, bestCall;
+        CallDetails bestInsertion;
 
-        // If no feasible position has been found, keep call outsourced
-        if (feasibleInsertions.empty()) {
-            continue;
+        for (int callIndex : callIndices) {
+            // Find all feasible insertions sorted from best-to-worst
+            std::vector<std::pair<int, CallDetails>> feasibleInsertions = calculateFeasibleInsertions(callIndex, solution, true);
+
+            // If greedy, store only the best entry of them all
+            if (greedy) {
+                if (feasibleInsertions[0].first < bestCost) {
+                    bestCost = feasibleInsertions[0].first;
+                    bestCall = callIndex;
+                    bestInsertion = feasibleInsertions[0].second;
+                }
+            // Else if not, select the first best entry
+            } else {
+                bestCall = callIndex;
+                bestInsertion = feasibleInsertions[0].second;
+                break;
+            }
         }
 
-        // At end, move callIndex to bestIndices and return new solution
-        solution->move(feasibleInsertions[0].second.vehicle, callIndex, feasibleInsertions[0].second.indices);
+        // At end, add callIndex to bestIndices and continue with the rest
+        solution->add(bestInsertion.vehicle, bestCall, bestInsertion.indices);
+        callIndices.erase(bestCall);
     }
 
     return solution;
@@ -174,19 +202,17 @@ std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callInd
     // Initialize a vector for storing feasible insertions
     std::vector<std::pair<int, CallDetails>> feasibleInsertions;
 
+    // Check all insertions within every possible vehicle
     for (int vehicleIndex : possibleVehicles) {
         // Store vehicle details
         std::pair<std::vector<int>, std::vector<int>> details = current.getDetails(vehicleIndex);
         std::vector<int>& times = details.first, capacities = details.second;
 
-        // Remove the call from wherever it is, and add it to start of current vehicle
-        current.move(vehicleIndex, callIndex, std::make_pair(0, 1));
-
         // Store previous cost for easy updates
         int previousCost = current.costs[vehicleIndex-1];
 
         // Loop over every possible insertion point
-        for (int pointer1 = 0; pointer1 < current.representation[vehicleIndex-1].size()-1; pointer1++) {
+        for (int pointer1 = 0; pointer1 < current.representation[vehicleIndex-1].size()+1; pointer1++) {
             // Ensure that current start is feasible
             if (times[pointer1] > call.pickupWindow.end) {
                 break;
@@ -196,28 +222,32 @@ std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callInd
             }
 
             int pointer2 = pointer1;
-            while (++pointer2 < current.representation[vehicleIndex-1].size()) {
+            while (++pointer2 < current.representation[vehicleIndex-1].size()+2) {
                 // Ensure that current end is feasible
                 if (times[pointer2] > call.deliveryWindow.end) {
                     break;
                 }
 
-                // Move call
-                std::pair<int, int> indices = std::make_pair(pointer1, pointer2);
-                current.move(vehicleIndex, callIndex, indices);
+                // Insert the call at the current position
+                current.add(vehicleIndex, callIndex, std::make_pair(pointer1, pointer2));
 
                 // Check feasibility
                 current.updateFeasibility(vehicleIndex);
-                if (!current.isFeasible()) {
-                    continue;
-                }
 
                 // If it is feasible, store it
-                CallDetails callDetail = {vehicleIndex, indices};
-                feasibleInsertions.push_back(std::make_pair(current.getCost(), callDetail));
+                if (current.isFeasible()) {
+                    feasibleInsertions.push_back(std::make_pair(current.getCost(), current.callDetails[callIndex-1]));
+                }
+
+                // Then remove the call again
+                current.remove(vehicleIndex, callIndex);
             }
         }
     }
+
+    // Aswell as checking outsource
+    current.outsource(callIndex);
+    feasibleInsertions.push_back(std::make_pair(current.getCost(), current.callDetails[callIndex-1]));
 
     // After all insertions, sort the vector by cost in ascending order and return
     if (sort) {

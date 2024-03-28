@@ -13,6 +13,7 @@
 struct {
     int vehicle;
     std::pair<int, int> indices;
+    bool removed;
 } typedef CallDetails;
 
 class Solution {

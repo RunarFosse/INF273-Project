@@ -73,7 +73,9 @@ class WeightedOperator : public Operator {
 class RandomInsert : public Operator {
     public:
     /**
-     * @brief Apply 1-insert heuristic operator to solution.
+     * @brief Apply random-insert heuristic operator to solution.
+     * Random-insert moves a random amount of calls to a random
+     * feasible position.
      * 
      * @param solution Solution to apply operator on
      * @param rng Random number generator Engine
@@ -82,12 +84,30 @@ class RandomInsert : public Operator {
     Solution apply(Solution* solution, std::default_random_engine& rng);
 };
 
-class BestInsert : public Operator {
+class RandomBestInsert : public Operator {
     public:
     /**
      * @brief Apply best-insert heuristic operator to solution.
      * Best-insert moves a random amount of calls to the current
-     * most optimal positions in a greedy fashion.
+     * most optimal positions.
+     * 
+     * @note The order calls are inserted in is randomized.
+     * 
+     * @param solution Solution to apply operator on
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution* solution, std::default_random_engine& rng);
+};
+
+class GreedyBestInsert : public Operator {
+    public:
+    /**
+     * @brief Apply best-insert heuristic operator to solution.
+     * Best-insert moves a random amount of calls to the current
+     * most optimal positions.
+     * 
+     * @note The order calls are inserted in is greedy.
      * 
      * @param solution Solution to apply operator on
      * @param rng Random number generator Engine
@@ -126,10 +146,11 @@ Solution* performRandomInsert(int callsToInsert, Solution* solution, std::defaul
  * @brief Performs the best insert operation on several calls on the given solution.
  * 
  * @param callsToInsert Number of calls to insert
+ * @param greedy If the order of calls inserted should be greedy or random.
  * @param solution The given solution
  * @param rng Random number generator engine
  * @return Neighbour solution 
  */
-Solution* performBestInsert(int callsToInsert, Solution* solution, std::default_random_engine& rng);
+Solution* performBestInsert(int callsToInsert, bool greedy, Solution* solution, std::default_random_engine& rng);
 
 std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callIndex, Solution* solution, bool sort);

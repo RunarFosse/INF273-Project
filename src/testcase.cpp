@@ -153,7 +153,6 @@ void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string
         int updates = 1;
 
         for (int w = 0; w < warmupIterations; w++) {
-            //Debugger::printSolution(&incumbent);
             Solution solution = neighbourOperator->apply(&incumbent, rng);
 
             if (!solution.isFeasible()) {
@@ -216,7 +215,7 @@ void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string
         if (bestSolution.getCost() < bestSolutionOverall.getCost()) {
             bestSolutionOverall = bestSolution;
         }
-        if (false) {
+        if (true) {
             Debugger::printSolution(&bestSolution);
             std::cout << "Cost: " << std::to_string(bestSolution.getCost());
             bestSolution.invalidateCache();

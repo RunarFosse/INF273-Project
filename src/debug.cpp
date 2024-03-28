@@ -100,7 +100,10 @@ void Debugger::printSolution(Solution* solution) {
             }
         }
         if (vehicleIndex < solution->outsourceVehicle) {
-            std::cout << "0, ";
+            std::cout << "0";
+            if (vehicleIndex < solution->outsourceVehicle-1 || solution->representation[solution->outsourceVehicle-1].size() > 0) {
+                std::cout <<", ";
+            }
         }
     }
 

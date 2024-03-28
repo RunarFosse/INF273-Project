@@ -160,11 +160,14 @@ void Solution::add(int vehicleIndex, int callIndex, std::pair<int, int> indices)
 
     // Resize the vector up
     representation.resize(representation.size()+2);
+
+    // Denote start of iteration
+    int start = indices.first;
     
     // Add call to representation
     std::deque<int> buffer;
     std::unordered_set<int> pickedCalls;
-    for (int i = 0; i < representation.size(); i++) {
+    for (int i = start; i < representation.size(); i++) {
         if (i == indices.first || i == indices.second) {
             buffer.push_back(representation[i]);
             representation[i] = callIndex;
@@ -175,7 +178,7 @@ void Solution::add(int vehicleIndex, int callIndex, std::pair<int, int> indices)
         }
 
         // Update any callDetails indices
-        if (pickedCalls.find(representation[i]) == pickedCalls.end()) {
+        if (this->callDetails[representation[i]-1].indices.first >= start and pickedCalls.find(representation[i]) == pickedCalls.end()) {
             this->callDetails[representation[i]-1].indices.first = i;
             pickedCalls.insert(representation[i]);
         } else {
@@ -184,16 +187,22 @@ void Solution::add(int vehicleIndex, int callIndex, std::pair<int, int> indices)
     }
 
     // Update callDetails for inserted call
-    this->callDetails[callIndex-1].vehicle = vehicleIndex;
+    this->callDetails[callIndex-1] = {vehicleIndex, indices, false};
+
+    // And then update the cost
+    this->updateCost(callIndex, true);
 }
 
 void Solution::remove(int vehicleIndex, int callIndex) {
     std::vector<int>& representation = this->representation[vehicleIndex-1];
 
+    // Denote start of iteration
+    int start = this->callDetails[callIndex-1].indices.first;
+
     // Remove call from representation
     int skip = 0;
     std::unordered_set<int> pickedCalls;
-    for (int i = 0; i+skip < representation.size(); i++) {
+    for (int i = start; i+skip < representation.size(); i++) {
         while (i+skip < representation.size() && representation[i+skip] == callIndex) {
             skip++;
         }
@@ -202,7 +211,7 @@ void Solution::remove(int vehicleIndex, int callIndex) {
             representation[i] = representation[i+skip];
             
             // Update any callDetails indices
-            if (pickedCalls.find(representation[i]) == pickedCalls.end()) {
+            if (this->callDetails[representation[i]-1].indices.first >= start and pickedCalls.find(representation[i]) == pickedCalls.end()) {
                 this->callDetails[representation[i]-1].indices.first = i;
                 pickedCalls.insert(representation[i]);
             } else {
@@ -211,8 +220,14 @@ void Solution::remove(int vehicleIndex, int callIndex) {
         }
     }
 
+    // Set callDetail to removed
+    this->callDetails[callIndex-1].removed = true;
+
     // Resize the vector down
     representation.resize(representation.size()-2);
+
+    // And update the cost
+    this->updateCost(callIndex, false);
 }
 
 void Solution::move(int vehicleIndex, int callIndex, std::pair<int, int> indices) {
@@ -220,16 +235,15 @@ void Solution::move(int vehicleIndex, int callIndex, std::pair<int, int> indices
     int vehicleCall = this->callDetails[callIndex-1].vehicle;
 
     // If call is at the exact position already, do nothing
-    if (vehicleIndex == vehicleCall && indices == this->callDetails[callIndex-1].indices) {
+    if (vehicleIndex == vehicleCall && indices == this->callDetails[callIndex-1].indices && !this->callDetails[callIndex-1].removed) {
         return;
     }
 
-    // If not, remove call from where it currently is and add to wanted position
-    this->remove(vehicleCall, callIndex);
-    this->updateCost(callIndex, false);
-
+    // If not, remove call from where it currently is (if not already) and add to wanted position
+    if (!this->callDetails[callIndex-1].removed) {
+        this->remove(vehicleCall, callIndex);
+    }
     this->add(vehicleIndex, callIndex, indices);
-    this->updateCost(callIndex, true);
 }
 
 std::pair<int, int> Solution::outsource(int callIndex) {
@@ -496,7 +510,7 @@ void Solution::updateCost(int callIndex, bool insertion) {
     }
 
     // Unpack details
-    auto [vehicleIndex, indices] = this->callDetails[callIndex-1];
+    auto [vehicleIndex, indices, removed] = this->callDetails[callIndex-1];
     auto [index1, index2] = indices;
 
     // Keep a multiplier deciding if we should add or remove cost
@@ -636,6 +650,12 @@ std::pair<std::vector<int>, std::vector<int>> Solution::getDetails(int vehicleIn
         times.push_back(currentTime);
         capacities.push_back(currentCapacity);
     }
+
+    // And extend details by two (because we might insert)
+    times.push_back(currentTime);
+    times.push_back(currentTime);
+    capacities.push_back(currentCapacity);
+    capacities.push_back(currentCapacity);
 
     // Return the details
     return std::make_pair(times, capacities);
