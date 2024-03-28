@@ -59,7 +59,8 @@ std::vector<int> removeRandom(int callsToRemove, Solution* solution, std::defaul
     std::vector<int> callIndices;
     callIndices.reserve(callsToRemove);
 
-    // Randomly sample all calls to remove
+    // Randomly sample all calls to remove 
+    // "https://stackoverflow.com/a/3724708"
     std::unordered_set<int> sampledCalls;
     int total = solution->problem->noCalls+1;
     for (int i = total - callsToRemove; i < total; i++) {
