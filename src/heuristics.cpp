@@ -53,3 +53,27 @@ std::vector<int> removeCostly(int callsToRemove, Solution* solution, std::defaul
     // Return all removed calls
     return callIndices;
 }
+
+std::vector<int> removeRandom(int callsToRemove, Solution* solution, std::default_random_engine& rng) {
+    // Initialize a vector to hold all removed calls
+    std::vector<int> callIndices;
+    callIndices.reserve(callsToRemove);
+
+    // Randomly sample all calls to remove
+    std::unordered_set<int> sampledCalls;
+    int total = solution->problem->noCalls+1;
+    for (int i = total - callsToRemove; i < total; i++) {
+        int callIndex = std::uniform_int_distribution<int>(1, i)(rng); 
+        if (sampledCalls.find(callIndex) != sampledCalls.end()) {
+            callIndex = i;
+        }
+        sampledCalls.insert(callIndex);
+
+        // Remove the call and add them to vector
+        solution->remove(callIndex);
+        callIndices.push_back(callIndex);
+    }
+
+    // Return all removed calls
+    return callIndices;
+}
