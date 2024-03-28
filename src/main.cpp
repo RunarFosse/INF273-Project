@@ -35,7 +35,7 @@ int main(int argc, char const *argv[])
     //Debugger::printSolution(&initial);
     //Debugger::printToTerminal("Cost: " + std::to_string(initial.getCost()) + "\n");
 
-    for (auto [callIndex, relatedness] : problem.calls[2-1].similarities) {
+    for (auto [callIndex, relatedness] : problem.calls[4-1].similarities) {
         Debugger::printToTerminal("(" + std::to_string(callIndex) + ", " + std::to_string(relatedness) + ")\n");
     }
 

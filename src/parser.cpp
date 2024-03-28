@@ -194,9 +194,11 @@ Problem Parser::parseProblem(std::string path) {
             
             Call& otherCall = problem.calls[otherCallIndex-1];
 
+            // Calculate shared vehicles between both calls
             std::vector<int> sharedVehicles;
             std::set_intersection(call.possibleVehicles.begin(), call.possibleVehicles.end(), otherCall.possibleVehicles.begin(), otherCall.possibleVehicles.end(), std::back_inserter(sharedVehicles));
 
+            // Formulate the similarity
             Similarity similarity;
             similarity.callIndex = otherCallIndex;
             similarity.relatedness = phi * (calculateMeanDistance(call.originNode, otherCall.originNode) + calculateMeanDistance(call.destinationNode, otherCall.destinationNode))
@@ -206,6 +208,11 @@ Problem Parser::parseProblem(std::string path) {
 
             problem.calls[callIndex-1].similarities.push_back(similarity);
         }
+
+        // Sort similarities from most- to least-similar
+        std::sort(problem.calls[callIndex-1].similarities.begin(), problem.calls[callIndex-1].similarities.end(), [](const Similarity& a, const Similarity& b) {
+            return a.relatedness < b.relatedness;
+        });
     }
 
     // Return the problem instance
