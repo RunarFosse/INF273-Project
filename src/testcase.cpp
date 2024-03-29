@@ -123,7 +123,7 @@ void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string
     // Parse the given test instance
     Problem problem = Parser::parseProblem("data/" + instance + ".txt");
     std::string algorithm = title == "" ? "Simulated Annealing" : title;
-    int infeasible = 0, iterfound = 0;
+    int iterfound = 0;
 
     // Create a timer object
     Timer timer = Timer(algorithm + ": " + instance, experiments);
@@ -187,7 +187,6 @@ void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string
             Solution solution = neighbourOperator->apply(&incumbent, rng);
 
             if (!solution.isFeasible()) {
-                infeasible++;
                 continue;
             }
 
@@ -228,8 +227,6 @@ void InstanceRunner::simulatedAnnealing(Operator* neighbourOperator, std::string
 
     // Retrieve runtime from timer
     double averageTime = timer.retrieve();
-
-    Debugger::printToTerminal("Infeasibles: " + std::to_string(infeasible) + "\n");
 
     // Print the results to standard output
     Debugger::printResults(instance, algorithm, averageObjective, bestSolutionOverall.getCost(), improvement, averageTime, &bestSolutionOverall);
