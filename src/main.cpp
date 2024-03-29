@@ -11,22 +11,13 @@ int main(int argc, char const *argv[])
 
     // Create a uniform and weighted neighbourhood operator
     Operator* uniformOperator = new UniformOperator({
-        new MultiOutsource(),
-        new RandomInsert(),
-        new RandomBestInsert(),
-        new GreedyBestInsert(),
-    });
-    Operator* weightedOperator = new WeightedOperator({
-        std::make_pair(new MultiOutsource(), 0.40),
-        std::make_pair(new RandomBestInsert(), 0.60),
+        new SimilarGreedyInsert(),
+        new SimilarRegretInsert()
     });
 
     // Run each test case given
-    Debugger::outputToFile("results_uniform.txt");
-    InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, uniformOperator, 10, 10000, rng, "SA-new operators (equal weights)");
-
-    //Debugger::outputToFile("results_weighted.txt");
-    //InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, weightedOperator, 10, 10000, rng, "SA-new operators (tuned weights)");
+    Debugger::outputToFile("results.txt");
+    InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, uniformOperator, 10, 10000, rng, "Simulated Annealing");
 
     // Verify correct implementation of operator
     //Problem problem = Parser::parseProblem("data/Call_7_Vehicle_3.txt");

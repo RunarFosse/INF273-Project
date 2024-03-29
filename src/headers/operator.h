@@ -1,13 +1,7 @@
 #pragma once
 
-#include <set>
-#include <vector>
-#include <random>
-#include <algorithm>
-#include <unordered_map>
-
-#include "solution.h"
 #include "problem.h"
+#include "solution.h"
 #include "heuristics.h"
 
 class Operator {
@@ -71,12 +65,12 @@ class WeightedOperator : public Operator {
     std::vector<double> weights;
 };
 
-class RandomInsert : public Operator {
+class SimilarGreedyInsert : public Operator {
     public:
     /**
-     * @brief Apply random-insert heuristic operator to solution.
-     * Random-insert moves a random amount of calls to a random
-     * feasible position.
+     * @brief Similar-greedy-insert is an operator which
+     * selects similar calls, and inserts them in the best
+     * possible position given by a greedy order.
      * 
      * @param solution Solution to apply operator on
      * @param rng Random number generator Engine
@@ -85,46 +79,12 @@ class RandomInsert : public Operator {
     Solution apply(Solution* solution, std::default_random_engine& rng);
 };
 
-class RandomBestInsert : public Operator {
+class SimilarRegretInsert : public Operator {
     public:
     /**
-     * @brief Apply best-insert heuristic operator to solution.
-     * Best-insert moves a random amount of calls to the current
-     * most optimal positions.
-     * 
-     * @note The order calls are inserted in is randomized.
-     * 
-     * @param solution Solution to apply operator on
-     * @param rng Random number generator Engine
-     * @return Neighbour solution
-     */
-    Solution apply(Solution* solution, std::default_random_engine& rng);
-};
-
-class GreedyBestInsert : public Operator {
-    public:
-    /**
-     * @brief Apply best-insert heuristic operator to solution.
-     * Best-insert moves a random amount of calls to the current
-     * most optimal positions.
-     * 
-     * @note The order calls are inserted in is greedy.
-     * 
-     * @param solution Solution to apply operator on
-     * @param rng Random number generator Engine
-     * @return Neighbour solution
-     */
-    Solution apply(Solution* solution, std::default_random_engine& rng);
-};
-
-class MultiOutsource : public Operator {
-    public:
-    /**
-     * @brief Apply multi-outsource heuristic operator to solution.
-     * Multi-outsource selects a random number of non-outsourced calls
-     * and outsources them.
-     * 
-     * @note If all calls are outsourced it returns without modification.
+     * @brief Similar-regret-insert is an operator which
+     * selects similar calls, and inserts them in the best
+     * possible position given by a regret-k order.
      * 
      * @param solution Solution to apply operator on
      * @param rng Random number generator Engine
@@ -134,22 +94,13 @@ class MultiOutsource : public Operator {
 };
 
 /**
- * @brief Performs the random insert operation on several calls on the given solution.
+ * @brief Sample an integer from a normal distribution,
+ * clamped to the given solution's problem.
  * 
- * @param callsToInsert Number of calls to insert
- * @param solution The given solution
+ * @param mean Mean normal distribution parameter
+ * @param std Standard deviation normal distribution parameter
+ * @param solution Given solution
  * @param rng Random number generator engine
- * @return Neighbour solution 
+ * @return int 
  */
-Solution* performRandomInsert(int callsToInsert, Solution* solution, std::default_random_engine& rng);
-
-/**
- * @brief Performs the best insert operation on several calls on the given solution.
- * 
- * @param callsToInsert Number of calls to insert
- * @param greedy If the order of calls inserted should be greedy or random.
- * @param solution The given solution
- * @param rng Random number generator engine
- * @return Neighbour solution 
- */
-Solution* performBestInsert(int callsToInsert, bool greedy, Solution* solution, std::default_random_engine& rng);
+int normalSample(double mean, double std, Solution* solution, std::default_random_engine& rng);

@@ -79,7 +79,7 @@ std::vector<int> removeRandom(int callsToRemove, Solution* solution, std::defaul
     return callIndices;
 }
 
-void insertGreedy(std::set<int> callIndices, Solution* solution) {
+void insertGreedy(std::set<int>& callIndices, Solution* solution) {
     // Move each call into its best possible position
     while (!callIndices.empty()) {
         int bestCost = INT_MAX, bestCall;
@@ -103,10 +103,10 @@ void insertGreedy(std::set<int> callIndices, Solution* solution) {
     }
 }
 
-void insertRegret(std::set<int> callIndices, Solution* solution, int k) {
+void insertRegret(std::set<int>& callIndices, Solution* solution, int k) {
     // Move each call into its best possible position
     while (!callIndices.empty()) {
-        int highestRegret = 0, bestCall;
+        int highestRegret = -1, bestCall;
         CallDetails bestInsertion;
 
         for (int callIndex : callIndices) {
@@ -119,7 +119,7 @@ void insertRegret(std::set<int> callIndices, Solution* solution, int k) {
                 if (i+1 >= feasibleInsertions.size()) {
                     break;
                 }
-                regret += feasibleInsertions[i].first - feasibleInsertions[i+1].first;
+                regret += feasibleInsertions[i+1].first - feasibleInsertions[i].first;
             }
 
             // Check if inserting the current call is better, if so, remember it

@@ -29,164 +29,57 @@ Solution WeightedOperator::apply(Solution* solution, std::default_random_engine&
     return this->operators[operatorIndex]->apply(solution, rng);
 }
 
-Solution RandomInsert::apply(Solution* solution, std::default_random_engine& rng) {
+Solution SimilarGreedyInsert::apply(Solution* solution, std::default_random_engine& rng) {
     // Create a copy of the current solution
     Solution current = solution->copy();
 
     // Pick out the number of calls to move
-    int lowerbound = 1, upperbound = solution->problem->noCalls;
+    int callsToMove = normalSample(3.0, 2.0, &current, rng);
 
-    double mean = solution->problem->noCalls * 0.2, std = solution->problem->noCalls * 0.075;
-    mean = 2.0;
-    std = 2.0;
-    int callsToInsert = std::clamp((int)std::ceil(std::normal_distribution<double>(mean, std)(rng)), lowerbound, upperbound);
+    // Remove similar calls
+    std::vector<int> removedCalls = removeSimilar(callsToMove, &current, rng);
 
-    return *performRandomInsert(callsToInsert, &current, rng);
-}
+    // Insert them using greedy
+    std::set<int> callIndices(removedCalls.begin(), removedCalls.end());
+    insertGreedy(callIndices, &current);
 
-Solution RandomBestInsert::apply(Solution* solution, std::default_random_engine& rng) {
-    // Create a copy of the solution
-    Solution current = solution->copy();
-
-    // Pick out the number of calls to move
-    int lowerbound = 1, upperbound = solution->problem->noCalls;
-
-    double mean = solution->problem->noCalls * 0.2, std = solution->problem->noCalls * 0.1;
-    mean = 2.0;
-    std = 2.0;
-    int callsToInsert = std::clamp((int)std::ceil(std::normal_distribution<double>(mean, std)(rng)), lowerbound, upperbound);
-
-    return *performBestInsert(callsToInsert, false, &current, rng);
-}
-
-Solution GreedyBestInsert::apply(Solution* solution, std::default_random_engine& rng) {
-    // Create a copy of the solution
-    Solution current = solution->copy();
-
-    // Pick out the number of calls to move
-    int lowerbound = 1, upperbound = solution->problem->noCalls;
-
-    double mean = solution->problem->noCalls * 0.2, std = solution->problem->noCalls * 0.1;
-    mean = 3.0;
-    std = 2.0;
-    int callsToInsert = std::clamp((int)std::ceil(std::normal_distribution<double>(mean, std)(rng)), lowerbound, upperbound);
-
-    return *performBestInsert(callsToInsert, true, &current, rng);
-}
-
-Solution MultiOutsource::apply(Solution* solution, std::default_random_engine& rng) {
-    // Create a copy of the solution
-    Solution current = solution->copy();
-
-    // Extract all currently outsourced calls
-    std::set<int> outsourcedCalls;
-    for (int callIndex : solution->representation[solution->outsourceVehicle-1]) {
-        outsourcedCalls.insert(callIndex);
-    }
-
-    // Compute all not-outsourced
-    std::vector<int> possibleCalls;
-    for (int callIndex = 1; callIndex <= solution->problem->noCalls; callIndex++) {
-        if (outsourcedCalls.find(callIndex) == outsourcedCalls.end()) {
-            possibleCalls.push_back(callIndex);
-        }
-    }
-
-    // If no call can be outsourced, return current solution
-    if (possibleCalls.empty()) {
-        return current;
-    }
-
-    // Pick the number random calls to outsource
-    int lowerbound = 1;
-    int upperbound = 3;//std::max(std::min((int)possibleCalls.size(), current.problem->noCalls / 20), 1);
-    int callsToOutsource = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
-    
-    std::vector<int> callIndices;
-    std::sample(possibleCalls.begin(), possibleCalls.end(), std::back_inserter(callIndices), callsToOutsource, rng);
-
-    // Outsource all of them
-    for (int callIndex : callIndices) {
-        current.outsource(callIndex);
-    }
-
-    // Return neighbour solution
+    // Return the neighbour solution
     return current;
 }
 
-Solution* performRandomInsert(int callsToInsert, Solution* solution, std::default_random_engine& rng) {
-    // Efficient (non-colliding) sampling algorithm "https://stackoverflow.com/a/3724708"
-    std::set<int> callIndices;
-    int total = solution->problem->noCalls+1;
-    for (int i = total - callsToInsert; i < total; i++) {
-        int callIndex = std::uniform_int_distribution<int>(1, i)(rng); 
-        if (callIndices.find(callIndex) != callIndices.end()) {
-            callIndex = i;
-        }
-        callIndices.insert(callIndex);
+Solution SimilarRegretInsert::apply(Solution* solution, std::default_random_engine& rng) {
+    // Create a copy of the current solution
+    Solution current = solution->copy();
 
-        // And temporarily remove them
-        solution->remove(callIndex);
-    }
+    // Pick out the number of calls to move
+    int callsToMove = normalSample(3.0, 2.0, &current, rng);
 
-    for (int callIndex : callIndices) {
-        // Find all feasible insertions
-        std::vector<std::pair<int, CallDetails>> feasibleInsertions = calculateFeasibleInsertions(callIndex, solution, false);
+    // Remove similar calls
+    std::vector<int> removedCalls = removeSimilar(callsToMove, &current, rng);
 
-        // Then randomly sample a feasible insertion
-        CallDetails insertion = feasibleInsertions[std::uniform_int_distribution<int>(0, feasibleInsertions.size()-1)(rng)].second;
+    // TODO: Make k parameter
+    int k = 3;
 
-        // Insert the callIndex under the new vehicleIndex at random positions
-        solution->add(insertion.vehicle, callIndex, insertion.indices);
-    }
+    // Insert them using greedy
+    std::set<int> callIndices(removedCalls.begin(), removedCalls.end());
+    insertRegret(callIndices, &current, k);
 
-    // Return the modified neighbour solution
-    return solution;
+    // Return the neighbour solution
+    return current;
 }
 
-Solution* performBestInsert(int callsToInsert, bool greedy, Solution* solution, std::default_random_engine& rng) {
-    // Efficient (non-colliding) sampling algorithm "https://stackoverflow.com/a/3724708"
-    std::set<int> callIndices;
-    int total = solution->problem->noCalls+1;
-    for (int i = total - callsToInsert; i < total; i++) {
-        int callIndex = std::uniform_int_distribution<int>(1, i)(rng); 
-        if (callIndices.find(callIndex) != callIndices.end()) {
-            callIndex = i;
-        }
-        callIndices.insert(callIndex);
+int normalSample(double mean, double std, Solution* solution, std::default_random_engine& rng) {
+    // Randomly sample an integer from the given normal distribution
+    int sample = std::ceil(std::normal_distribution<double>(mean, std)(rng));
 
-        // And temporarily remove them
-        solution->remove(callIndex);
+    // Clamp the sampled value to the solution's interval
+    int lowerbound = 1, upperbound = solution->problem->noCalls;
+    if (sample < lowerbound) {
+        return lowerbound;
+    }
+    if (sample > upperbound) {
+        return upperbound;
     }
 
-    // Then move each call to the best possible position
-    while (!callIndices.empty()) {
-        int bestCost = INT_MAX, bestCall;
-        CallDetails bestInsertion;
-
-        for (int callIndex : callIndices) {
-            // Find all feasible insertions sorted from best-to-worst
-            std::vector<std::pair<int, CallDetails>> feasibleInsertions = calculateFeasibleInsertions(callIndex, solution, true);
-
-            // If greedy, store only the best entry of them all
-            if (greedy) {
-                if (feasibleInsertions[0].first < bestCost) {
-                    bestCost = feasibleInsertions[0].first;
-                    bestCall = callIndex;
-                    bestInsertion = feasibleInsertions[0].second;
-                }
-            // Else if not, select the first best entry
-            } else {
-                bestCall = callIndex;
-                bestInsertion = feasibleInsertions[0].second;
-                break;
-            }
-        }
-
-        // At end, add callIndex to bestIndices and continue with the rest
-        solution->add(bestInsertion.vehicle, bestCall, bestInsertion.indices);
-        callIndices.erase(bestCall);
-    }
-
-    return solution;
+    return sample;
 }
