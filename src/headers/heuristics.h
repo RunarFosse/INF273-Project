@@ -37,20 +37,20 @@ std::vector<int> removeRandom(int callsToRemove, Solution* solution, std::defaul
  * @brief Insert all given calls into their best possible positions.
  * Calls are inserted in a greedy-order.
  * 
- * @param callIndices Calls to insert
+ * @param callIndices Set of calls to insert
  * @param solution Solution to insert into
  */
-void insertGreedy(std::vector<int> callIndices, Solution* solution);
+void insertGreedy(std::set<int> callIndices, Solution* solution);
 
 /**
  * @brief Insert all given calls into their best possible positions.
  * Calls are inserted in a regret-k order.
  * 
- * @param callIndices Calls to insert
+ * @param callIndices Set of calls to insert
  * @param solution Solution to insert into
  * @param k Regret-k parameter
  */
-void insertRegret(std::vector<int> callIndices, Solution* solution, int k);
+void insertRegret(std::set<int> callIndices, Solution* solution, int k);
 
 /**
  * @brief Calculate all different insertion positions for a given call.

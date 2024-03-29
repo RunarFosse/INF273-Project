@@ -79,6 +79,63 @@ std::vector<int> removeRandom(int callsToRemove, Solution* solution, std::defaul
     return callIndices;
 }
 
+void insertGreedy(std::set<int> callIndices, Solution* solution) {
+    // Move each call into its best possible position
+    while (!callIndices.empty()) {
+        int bestCost = INT_MAX, bestCall;
+        CallDetails bestInsertion;
+
+        for (int callIndex : callIndices) {
+            // Find all feasible insertions sorted from best-to-worst
+            std::vector<std::pair<int, CallDetails>> feasibleInsertions = calculateFeasibleInsertions(callIndex, solution, true);
+
+            // Check if inserting the current call is better, if so, remember it
+            if (feasibleInsertions[0].first < bestCost) {
+                bestCost = feasibleInsertions[0].first;
+                bestCall = callIndex;
+                bestInsertion = feasibleInsertions[0].second;
+            }
+        }
+
+        // Move the current best call into its best position and remove it from the set
+        solution->add(bestInsertion.vehicle, bestCall, bestInsertion.indices);
+        callIndices.erase(bestCall);
+    }
+}
+
+void insertRegret(std::set<int> callIndices, Solution* solution, int k) {
+    // Move each call into its best possible position
+    while (!callIndices.empty()) {
+        int highestRegret = 0, bestCall;
+        CallDetails bestInsertion;
+
+        for (int callIndex : callIndices) {
+            // Find all feasible insertions sorted from best-to-worst
+            std::vector<std::pair<int, CallDetails>> feasibleInsertions = calculateFeasibleInsertions(callIndex, solution, true);
+
+            // Calculate the regret for the current call
+            int regret = 0;
+            for (int i = 0; i < k; i++) {
+                if (i+1 >= feasibleInsertions.size()) {
+                    break;
+                }
+                regret += feasibleInsertions[i].first - feasibleInsertions[i+1].first;
+            }
+
+            // Check if inserting the current call is better, if so, remember it
+            if (highestRegret < regret) {
+                highestRegret = regret;
+                bestCall = callIndex;
+                bestInsertion = feasibleInsertions[0].second;
+            }
+        }
+
+        // Move the call with the highest regret into its best position and remove it from the set
+        solution->add(bestInsertion.vehicle, bestCall, bestInsertion.indices);
+        callIndices.erase(bestCall);
+    }
+}
+
 std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callIndex, Solution* solution, bool sort) {
     // Get the call and its feasible vehicles
     Call& call = solution->problem->calls[callIndex-1];
