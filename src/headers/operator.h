@@ -149,6 +149,23 @@ class RandomRegretInsert : public Operator {
     Solution apply(Solution* solution, std::default_random_engine& rng);
 };
 
+/**
+ * @brief Dynamically calculate the mean given a solution.
+ * Scales the mean by how many calls a given problem has.
+ * 
+ * @param solution Given solution
+ * @return Mean scaled by number of calls 
+ */
+double dynamicMean(Solution* solution);
+
+/**
+ * @brief Dynamically calculate the standard deviation given a solution.
+ * Scales the standard deviation by how many calls a given problem has.
+ * 
+ * @param solution Given solution
+ * @return Standard deviation scaled by number of calls 
+ */
+double dynamicStd(Solution* solution);
 
 /**
  * @brief Sample an integer from a normal distribution,

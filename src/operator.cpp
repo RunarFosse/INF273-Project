@@ -34,7 +34,7 @@ Solution SimilarGreedyInsert::apply(Solution* solution, std::default_random_engi
     Solution current = solution->copy();
 
     // Pick out the number of calls to move
-    int callsToMove = normalSample(3.0, 2.0, &current, rng);
+    int callsToMove = normalSample(dynamicMean(&current), dynamicStd(&current), &current, rng);
 
     // Remove similar calls
     std::vector<int> removedCalls = removeSimilar(callsToMove, &current, rng);
@@ -52,7 +52,7 @@ Solution SimilarRegretInsert::apply(Solution* solution, std::default_random_engi
     Solution current = solution->copy();
 
     // Pick out the number of calls to move
-    int callsToMove = normalSample(3.0, 2.0, &current, rng);
+    int callsToMove = normalSample(dynamicMean(&current), dynamicStd(&current), &current, rng);
 
     // Remove similar calls
     std::vector<int> removedCalls = removeSimilar(callsToMove, &current, rng);
@@ -73,7 +73,7 @@ Solution CostlyGreedyInsert::apply(Solution* solution, std::default_random_engin
     Solution current = solution->copy();
 
     // Pick out the number of calls to move
-    int callsToMove = normalSample(3.0, 2.0, &current, rng);
+    int callsToMove = normalSample(dynamicMean(&current), dynamicStd(&current), &current, rng);
 
     // Remove current most costly calls
     std::vector<int> removedCalls = removeCostly(callsToMove, &current, rng);
@@ -91,7 +91,7 @@ Solution CostlyRegretInsert::apply(Solution* solution, std::default_random_engin
     Solution current = solution->copy();
 
     // Pick out the number of calls to move
-    int callsToMove = normalSample(3.0, 2.0, &current, rng);
+    int callsToMove = normalSample(dynamicMean(&current), dynamicStd(&current), &current, rng);
 
     // Remove current most costly calls
     std::vector<int> removedCalls = removeCostly(callsToMove, &current, rng);
@@ -113,7 +113,7 @@ Solution RandomGreedyInsert::apply(Solution* solution, std::default_random_engin
     Solution current = solution->copy();
 
     // Pick out the number of calls to move
-    int callsToMove = normalSample(3.0, 2.0, &current, rng);
+    int callsToMove = normalSample(dynamicMean(&current), dynamicStd(&current), &current, rng);
 
     // Remove random calls
     std::vector<int> removedCalls = removeRandom(callsToMove, &current, rng);
@@ -131,7 +131,7 @@ Solution RandomRegretInsert::apply(Solution* solution, std::default_random_engin
     Solution current = solution->copy();
 
     // Pick out the number of calls to move
-    int callsToMove = normalSample(3.0, 2.0, &current, rng);
+    int callsToMove = normalSample(dynamicMean(&current), dynamicStd(&current), &current, rng);
 
     // Remove random calls
     std::vector<int> removedCalls = removeRandom(callsToMove, &current, rng);
@@ -147,6 +147,13 @@ Solution RandomRegretInsert::apply(Solution* solution, std::default_random_engin
     return current;
 }
 
+double dynamicMean(Solution* solution) {
+    return std::pow(solution->problem->noCalls, 1.0 / 3.5);
+}
+
+double dynamicStd(Solution* solution) {
+    return dynamicMean(solution) - 0.5;
+}
 
 int normalSample(double mean, double std, Solution* solution, std::default_random_engine& rng) {
     // Randomly sample an integer from the given normal distribution
