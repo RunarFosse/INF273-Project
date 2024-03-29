@@ -93,6 +93,63 @@ class SimilarRegretInsert : public Operator {
     Solution apply(Solution* solution, std::default_random_engine& rng);
 };
 
+class CostlyGreedyInsert : public Operator {
+    public:
+    /**
+     * @brief Similar-greedy-insert is an operator which
+     * selects the most costly calls, and inserts them in the best
+     * possible position given by a greedy order.
+     * 
+     * @param solution Solution to apply operator on
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution* solution, std::default_random_engine& rng);
+};
+
+class CostlyRegretInsert : public Operator {
+    public:
+    /**
+     * @brief Similar-regret-insert is an operator which
+     * selects the most costly calls, and inserts them in the best
+     * possible position given by a regret-k order.
+     * 
+     * @param solution Solution to apply operator on
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution* solution, std::default_random_engine& rng);
+};
+
+class RandomGreedyInsert : public Operator {
+    public:
+    /**
+     * @brief Similar-greedy-insert is an operator which
+     * randomly selects several calls, and inserts them in the best
+     * possible position given by a greedy order.
+     * 
+     * @param solution Solution to apply operator on
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution* solution, std::default_random_engine& rng);
+};
+
+class RandomRegretInsert : public Operator {
+    public:
+    /**
+     * @brief Similar-regret-insert is an operator which
+     * randomly selects several calls, and inserts them in the best
+     * possible position given by a regret-k order.
+     * 
+     * @param solution Solution to apply operator on
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution* solution, std::default_random_engine& rng);
+};
+
+
 /**
  * @brief Sample an integer from a normal distribution,
  * clamped to the given solution's problem.

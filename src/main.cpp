@@ -12,7 +12,11 @@ int main(int argc, char const *argv[])
     // Create a uniform and weighted neighbourhood operator
     Operator* uniformOperator = new UniformOperator({
         new SimilarGreedyInsert(),
-        new SimilarRegretInsert()
+        new SimilarRegretInsert(),
+        new CostlyGreedyInsert(),
+        new CostlyRegretInsert(),
+        new RandomGreedyInsert(),
+        new RandomRegretInsert(),
     });
 
     // Run each test case given
