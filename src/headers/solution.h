@@ -94,9 +94,12 @@ class Solution {
      * @note Solution is otherwise assumed to already be feasible.
      * 
      * @param vehicleIndex Specific vehicle which has changed
+     * @param startIndex Greedy start of feasibility calculation
+     * @param startTime Current time at greedy start of feasibility calculation
+     * @param startCapacity Current capacity at greedy start of feasibility calculation
      * @return Pair (index of failure, true if due to capacity else false)
      */
-    std::pair<int, bool> updateFeasibility(int vehicleIndex);
+    std::pair<int, bool> updateFeasibility(int vehicleIndex, int startIndex = 0, int startTime = 0, int startCapacity = 0);
 
     /**
      * @brief Calculates and returns the cost of the solution.
@@ -117,6 +120,15 @@ class Solution {
      * @param insertion Decides if change is an insertion or removal
      */
     void updateCost(int callIndex, bool insertion);
+
+    /**
+     * @brief Get the times and capacities of a given vehicle.
+     * 
+     * @param vehicleIndex Given vehicle
+     * @param timeConstraint Stop when this time is reached
+     * @return Returns the times and capacities as a pair (times, capacities)
+     */
+    std::pair<std::vector<int>, std::vector<int>> getDetails(int vehicleIndex, int timeConstraint);
 
     /**
      * @brief Returns a copy of the current solution.

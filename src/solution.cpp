@@ -340,7 +340,7 @@ bool Solution::isFeasible() {
     return this->feasibilityCache.second;
 }
 
-std::pair<int, bool> Solution::updateFeasibility(int vehicleIndex) {
+std::pair<int, bool> Solution::updateFeasibility(int vehicleIndex, int startIndex, int startTime, int startCapacity) {
     // Initialize feasibility information
     std::pair<int, bool> feasibilityInformation = std::make_pair(-1, false);
 
@@ -350,17 +350,26 @@ std::pair<int, bool> Solution::updateFeasibility(int vehicleIndex) {
         return feasibilityInformation;
     }  
 
-    Vehicle vehicle = this->problem->vehicles[vehicleIndex-1];
+    Vehicle& vehicle = this->problem->vehicles[vehicleIndex-1];
+    std::vector<int>& representation = this->representation[vehicleIndex-1];
 
     std::unordered_set<int> startedCalls;
     std::unordered_set<int> possibleCalls(vehicle.possibleCalls.begin(), vehicle.possibleCalls.end());
 
-    int currentTime = vehicle.startTime;
-    int currentCapacity = vehicle.capacity;
+    int currentTime = startTime == 0 ? vehicle.startTime : startTime;
+    int currentCapacity = startCapacity == 0 ? vehicle.capacity : startCapacity;
     int currentNode = vehicle.homeNode;
+    if (startIndex > 0) {
+        Call& startCall = this->problem->calls[representation[startIndex-1]-1];
+        if (this->callDetails[representation[startIndex-1]-1].indices.first == startIndex-1) {
+            currentNode = startCall.originNode;
+        } else {
+            currentNode = startCall.destinationNode;
+        }
+    }
 
-    for (int i = 0; i < this->representation[vehicleIndex-1].size(); i++) {
-        int callIndex = this->representation[vehicleIndex-1][i];
+    for (int i = startIndex; i < representation.size(); i++) {
+        int callIndex = representation[i];
         if (possibleCalls.find(callIndex) == possibleCalls.end()) {
             // Vehicle incompatible with call
             this->feasibilityCache = std::make_pair(true, false);
@@ -369,7 +378,7 @@ std::pair<int, bool> Solution::updateFeasibility(int vehicleIndex) {
             return feasibilityInformation;
         }
 
-        if (startedCalls.find(callIndex) == startedCalls.end()) {
+        if (this->callDetails[callIndex-1].indices.first >= startIndex and startedCalls.find(callIndex) == startedCalls.end()) {
             startedCalls.insert(callIndex);
             // Pickup call cargo
             Call call = this->problem->calls[callIndex-1];
@@ -595,6 +604,72 @@ void Solution::updateCost(int callIndex, bool insertion) {
     this->costCache.second += newCost - previousCost;
     return;
 }
+
+std::pair<std::vector<int>, std::vector<int>> Solution::getDetails(int vehicleIndex, int timeConstraint) {
+    std::vector<int> times, capacities;
+
+    Vehicle vehicle = this->problem->vehicles[vehicleIndex-1];
+
+    std::unordered_set<int> startedCalls;
+
+    int currentTime = vehicle.startTime;
+    int currentCapacity = vehicle.capacity;
+    int currentNode = vehicle.homeNode;
+
+    times.push_back(currentTime);
+    capacities.push_back(currentCapacity);
+
+    for (int callIndex : this->representation[vehicleIndex-1]) {
+        if (startedCalls.find(callIndex) == startedCalls.end()) {
+            startedCalls.insert(callIndex);
+            // Pickup call cargo
+            Call call = this->problem->calls[callIndex-1];
+                
+            // Travel to call origin node
+            currentTime += vehicle.routeTimeCost[currentNode-1][call.originNode-1].time;
+            currentNode = call.originNode;
+
+            // Verify within time window for pickup (inclusive)
+            if (currentTime < call.pickupWindow.start) {
+                // Wait if arrived early
+                currentTime = call.pickupWindow.start;
+            }
+
+            // Pickup cargo at origin node (wait some time)
+            currentTime += vehicle.callTimeCost[callIndex-1].first.time;
+            currentCapacity -= call.size;
+            
+        } else {
+            // Deliver call cargo
+            Call call = this->problem->calls[callIndex-1];
+
+            // Travel to call destination node
+            currentTime += vehicle.routeTimeCost[currentNode-1][call.destinationNode-1].time;
+            currentNode = call.destinationNode;
+
+            // Verify within time window for delivery (inclusive)
+            if (currentTime < call.deliveryWindow.start) {
+                // Wait if arrived early
+                currentTime = call.deliveryWindow.start;
+            }
+
+            // Deliver cargo at destination node (wait some time)
+            currentTime += vehicle.callTimeCost[callIndex-1].second.time;
+            currentCapacity += call.size;
+        }
+
+        times.push_back(currentTime);
+        capacities.push_back(currentCapacity);
+
+        if (currentTime > timeConstraint) {
+            break;
+        }
+    }
+
+    // Return the details
+    return std::make_pair(times, capacities);
+}
+
 
 void Solution::invalidateCache() {
     this->feasibilityCache.first = false;

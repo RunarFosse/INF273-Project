@@ -146,6 +146,9 @@ std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callInd
 
     // Check all insertions within every possible vehicle
     for (int vehicleIndex : possibleVehicles) {
+        // Store initial vehicle details
+        std::pair<std::vector<int>, std::vector<int>> details = solution->getDetails(vehicleIndex, call.pickupWindow.end);
+        std::vector<int>& times = details.first, capacities = details.second;
 
         // Loop over every possible insertion point
         for (int pointer1 = 0; pointer1 < solution->representation[vehicleIndex-1].size()+1; pointer1++) {
@@ -155,7 +158,7 @@ std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callInd
                 solution->add(vehicleIndex, callIndex, std::make_pair(pointer1, pointer2));
 
                 // Check feasibility
-                std::pair<int, bool> feasibilityInformation = solution->updateFeasibility(vehicleIndex);
+                std::pair<int, bool> feasibilityInformation = solution->updateFeasibility(vehicleIndex, pointer1, times[pointer1], capacities[pointer1]);
 
                 // If it is feasible, store it
                 if (solution->isFeasible()) {
