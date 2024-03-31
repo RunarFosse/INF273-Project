@@ -94,8 +94,9 @@ class Solution {
      * @note Solution is otherwise assumed to already be feasible.
      * 
      * @param vehicleIndex Specific vehicle which has changed
+     * @return Pair (index of failure, true if due to capacity else false)
      */
-    void updateFeasibility(int vehicleIndex);
+    std::pair<int, bool> updateFeasibility(int vehicleIndex);
 
     /**
      * @brief Calculates and returns the cost of the solution.
@@ -116,14 +117,6 @@ class Solution {
      * @param insertion Decides if change is an insertion or removal
      */
     void updateCost(int callIndex, bool insertion);
-
-    /**
-     * @brief Get the times and capacities of a given vehicle.
-     * 
-     * @param vehicleIndex Given vehicle
-     * @return Returns the times and capacities as a pair (times, capacities)
-     */
-    std::pair<std::vector<int>, std::vector<int>> getDetails(int vehicleIndex);
 
     /**
      * @brief Returns a copy of the current solution.

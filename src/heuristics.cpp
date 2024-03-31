@@ -146,36 +146,40 @@ std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callInd
 
     // Check all insertions within every possible vehicle
     for (int vehicleIndex : possibleVehicles) {
-        // Store vehicle details
-        std::pair<std::vector<int>, std::vector<int>> details = solution->getDetails(vehicleIndex);
-        std::vector<int>& times = details.first, capacities = details.second;
 
         // Loop over every possible insertion point
         for (int pointer1 = 0; pointer1 < solution->representation[vehicleIndex-1].size()+1; pointer1++) {
-            // Ensure that current start is feasible
-            if (times[pointer1] > call.pickupWindow.end) {
-                break;
-            }
-            if (capacities[pointer1] < call.size) {
-                continue;
-            }
-
-            int pointer2 = pointer1;
-            while (++pointer2 < solution->representation[vehicleIndex-1].size()+2) {
-                // Ensure that current end is feasible
-                if (times[pointer2] > call.deliveryWindow.end) {
-                    break;
-                }
+            for (int pointer2 = pointer1+1; pointer2 < solution->representation[vehicleIndex-1].size()+2; pointer2++) {
 
                 // Insert the call at the current position
                 solution->add(vehicleIndex, callIndex, std::make_pair(pointer1, pointer2));
 
                 // Check feasibility
-                solution->updateFeasibility(vehicleIndex);
+                std::pair<int, bool> feasibilityInformation = solution->updateFeasibility(vehicleIndex);
 
                 // If it is feasible, store it
                 if (solution->isFeasible()) {
                     feasibleInsertions.push_back(std::make_pair(solution->getCost(), solution->callDetails[callIndex-1]));
+
+                // If not, use infeasibility information to decide how we should check further positions
+                } else {
+
+                    // If due to capacity, check next pickup index
+                    if (feasibilityInformation.second) {
+                        pointer2 = solution->representation[vehicleIndex-1].size()+2;
+                    
+                    // Else if due to time window exceeded
+                    } else {
+                        // If at pickup index, break (pickup is outside pickup window)
+                        if (feasibilityInformation.first == pointer1) {
+                            pointer1 = solution->representation[vehicleIndex-1].size()+1;
+                            pointer2 = solution->representation[vehicleIndex-1].size()+2;
+                        
+                        // Else if at or before delivery index, break inner (delivery is outside delivery window or pickup makes another pickup/delivery infeasible)
+                        } else if (feasibilityInformation.first <= pointer2) {
+                            pointer2 = solution->representation[vehicleIndex-1].size()+2;
+                        } 
+                    }
                 }
 
                 // Then remove the call again
