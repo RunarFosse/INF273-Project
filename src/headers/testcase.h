@@ -28,39 +28,52 @@ class InstanceRunner {
      * Runs 'Blind Random Search' on the given test case, outputting the results to standard output.
      * 
      * @param neighbourOperator Neighbourhood operator
-     * @param instanceName Name of the test case instance to run
+     * @param instance Name of the test case instance to run
      * @param experiments Number of experiments to run
      * @param iterations Number of iterations per experiment
      * @param rng Random number generator (for randomness)
      * @param title Output title in loading bar and result txt
      */
-    static void blindRandomSearch(Operator* neighbourOperator, std::string instanceName, int experiments, int iterations, std::default_random_engine& rng, std::string title);
+    static void blindRandomSearch(Operator* neighbourOperator, std::string instance, int experiments, int iterations, std::default_random_engine& rng, std::string title);
 
     /**
      * @brief Assignment 3.
      * Runs 'Local Search' on the given test case, outputting the results to standard output.
      * 
      * @param neighbourOperator Neighbourhood operator
-     * @param instanceName Name of the test case instance to run
+     * @param instance Name of the test case instance to run
      * @param experiments Number of experiments to run
      * @param iterations Number of iterations per experiment
      * @param rng Random number generator (for randomness)
      * @param title Output title in loading bar and result txt
      */
-    static void localSearch(Operator* neighbourOperator, std::string instanceName, int experiments, int iterations, std::default_random_engine& rng, std::string title);
+    static void localSearch(Operator* neighbourOperator, std::string instance, int experiments, int iterations, std::default_random_engine& rng, std::string title);
 
     /**
-     * @brief Assignment 3.
+     * @brief Assignment 3 and 4.
      * Runs 'Simulated Annealing' on the given test case, outputting the results to standard output.
      * 
      * @param neighbourOperator Neighbourhood operator
-     * @param instanceName Name of the test case instance to run
+     * @param instance Name of the test case instance to run
      * @param experiments Number of experiments to run
      * @param iterations Number of iterations per experiment
      * @param rng Random number generator (for randomness)
      * @param title Output title in loading bar and result txt
      */
-    static void simulatedAnnealing(Operator* neighbourOperator, std::string instanceName, int experiments, int iterations, std::default_random_engine& rng, std::string title);
+    static void simulatedAnnealing(Operator* neighbourOperator, std::string instance, int experiments, int iterations, std::default_random_engine& rng, std::string title);
+
+    /**
+     * @brief Assignment 5.
+     * Runs the 'General Adaptive Metaheuristic', as desribed on the slides, on the given test case, outputting the results to standard output.
+     * 
+     * @param neighbourOperator Neighbourhood operator
+     * @param instance Name of the test case instance to run
+     * @param experiments Number of experiments to run
+     * @param iterations Number of iterations per experiment
+     * @param rng Random number generator (for randomness)
+     * @param title Output title in loading bar and result txt
+     */
+    static void generalAdaptiveMetaheuristic(Operator* neighbourOperator, std::string instance, int experiments, int iterations, std::default_random_engine& rng, std::string title);
 
     private:
     // This is a static class, prevent class creation

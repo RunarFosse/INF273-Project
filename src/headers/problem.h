@@ -23,6 +23,7 @@ struct {
     int startTime;
     int capacity;
     std::vector<int> possibleCalls;
+    std::unordered_set<int> possibleCallsSet;
     std::vector<std::vector<TimeCost>> routeTimeCost;
     std::vector<std::pair<TimeCost, TimeCost>> callTimeCost;
 } typedef Vehicle;
@@ -35,6 +36,7 @@ struct {
     Interval pickupWindow;
     Interval deliveryWindow;
     std::vector<int> possibleVehicles;
+    std::unordered_set<int> possibleVehiclesSet;
     std::vector<Similarity> similarities;
 } typedef Call;
 

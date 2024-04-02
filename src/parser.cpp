@@ -68,9 +68,11 @@ Problem Parser::parseProblem(std::string path) {
             pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
             while (pointer2 != std::string::npos) {
                 problem.vehicles[vehicleIndex-1].possibleCalls.push_back(std::stoi(line.substr(pointer1, pointer2)));
+                problem.vehicles[vehicleIndex-1].possibleCallsSet.insert(std::stoi(line.substr(pointer1, pointer2)));
                 pointer1 = pointer2+1, pointer2 = line.find(',', pointer1);
             }
             problem.vehicles[vehicleIndex-1].possibleCalls.push_back(std::stoi(line.substr(pointer1)));
+            problem.vehicles[vehicleIndex-1].possibleCallsSet.insert(std::stoi(line.substr(pointer1)));
 
             // Reserve space for the call node time/cost
             problem.vehicles[vehicleIndex-1].callTimeCost.resize(problem.noCalls);
@@ -112,6 +114,7 @@ Problem Parser::parseProblem(std::string path) {
                 for (int possibleCall : problem.vehicles[vehicleIndex-1].possibleCalls) {
                     if (possibleCall == index) {
                         call->possibleVehicles.push_back(vehicleIndex);
+                        call->possibleVehiclesSet.insert(vehicleIndex);
                         break;
                     }
                 }

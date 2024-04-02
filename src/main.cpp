@@ -9,8 +9,8 @@ int main(int argc, char const *argv[])
     // Initialize a random number generator
     std::default_random_engine rng{std::random_device {}()};
 
-    // Create a uniform and weighted neighbourhood operator
-    Operator* uniformOperator = new UniformOperator({
+    // Create a adaptive neighbourhood operator
+    Operator* adaptiveOperator = new AdaptiveOperator({
         new SimilarGreedyInsert(),
         new SimilarRegretInsert(),
         new CostlyGreedyInsert(),
@@ -21,7 +21,7 @@ int main(int argc, char const *argv[])
 
     // Run each test case given
     Debugger::outputToFile("results.txt");
-    InstanceRunner::testAlgorithm(InstanceRunner::simulatedAnnealing, uniformOperator, 10, 10000, rng, "Simulated Annealing");
+    InstanceRunner::testAlgorithm(InstanceRunner::generalAdaptiveMetaheuristic, adaptiveOperator, 10, 10000, rng, "Adaptive Algorithm");
 
     // Verify correct implementation of operator
     //Problem problem = Parser::parseProblem("data/Call_7_Vehicle_3.txt");

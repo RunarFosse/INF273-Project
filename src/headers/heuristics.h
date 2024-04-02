@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+
 #include "solution.h"
 
 /**
@@ -58,6 +60,17 @@ void insertRegret(std::set<int>& callIndices, Solution* solution, int k);
  * @param callIndex Given call to find insertions for
  * @param solution Solution to find insertion positions in
  * @param sort Sort the positions by cost in an ascending order 
- * @return Vector of (cost, callDetail) for each insertion position
+ * @return Vector of vectors of (cost, callDetail) for each insertion position for each vehicle
  */
-std::vector<std::pair<int, CallDetails>> calculateFeasibleInsertions(int callIndex, Solution* solution, bool sort);
+std::vector<std::vector<std::pair<int, CallDetails>>> calculateFeasibleInsertions(int callIndex, Solution* solution, bool sort);
+
+/**
+ * @brief Calculate all different insertion positions for a given call, inside a single vehicle.
+ * 
+ * @param vehicleIndex Given vehicle to find insertion in
+ * @param callIndex Given call to find insertions for
+ * @param solution Solution to find insertion positions in
+ * @param sort Sort the positions by cost in an ascending order 
+ * @return Vector of (cost, callDetail) for each insertion position in the vehicle
+ */
+std::vector<std::pair<int, CallDetails>> greedyFeasibleInsertions(int vehicleIndex, int callIndex, Solution* solution, bool sort);

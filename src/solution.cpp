@@ -259,10 +259,10 @@ bool Solution::isFeasible() {
 
     // Handle our vehicles
     for (int vehicleIndex = 1; vehicleIndex <= this->problem->noVehicles; vehicleIndex++) {
-        Vehicle vehicle = this->problem->vehicles[vehicleIndex-1];
+        Vehicle& vehicle = this->problem->vehicles[vehicleIndex-1];
 
         std::unordered_set<int> startedCalls;
-        std::unordered_set<int> possibleCalls(vehicle.possibleCalls.begin(), vehicle.possibleCalls.end());
+        std::unordered_set<int>& possibleCalls = vehicle.possibleCallsSet;
 
         int currentTime = vehicle.startTime;
         int currentCapacity = vehicle.capacity;
@@ -278,7 +278,7 @@ bool Solution::isFeasible() {
             if (startedCalls.find(callIndex) == startedCalls.end()) {
                 startedCalls.insert(callIndex);
                 // Pickup call cargo
-                Call call = this->problem->calls[callIndex-1];
+                Call& call = this->problem->calls[callIndex-1];
                 
                 // Travel to call origin node
                 currentTime += vehicle.routeTimeCost[currentNode-1][call.originNode-1].time;
@@ -308,7 +308,7 @@ bool Solution::isFeasible() {
                 
             } else {
                 // Deliver call cargo
-                Call call = this->problem->calls[callIndex-1];
+                Call& call = this->problem->calls[callIndex-1];
 
                 // Travel to call destination node
                 currentTime += vehicle.routeTimeCost[currentNode-1][call.destinationNode-1].time;
@@ -351,13 +351,13 @@ std::pair<int, bool> Solution::updateFeasibility(int vehicleIndex, int startInde
     }  
 
     Vehicle& vehicle = this->problem->vehicles[vehicleIndex-1];
+    std::unordered_set<int>& possibleCalls = vehicle.possibleCallsSet;
+
     std::vector<int>& representation = this->representation[vehicleIndex-1];
-
     std::unordered_set<int> startedCalls;
-    std::unordered_set<int> possibleCalls(vehicle.possibleCalls.begin(), vehicle.possibleCalls.end());
 
-    int currentTime = startTime == 0 ? vehicle.startTime : startTime;
-    int currentCapacity = startCapacity == 0 ? vehicle.capacity : startCapacity;
+    int currentTime = startTime == -1 ? vehicle.startTime : startTime;
+    int currentCapacity = startCapacity == -1 ? vehicle.capacity : startCapacity;
     int currentNode = vehicle.homeNode;
     if (startIndex > 0) {
         Call& startCall = this->problem->calls[representation[startIndex-1]-1];
@@ -370,18 +370,18 @@ std::pair<int, bool> Solution::updateFeasibility(int vehicleIndex, int startInde
 
     for (int i = startIndex; i < representation.size(); i++) {
         int callIndex = representation[i];
-        if (possibleCalls.find(callIndex) == possibleCalls.end()) {
-            // Vehicle incompatible with call
-            this->feasibilityCache = std::make_pair(true, false);
-            // This should throw an error, means something is wrong with implementation
-            assert(false);
-            return feasibilityInformation;
-        }
+        //if (possibleCalls.find(callIndex) == possibleCalls.end()) {
+        //    // Vehicle incompatible with call
+        //    this->feasibilityCache = std::make_pair(true, false);
+        //    // This should throw an error, means something is wrong with implementation
+        //    assert(false);
+        //    return feasibilityInformation;
+        //}
 
         if (this->callDetails[callIndex-1].indices.first >= startIndex and startedCalls.find(callIndex) == startedCalls.end()) {
             startedCalls.insert(callIndex);
             // Pickup call cargo
-            Call call = this->problem->calls[callIndex-1];
+            Call& call = this->problem->calls[callIndex-1];
                 
             // Travel to call origin node
             currentTime += vehicle.routeTimeCost[currentNode-1][call.originNode-1].time;
@@ -414,7 +414,7 @@ std::pair<int, bool> Solution::updateFeasibility(int vehicleIndex, int startInde
             
         } else {
             // Deliver call cargo
-            Call call = this->problem->calls[callIndex-1];
+            Call& call = this->problem->calls[callIndex-1];
 
             // Travel to call destination node
             currentTime += vehicle.routeTimeCost[currentNode-1][call.destinationNode-1].time;
@@ -439,7 +439,11 @@ std::pair<int, bool> Solution::updateFeasibility(int vehicleIndex, int startInde
     }
 
     // Verify that all picked up calls were delivered (Only validity check as it is efficient to compute)
-    assert(currentCapacity == vehicle.capacity);
+    if (currentCapacity != vehicle.capacity) {
+        std::cout << "Invalid solution!" << std::endl;
+        Debugger::printSolution(this);
+        assert(false);
+    }
 
     // The solution is feasible!
     this->feasibilityCache = std::make_pair(true, true);
@@ -458,7 +462,7 @@ int Solution::getCost() {
         // Reset cost before computing
         this->costs[vehicleIndex-1] = 0;
 
-        Vehicle vehicle = this->problem->vehicles[vehicleIndex-1];
+        Vehicle& vehicle = this->problem->vehicles[vehicleIndex-1];
 
         int currentNode = vehicle.homeNode;
         std::unordered_set<int> startedCalls;
@@ -466,7 +470,7 @@ int Solution::getCost() {
         for (int callIndex : this->representation[vehicleIndex-1]) {
             if (startedCalls.find(callIndex) == startedCalls.end()) {
                 // Pickup call cargo
-                Call call = this->problem->calls[callIndex-1];
+                Call& call = this->problem->calls[callIndex-1];
 
                 // Travel to call origin node
                 this->costs[vehicleIndex-1] += vehicle.routeTimeCost[currentNode-1][call.originNode-1].cost;
@@ -478,7 +482,7 @@ int Solution::getCost() {
                 startedCalls.insert(callIndex);
             } else {
                 // Deliver call cargo
-                Call call = this->problem->calls[callIndex-1];
+                Call& call = this->problem->calls[callIndex-1];
 
                 // Travel to call destination node
                 this->costs[vehicleIndex-1] += vehicle.routeTimeCost[currentNode-1][call.destinationNode-1].cost;
@@ -500,7 +504,7 @@ int Solution::getCost() {
         // Only count outsourced calls once (for effiency)
         if (outsourcedCalls.find(callIndex) == outsourcedCalls.end()) {
             // Outsource the call
-            Call call = this->problem->calls[callIndex-1];
+            Call& call = this->problem->calls[callIndex-1];
             this->costs[this->outsourceVehicle-1] += call.costOfNotTransporting;
 
             outsourcedCalls.insert(callIndex);
@@ -608,7 +612,7 @@ void Solution::updateCost(int callIndex, bool insertion) {
 std::pair<std::vector<int>, std::vector<int>> Solution::getDetails(int vehicleIndex, int timeConstraint) {
     std::vector<int> times, capacities;
 
-    Vehicle vehicle = this->problem->vehicles[vehicleIndex-1];
+    Vehicle& vehicle = this->problem->vehicles[vehicleIndex-1];
 
     std::unordered_set<int> startedCalls;
 
@@ -623,7 +627,7 @@ std::pair<std::vector<int>, std::vector<int>> Solution::getDetails(int vehicleIn
         if (startedCalls.find(callIndex) == startedCalls.end()) {
             startedCalls.insert(callIndex);
             // Pickup call cargo
-            Call call = this->problem->calls[callIndex-1];
+            Call& call = this->problem->calls[callIndex-1];
                 
             // Travel to call origin node
             currentTime += vehicle.routeTimeCost[currentNode-1][call.originNode-1].time;
@@ -641,7 +645,7 @@ std::pair<std::vector<int>, std::vector<int>> Solution::getDetails(int vehicleIn
             
         } else {
             // Deliver call cargo
-            Call call = this->problem->calls[callIndex-1];
+            Call& call = this->problem->calls[callIndex-1];
 
             // Travel to call destination node
             currentTime += vehicle.routeTimeCost[currentNode-1][call.destinationNode-1].time;

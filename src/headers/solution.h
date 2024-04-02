@@ -99,7 +99,7 @@ class Solution {
      * @param startCapacity Current capacity at greedy start of feasibility calculation
      * @return Pair (index of failure, true if due to capacity else false)
      */
-    std::pair<int, bool> updateFeasibility(int vehicleIndex, int startIndex = 0, int startTime = 0, int startCapacity = 0);
+    std::pair<int, bool> updateFeasibility(int vehicleIndex, int startIndex = 0, int startTime = -1, int startCapacity = -1);
 
     /**
      * @brief Calculates and returns the cost of the solution.
@@ -161,6 +161,11 @@ class Solution {
     
     std::pair<bool, bool> feasibilityCache;
     std::pair<bool, int> costCache;
+
+    // Change equality operatior
+    bool operator==(const Solution& other) const {
+        return this->representation == other.representation;
+    };
 
     private:
     // Only allow static instance creation, unless created from given vector (above)
