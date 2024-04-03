@@ -115,7 +115,7 @@ class AdaptiveOperator : public Operator {
     std::unordered_set<Solution, SolutionHash> seenSolutions;
 
     int bestCost = 0;
-    double r = 0.8;
+    double r = 0.2;
 
     /**
      * @brief Update each operator's weight based on previous performance.
