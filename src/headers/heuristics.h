@@ -55,6 +55,14 @@ void insertGreedy(std::set<int>& callIndices, Solution* solution);
 void insertRegret(std::set<int>& callIndices, Solution* solution, int k);
 
 /**
+ * @brief Insert all given calls into a random, feasible position.
+ * 
+ * @param callIndices Set of calls to insert
+ * @param solution Solution to insert into
+ */
+void insertRandom(std::set<int>& callIndices, Solution* solution, std::default_random_engine& rng);
+
+/**
  * @brief Calculate all different insertion positions for a given call.
  * 
  * @param callIndex Given call to find insertions for

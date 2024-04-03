@@ -95,6 +95,10 @@ void AdaptiveOperator::reset() {
     // Reset weights
     for (int i = 0; i < this->operators.size(); i++) {
         this->weights[i] = 1.0 / this->operators.size();
+
+        // Reset score/uses
+        this->scores[i] = 0;
+        this->uses[i] = 0;
     }
     // Reset seen solutions
     this->seenSolutions.clear();
@@ -227,9 +231,10 @@ double dynamicStd(Solution* solution) {
 }
 
 int uniformSample(Solution* solution, int iteration, std::default_random_engine& rng) {
-    return normalSample(dynamicMean(solution), dynamicStd(solution), solution, rng);
-    //int lowerbound = 1;
-    //return std::uniform_int_distribution<int>(1, solution->problem->noCalls / 4)(rng);
+    //return normalSample(dynamicMean(solution), dynamicStd(solution), solution, rng);
+    int lowerbound = 1;
+    int upperbound = std::max(1, 2 * solution->problem->noCalls / 5);
+    return std::uniform_int_distribution<int>(1, upperbound)(rng);
 }
 
 int normalSample(double mean, double std, Solution* solution, std::default_random_engine& rng) {

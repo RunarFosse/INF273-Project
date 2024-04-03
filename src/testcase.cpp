@@ -245,7 +245,7 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
     double initialObjective = bestSolutionOverall.getCost();
     double averageObjective = 0;
 
-    int iterfound = 0, foundBestIteration = 0, escapeCondition = 300;
+    int iterfound = 0, foundBestIteration = 0, escapeCondition = 250;
     
     // Declare probability of exploring during "warmup" period
     double explorationProbability = 0.8;
@@ -301,22 +301,40 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
         for (int j = warmupIterations; j < iterations; j++) {
             // If long since found new best, run escape algorithm
             if (j - foundBestIteration > escapeCondition) {
-                // Modify incumbent by outsourcing several similar calls
-                for (int k = 0; k < incumbent.problem->noCalls / 3; k += std::max(3, incumbent.problem->noCalls / 20)) {
-                    std::vector<int> removedCalls = removeSimilar(std::max(3, incumbent.problem->noCalls / 20), &incumbent, rng);
+                // First outsource a lot
+                for (int k = 0; k < 10; k++) {
+                    int callsToRemove = std::uniform_int_distribution<int>(std::max(1, incumbent.problem->noCalls / 20), std::max(1, incumbent.problem->noCalls / 15))(rng);
+                    std::vector<int> removedCalls = (random(rng) < 0.6) ? removeSimilar(callsToRemove, &incumbent, rng) : removeRandom(callsToRemove, &incumbent, rng);
+
                     for (int callIndex : removedCalls) {
                         incumbent.outsource(callIndex);
-                    } 
+                    }
                 }
-                std::vector<int> removedCalls = removeRandom(incumbent.problem->noCalls / 7, &incumbent, rng);
-                for (int callIndex : removedCalls) {
-                    incumbent.outsource(callIndex);
-                } 
 
-                // If it is best, store it
-                if (incumbent.getCost() < bestSolution.getCost()) {
-                    bestSolution = incumbent;
+                // Then perform random insertions
+                for (int k = 0; k < 5; k++) {
+                    int callsToRemove = std::uniform_int_distribution<int>(std::max(1, incumbent.problem->noCalls / 6), std::max(1, incumbent.problem->noCalls / 4))(rng);
+                    std::vector<int> removedCalls = (random(rng) < 0.4) ? removeSimilar(callsToRemove, &incumbent, rng) : removeRandom(callsToRemove, &incumbent, rng);
+
+                    std::set<int> callIndices(removedCalls.begin(), removedCalls.end());
+                    insertRandom(callIndices, &incumbent, rng);
+
+                    // If it is best, store it
+                    if (incumbent.getCost() < bestSolution.getCost()) {
+                        bestSolution = incumbent;
+                        iterfound = j;
+                    }
                 }
+
+                // Then perform using operator
+                for (int k = 0; k < 20; k++) {
+                    incumbent = neighbourOperator->apply(&incumbent, j, rng);
+                    if (incumbent.getCost() < bestSolution.getCost()) {
+                        bestSolution = incumbent;
+                        iterfound = j;
+                    }
+                }
+
                 foundBestIteration = j;
             }
 

@@ -186,6 +186,45 @@ void insertRegret(std::set<int>& callIndices, Solution* solution, int k) {
     }
 }
 
+void insertRandom(std::set<int>& callIndices, Solution* solution, std::default_random_engine& rng) {
+    // Initially calculate all feasible insertion positions for all the calls
+    std::map<int, std::vector<std::vector<std::pair<int, CallDetails>>>> feasibleInsertions;
+    for (int callIndex : callIndices) {
+        // Find all feasible insertions for callIndex sorted from best-to-worst
+        feasibleInsertions.insert(std::make_pair(callIndex, calculateFeasibleInsertions(callIndex, solution, false)));
+    }
+
+    // Move each call into its best possible position
+    while (!callIndices.empty()) {
+        // Select a random call
+        std::vector<int> out;
+        std::sample(callIndices.begin(), callIndices.end(), std::back_inserter(out), 1, rng);
+        int callIndex = out[0];
+
+        std::vector<std::vector<std::pair<int, CallDetails>>>& feasibleCallInsertions = feasibleInsertions.find(callIndex)->second;
+
+            // Add all to 1-dimensional vector to easily sample random insertions over different vehicles
+        std::vector<std::pair<int, CallDetails>> feasibleCallInsertionsUnwrapped;
+        for (auto && inner : feasibleCallInsertions) {
+            feasibleCallInsertionsUnwrapped.insert(feasibleCallInsertionsUnwrapped.end(), inner.begin(), inner.end());
+        }
+
+        // And select a random insertion
+        CallDetails insertion = feasibleCallInsertionsUnwrapped[std::uniform_int_distribution<int>(0, feasibleCallInsertionsUnwrapped.size()-1)(rng)].second;
+
+        // Move the call with the highest regret into its best position and remove it from the set
+        solution->add(insertion.vehicle, callIndex, insertion.indices);
+        callIndices.erase(callIndex);
+
+        // If the call was inserted into a vehicle (which is not outsource), update all other's feasible insertion for that vehicle
+        if (insertion.vehicle != solution->outsourceVehicle) {
+            for (int callIndex : callIndices) {
+                feasibleInsertions.find(callIndex)->second[insertion.vehicle-1] = greedyFeasibleInsertions(insertion.vehicle, callIndex, solution, false);
+            }
+        }
+    }
+}
+
 std::vector<std::vector<std::pair<int, CallDetails>>> calculateFeasibleInsertions(int callIndex, Solution* solution, bool sort) {
     // Get the call and its feasible vehicles
     Call& call = solution->problem->calls[callIndex-1];
