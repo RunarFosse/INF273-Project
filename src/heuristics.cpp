@@ -111,10 +111,18 @@ void insertGreedy(std::set<int>& callIndices, Solution* solution) {
             }
         }
 
+        // Store change in cost after insertion
+        //Debugger::printToTerminal("best = " + std::to_string(bestCost) + ", current = " + std::to_string(solution->getCost()) + "\n");
+        //Debugger::printSolution(solution);
+        int deltaCost = bestCost - solution->getCost();
+        //Debugger::printToTerminal("DeltaCost: " + std::to_string(deltaCost) + "\n");
 
         // Move the current best call into its best position and remove it from the set
         solution->add(bestInsertion.vehicle, bestCall, bestInsertion.indices);
         callIndices.erase(bestCall);
+        //Debugger::printToTerminal("Actual: " + std::to_string(solution->getCost()) + "\n");
+        //Debugger::printSolution(solution);
+        assert(deltaCost >= 0);
 
         // If the call was inserted into a vehicle (which is not outsource),
         // and there still exist calls to be inserted, update all other's feasible insertion for that vehicle
@@ -126,10 +134,23 @@ void insertGreedy(std::set<int>& callIndices, Solution* solution) {
                 feasibleInsertions.find(callIndex)->second[bestInsertion.vehicle-1] = greedyFeasibleInsertions(bestInsertion.vehicle, callIndex, solution, true);
             }
         }
+
+        // And update the cost of the other insertions to correctly include cost of the next call
+        for (int callIndex : callIndices) {
+            std::vector<std::vector<std::pair<int, CallDetails>>>& feasibleCallInsertions = feasibleInsertions.find(callIndex)->second;
+
+            for (int vehicleIndex = 1; vehicleIndex <= solution->outsourceVehicle; vehicleIndex++) {
+                if (vehicleIndex == bestInsertion.vehicle && vehicleIndex != solution->outsourceVehicle) {
+                    continue;
+                }
+                
+                for (std::pair<int, CallDetails>& insertion : feasibleCallInsertions[vehicleIndex-1]) {
+                    insertion.first += deltaCost;
+                }
+            }
+        }
     }
 }
-
-
 
 void insertRegret(std::set<int>& callIndices, Solution* solution, int k) {
    // Initially calculate all feasible insertion positions for all the calls
@@ -141,7 +162,7 @@ void insertRegret(std::set<int>& callIndices, Solution* solution, int k) {
 
     // Move each call into its best possible position
     while (!callIndices.empty()) {
-        int highestRegret = -1, bestCall;
+        long long highestRegret = -1, bestCall, bestCost = INT_MAX;
         CallDetails bestInsertion;
 
         for (int callIndex : callIndices) {
@@ -157,21 +178,23 @@ void insertRegret(std::set<int>& callIndices, Solution* solution, int k) {
             });
 
             // Then calculate the regret for the current call
-            int regret = 0;
-            for (int i = 0; i < k; i++) {
-                if (i+1 >= feasibleCallInsertionsUnwrapped.size()) {
-                    break;
-                }
-                regret += feasibleCallInsertionsUnwrapped[i+1].first - feasibleCallInsertionsUnwrapped[i].first;
-            }
-
+            long long regret = feasibleCallInsertionsUnwrapped[std::min(k, (int)feasibleCallInsertionsUnwrapped.size()-1)].first - feasibleCallInsertionsUnwrapped[0].first;
+            //Debugger::printToTerminal(std::to_string(feasibleCallInsertionsUnwrapped[std::min(k, (int)feasibleCallInsertionsUnwrapped.size()-1)].first) + " - " + std::to_string(feasibleCallInsertionsUnwrapped[0].first) + " = " + std::to_string(regret) + "\n");
             // Check if inserting the current call is better, if so, remember it
-            if (highestRegret < regret) {
+            if (regret > highestRegret || (regret == highestRegret && feasibleCallInsertionsUnwrapped[0].first < bestCost)) {
                 highestRegret = regret;
                 bestCall = callIndex;
+                bestCost = feasibleCallInsertionsUnwrapped[0].first;
                 bestInsertion = feasibleCallInsertionsUnwrapped[0].second;
             }
+            assert(regret >= 0);
         }
+
+
+        // Store change in cost after insertion
+        int deltaCost = bestCost - solution->getCost();
+
+        //Debugger::printToTerminal("DeltaCost: " + std::to_string(deltaCost) + "\n");
 
         // Move the call with the highest regret into its best position and remove it from the set
         solution->add(bestInsertion.vehicle, bestCall, bestInsertion.indices);
@@ -181,6 +204,20 @@ void insertRegret(std::set<int>& callIndices, Solution* solution, int k) {
         if (bestInsertion.vehicle != solution->outsourceVehicle) {
             for (int callIndex : callIndices) {
                 feasibleInsertions.find(callIndex)->second[bestInsertion.vehicle-1] = greedyFeasibleInsertions(bestInsertion.vehicle, callIndex, solution, true);
+            }
+        }
+
+        // And update the cost of the other insertions to correctly include cost of the next call
+        for (int callIndex : callIndices) {
+            std::vector<std::vector<std::pair<int, CallDetails>>>& feasibleCallInsertions = feasibleInsertions.find(callIndex)->second;
+            for (int vehicleIndex = 1; vehicleIndex <= solution->outsourceVehicle; vehicleIndex++) {
+                if (vehicleIndex == bestInsertion.vehicle && vehicleIndex != solution->outsourceVehicle) {
+                    continue;
+                }
+                
+                for (std::pair<int, CallDetails>& insertion : feasibleCallInsertions[vehicleIndex-1]) {
+                    insertion.first += deltaCost;
+                }
             }
         }
     }

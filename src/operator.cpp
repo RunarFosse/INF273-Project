@@ -77,6 +77,9 @@ Solution AdaptiveOperator::apply(Solution* solution, int iteration, std::default
 }
 
 void AdaptiveOperator::update() {
+    // Store sum for normalization later
+    double sum = 0;
+
     for (int i = 0; i < this->operators.size(); i++) {
         this->weights[i] *= (1.0 - r);
 
@@ -88,7 +91,17 @@ void AdaptiveOperator::update() {
         // Reset score/uses
         this->scores[i] = 0;
         this->uses[i] = 0;
+
+        sum += this->weights[i];
     }
+
+    // And normalize all the weights
+    //Debugger::printToTerminal("Weights: [");
+    for (int i = 0; i < this->operators.size(); i++) {
+        this->weights[i] /= sum;
+        //Debugger::printToTerminal(std::to_string(this->weights[i]) + ", ");
+    }
+    //Debugger::printToTerminal("]\n");
 }
 
 void AdaptiveOperator::reset() {
@@ -109,7 +122,7 @@ Solution SimilarGreedyInsert::apply(Solution* solution, int iteration, std::defa
     Solution current = solution->copy();
 
     // Pick out the number of calls to move
-    int callsToMove = uniformSample(solution, iteration, rng);
+    int callsToMove = boundedUniformSample(solution, iteration, rng);
 
     // Remove similar calls
     std::vector<int> removedCalls = removeSimilar(callsToMove, &current, rng);
@@ -127,13 +140,13 @@ Solution SimilarRegretInsert::apply(Solution* solution, int iteration, std::defa
     Solution current = solution->copy();
 
     // Pick out the number of calls to move
-    int callsToMove = uniformSample(solution, iteration, rng);
+    int callsToMove = boundedUniformSample(solution, iteration, rng);
 
     // Remove similar calls
     std::vector<int> removedCalls = removeSimilar(callsToMove, &current, rng);
 
     // Infer k from current iteration
-    int k = (int)std::ceil(std::pow(iteration, 1.0 / 2.0));
+    int k = std::uniform_int_distribution<int>(2, 5)(rng);
 
     // Insert them using greedy
     std::set<int> callIndices(removedCalls.begin(), removedCalls.end());
@@ -148,7 +161,7 @@ Solution CostlyGreedyInsert::apply(Solution* solution, int iteration, std::defau
     Solution current = solution->copy();
 
     // Pick out the number of calls to move
-    int callsToMove = uniformSample(solution, iteration, rng);
+    int callsToMove = boundedUniformSample(solution, iteration, rng);
 
     // Remove current most costly calls
     std::vector<int> removedCalls = removeCostly(callsToMove, &current, rng);
@@ -166,13 +179,13 @@ Solution CostlyRegretInsert::apply(Solution* solution, int iteration, std::defau
     Solution current = solution->copy();
 
     // Pick out the number of calls to move
-    int callsToMove = uniformSample(solution, iteration, rng);
+    int callsToMove = boundedUniformSample(solution, iteration, rng);
 
     // Remove current most costly calls
     std::vector<int> removedCalls = removeCostly(callsToMove, &current, rng);
 
     // Infer k from current iteration
-    int k = (int)std::ceil(std::pow(iteration, 1.0 / 2.0));
+    int k = std::uniform_int_distribution<int>(2, 5)(rng);
 
     // Insert them using greedy
     std::set<int> callIndices(removedCalls.begin(), removedCalls.end());
@@ -188,7 +201,7 @@ Solution RandomGreedyInsert::apply(Solution* solution, int iteration, std::defau
     Solution current = solution->copy();
 
     // Pick out the number of calls to move
-    int callsToMove = uniformSample(solution, iteration, rng);
+    int callsToMove = boundedUniformSample(solution, iteration, rng);
 
     // Remove random calls
     std::vector<int> removedCalls = removeRandom(callsToMove, &current, rng);
@@ -206,13 +219,13 @@ Solution RandomRegretInsert::apply(Solution* solution, int iteration, std::defau
     Solution current = solution->copy();
 
     // Pick out the number of calls to move
-    int callsToMove = uniformSample(solution, iteration, rng);
+    int callsToMove = boundedUniformSample(solution, iteration, rng);
 
     // Remove random calls
     std::vector<int> removedCalls = removeRandom(callsToMove, &current, rng);
 
     // Infer k from current iteration
-    int k = (int)std::ceil(std::pow(iteration, 1.0 / 2.0));
+    int k = std::uniform_int_distribution<int>(2, 5)(rng);
 
     // Insert them using greedy
     std::set<int> callIndices(removedCalls.begin(), removedCalls.end());
@@ -222,33 +235,8 @@ Solution RandomRegretInsert::apply(Solution* solution, int iteration, std::defau
     return current;
 }
 
-double dynamicMean(Solution* solution) {
-    return std::pow(solution->problem->noCalls, 1.0 / 3.5) + 0.5;
-}
-
-double dynamicStd(Solution* solution) {
-    return dynamicMean(solution) - 0.5;
-}
-
-int uniformSample(Solution* solution, int iteration, std::default_random_engine& rng) {
-    //return normalSample(dynamicMean(solution), dynamicStd(solution), solution, rng);
+int boundedUniformSample(Solution* solution, int iteration, std::default_random_engine& rng) {
     int lowerbound = 1;
-    int upperbound = std::max(1, 2 * solution->problem->noCalls / 5);
+    int upperbound = std::max(4, 2 * solution->problem->noCalls / 5);
     return std::uniform_int_distribution<int>(1, upperbound)(rng);
-}
-
-int normalSample(double mean, double std, Solution* solution, std::default_random_engine& rng) {
-    // Randomly sample an integer from the given normal distribution
-    int sample = std::ceil(std::normal_distribution<double>(mean, std)(rng));
-
-    // Clamp the sampled value to the solution's interval
-    int lowerbound = 1, upperbound = solution->problem->noCalls;
-    if (sample < lowerbound) {
-        return lowerbound;
-    }
-    if (sample > upperbound) {
-        return upperbound;
-    }
-
-    return sample;
 }

@@ -245,7 +245,7 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
     double initialObjective = bestSolutionOverall.getCost();
     double averageObjective = 0;
 
-    int iterfound = 0, foundBestIteration = 0, escapeCondition = 250;
+    int iterfound = 0, lastIncumbantChange = 0, escapeCondition = 250;
     
     // Declare probability of exploring during "warmup" period
     double explorationProbability = 0.8;
@@ -279,12 +279,14 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
                 incumbent = solution;
                 if (incumbent.getCost() < bestSolution.getCost()) {
                     bestSolution = incumbent;
-                    foundBestIteration = w;
                     iterfound = w;
                 }
+                lastIncumbantChange = w;
             } else {
                 if (random(rng) < explorationProbability) {
                     incumbent = solution;
+                    lastIncumbantChange = w;
+
                 }
                 deltaAverage += (deltaE - deltaAverage) / updates;
                 updates++;
@@ -299,20 +301,26 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
 
         // Run iterations per experiment
         for (int j = warmupIterations; j < iterations; j++) {
-            // If long since found new best, run escape algorithm
-            if (j - foundBestIteration > escapeCondition) {
-                // First outsource a lot
-                for (int k = 0; k < 10; k++) {
-                    int callsToRemove = std::uniform_int_distribution<int>(std::max(1, incumbent.problem->noCalls / 20), std::max(1, incumbent.problem->noCalls / 15))(rng);
-                    std::vector<int> removedCalls = (random(rng) < 0.6) ? removeSimilar(callsToRemove, &incumbent, rng) : removeRandom(callsToRemove, &incumbent, rng);
+            // If long since successful modification of incumbant, run escape algorithm
+            if (j - lastIncumbantChange > escapeCondition) {
+                // Copy incumbant to not make changes to best solution
+                incumbent = incumbent.copy();
+
+                // First outsource a lot of calls
+                int totalRemoved = 0, bound = std::uniform_int_distribution<int>(2 * incumbent.problem->noCalls / 5, 2 * incumbent.problem->noCalls / 3)(rng);
+                while (totalRemoved < bound) {
+                    int callsToRemove = std::max(3, boundedUniformSample(&incumbent, j, rng) / 2);
+                    std::vector<int> removedCalls = (random(rng) < 0.75) ? removeSimilar(callsToRemove, &incumbent, rng) : removeRandom(callsToRemove, &incumbent, rng);
 
                     for (int callIndex : removedCalls) {
                         incumbent.outsource(callIndex);
                     }
+
+                    totalRemoved += callsToRemove;
                 }
 
                 // Then perform random insertions
-                for (int k = 0; k < 5; k++) {
+                /*for (int k = 0; k < 10; k++) {
                     int callsToRemove = std::uniform_int_distribution<int>(std::max(1, incumbent.problem->noCalls / 6), std::max(1, incumbent.problem->noCalls / 4))(rng);
                     std::vector<int> removedCalls = (random(rng) < 0.4) ? removeSimilar(callsToRemove, &incumbent, rng) : removeRandom(callsToRemove, &incumbent, rng);
 
@@ -327,15 +335,14 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
                 }
 
                 // Then perform using operator
-                for (int k = 0; k < 20; k++) {
+                for (int k = 0; k < 25; k++) {
                     incumbent = neighbourOperator->apply(&incumbent, j, rng);
                     if (incumbent.getCost() < bestSolution.getCost()) {
                         bestSolution = incumbent;
                         iterfound = j;
                     }
-                }
-
-                foundBestIteration = j;
+                }*/
+                lastIncumbantChange = j;
             }
 
             // Generate a new neighbour solution
@@ -348,13 +355,14 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
             double deltaE = solution.getCost() - incumbent.getCost();
             if (deltaE < 0) {
                 incumbent = solution;
+                lastIncumbantChange = j;
                 if (incumbent.getCost() < bestSolution.getCost()) {
                     bestSolution = incumbent;
                     iterfound = j;
-                    foundBestIteration = j;
                 }
             } else if (random(rng) < exp(-deltaE / temperature)) {
                 incumbent = solution;
+                lastIncumbantChange = j;
             }
 
             // Lower the temperature
