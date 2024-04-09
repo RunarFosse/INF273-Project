@@ -58,6 +58,8 @@ Solution AdaptiveOperator::apply(Solution* solution, int iteration, std::default
     // Add a use to the current operator
     this->uses[operatorIndex]++;
 
+    int deltaCost = solution->getCost() - newSolution.getCost();
+
     // Update scoring based on how good the new solution is
     if (newSolution.getCost() < bestCost) {
         // New best solution
@@ -86,6 +88,11 @@ void AdaptiveOperator::update() {
         // Don't add to weight if operator wasn't used
         if (this->uses[i] > 0) {
             this->weights[i] += r * this->scores[i] / (double)this->uses[i];
+        }
+
+        // Also ensure weights never become zero
+        if (this->weights[i] < 0.01) {
+            this->weights[i] = 0.01;
         }
 
         // Reset score/uses

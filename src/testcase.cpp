@@ -310,38 +310,21 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
                 int totalRemoved = 0, bound = std::uniform_int_distribution<int>(2 * incumbent.problem->noCalls / 5, 2 * incumbent.problem->noCalls / 3)(rng);
                 while (totalRemoved < bound) {
                     int callsToRemove = std::max(3, boundedUniformSample(&incumbent, j, rng) / 2);
-                    std::vector<int> removedCalls = (random(rng) < 0.75) ? removeSimilar(callsToRemove, &incumbent, rng) : removeRandom(callsToRemove, &incumbent, rng);
+                    std::vector<int> removedCalls = (random(rng) < 0.25) ? removeSimilar(callsToRemove, &incumbent, rng) : removeRandom(callsToRemove, &incumbent, rng);
 
-                    for (int callIndex : removedCalls) {
-                        incumbent.outsource(callIndex);
+                    // But also have a small chance of reinserting them instead (in a random position)
+                    if (random(rng) < 0.8) {
+                        for (int callIndex : removedCalls) {
+                            incumbent.outsource(callIndex);
+                        }
+                    } else {
+                        std::set<int> callIndices(removedCalls.begin(), removedCalls.end());
+                        insertRandom(callIndices, &incumbent, rng);
                     }
 
                     totalRemoved += callsToRemove;
                 }
-
-                // Then perform random insertions
-                /*for (int k = 0; k < 10; k++) {
-                    int callsToRemove = std::uniform_int_distribution<int>(std::max(1, incumbent.problem->noCalls / 6), std::max(1, incumbent.problem->noCalls / 4))(rng);
-                    std::vector<int> removedCalls = (random(rng) < 0.4) ? removeSimilar(callsToRemove, &incumbent, rng) : removeRandom(callsToRemove, &incumbent, rng);
-
-                    std::set<int> callIndices(removedCalls.begin(), removedCalls.end());
-                    insertRandom(callIndices, &incumbent, rng);
-
-                    // If it is best, store it
-                    if (incumbent.getCost() < bestSolution.getCost()) {
-                        bestSolution = incumbent;
-                        iterfound = j;
-                    }
-                }
-
-                // Then perform using operator
-                for (int k = 0; k < 25; k++) {
-                    incumbent = neighbourOperator->apply(&incumbent, j, rng);
-                    if (incumbent.getCost() < bestSolution.getCost()) {
-                        bestSolution = incumbent;
-                        iterfound = j;
-                    }
-                }*/
+                
                 lastIncumbantChange = j;
             }
 
