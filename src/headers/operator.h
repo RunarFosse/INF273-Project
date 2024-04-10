@@ -92,6 +92,7 @@ class AdaptiveOperator : public Operator {
 
     // Public for debugging purposes
     std::vector<double> weights;
+    int lastOperatorUsed;
 
     private:
     std::vector<Operator*> operators;

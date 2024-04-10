@@ -51,6 +51,7 @@ Solution AdaptiveOperator::apply(Solution* solution, int iteration, std::default
 
     // Get a weighted random operator from those this contains
     int operatorIndex = std::discrete_distribution<std::size_t>(this->weights.begin(), this->weights.end())(rng);
+    this->lastOperatorUsed = operatorIndex;
 
     // Apply it
     Solution newSolution = this->operators[operatorIndex]->apply(solution, iteration, rng);

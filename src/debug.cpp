@@ -196,7 +196,7 @@ void Debugger::storeAlgorithmInformation(int iteration, double temperature, doub
     std::cout.rdbuf(infobuf.rdbuf());
 
     // Output "iteration temperature acceptanceProbability deltaValue"
-    std::cout << std::to_string(iteration) << " " << std::to_string(temperature) << " " << std::to_string(acceptanceProbability) << " " << std::to_string(deltaValue) << " ";
+    std::cout << std::to_string(iteration) << " " << std::to_string(temperature) << " " << std::to_string(acceptanceProbability) << " " << std::to_string(deltaValue) << " " << std::to_string(adaptiveOperator->lastOperatorUsed) << " ";
 
     // Output "weight_1,weight_2,weight_3,...,weight_n"
     for (double weight : adaptiveOperator->weights) {
