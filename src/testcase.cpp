@@ -238,6 +238,13 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
     Problem problem = Parser::parseProblem("data/" + instance + ".txt");
     std::string algorithm = title == "" ? "General Adaptive Metaheuristic" : title;
 
+    // Decide if we output extra information
+    bool outputAlgorithmInformation = true;
+
+    if (outputAlgorithmInformation) {
+        Debugger::storeStartOfAlgorithmInformation(instance);
+    }
+
     // Create a timer object
     Timer timer = Timer(algorithm + ": " + instance, experiments);
     
@@ -274,7 +281,7 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
                 continue;
             }
             
-            double deltaE = solution.getCost() - incumbent.getCost();
+            int deltaE = solution.getCost() - incumbent.getCost();
             if (deltaE < 0) {
                 incumbent = solution;
                 if (incumbent.getCost() < bestSolution.getCost()) {
@@ -290,6 +297,10 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
                 }
                 deltaAverage += (deltaE - deltaAverage) / updates;
                 updates++;
+            }
+
+            if (outputAlgorithmInformation) {
+                Debugger::storeAlgorithmInformation(w, 0, explorationProbability, deltaE, (AdaptiveOperator*) neighbourOperator);
             }
         }
 
@@ -335,7 +346,7 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
                 continue;
             }
 
-            double deltaE = solution.getCost() - incumbent.getCost();
+            int deltaE = solution.getCost() - incumbent.getCost();
             if (deltaE < 0) {
                 incumbent = solution;
                 lastIncumbantChange = j;
@@ -346,6 +357,10 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
             } else if (random(rng) < exp(-deltaE / temperature)) {
                 incumbent = solution;
                 lastIncumbantChange = j;
+            }
+
+            if (outputAlgorithmInformation) {
+                Debugger::storeAlgorithmInformation(j, temperature, exp(-deltaE / temperature), deltaE, (AdaptiveOperator*) neighbourOperator);
             }
 
             // Lower the temperature
@@ -366,6 +381,10 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
             std::cout << "Cost: " << std::to_string(bestSolution.getCost());
             bestSolution.invalidateCache();
             std::cout << " Actual: " << std::to_string(bestSolution.getCost()) << ", found after iteration " << std::to_string(iterfound) << std::endl;
+        }
+
+        if (outputAlgorithmInformation) {
+            Debugger::storeEndOfAlgorithmInformation(iterfound);
         }
     }
 

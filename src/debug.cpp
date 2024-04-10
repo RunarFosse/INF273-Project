@@ -4,6 +4,7 @@
 bool Debugger::outputChanged = false;
 std::streambuf *Debugger::coutbuf = std::cout.rdbuf();
 std::ofstream Debugger::filebuf;
+std::ofstream Debugger::infobuf;
 
 void Debugger::outputToFile(std::string path) {
     outputChanged = true;
@@ -180,4 +181,41 @@ std::string Debugger::formatDouble(double number, int decimals) {
     }
 
     return string;
+}
+
+void Debugger::storeStartOfAlgorithmInformation(std::string instance) {
+    // Create information output to for instance
+    infobuf = std::ofstream("info/" + instance + ".txt");
+
+    // Reset to filebuf
+    std::cout.rdbuf(filebuf.rdbuf());
+}
+
+void Debugger::storeAlgorithmInformation(int iteration, double temperature, double acceptanceProbability, int deltaValue, AdaptiveOperator* adaptiveOperator) {
+    // Redirect output to infobuf
+    std::cout.rdbuf(infobuf.rdbuf());
+
+    // Output "iteration temperature acceptanceProbability deltaValue"
+    std::cout << std::to_string(iteration) << " " << std::to_string(temperature) << " " << std::to_string(acceptanceProbability) << " " << std::to_string(deltaValue) << " ";
+
+    // Output "weight_1,weight_2,weight_3,...,weight_n"
+    for (double weight : adaptiveOperator->weights) {
+        std::cout << std::to_string(weight) << ",";
+    }
+
+    std::cout << std::endl;
+
+    // Reset standard output to filebuf
+    std::cout.rdbuf(filebuf.rdbuf());
+}
+
+void Debugger::storeEndOfAlgorithmInformation(int bestSolutionIteration) {
+    // Redirect output to infobuf
+    std::cout.rdbuf(infobuf.rdbuf());
+
+    std::cout << "Best_iteration: " << std::to_string(bestSolutionIteration) << std::endl;
+    std::cout << "END_OF_EPISODE" << std::endl;
+
+    // Reset standard output to filebuf
+    std::cout.rdbuf(filebuf.rdbuf());
 }

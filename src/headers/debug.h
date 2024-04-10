@@ -6,6 +6,7 @@
 
 #include "problem.h"
 #include "solution.h"
+#include "operator.h"
 
 class Debugger {
     public:
@@ -69,6 +70,30 @@ class Debugger {
      */
     static void displayCursor(bool show);
 
+    /**
+     * @brief Start storing episodic information algorithm information.
+     * 
+     * @param instance Current instance algorithm is running
+     */
+    static void storeStartOfAlgorithmInformation(std::string instance);
+
+    /**
+     * @brief Store algorithm information about the current iteration.
+     * 
+     * @param temperature Current temperature
+     * @param acceptanceProbability Current probability for acceptance
+     * @param deltaValue Current iterations delta value
+     * @param adaptiveOperator Operator to extract weight values from
+     */
+    static void storeAlgorithmInformation(int iteration, double temperature, double acceptanceProbability, int deltaValue, AdaptiveOperator* adaptiveOperator);
+
+    /**
+     * @brief End a current episode of an algorithm.
+     * 
+     * @param bestSolutionIteration Iteration where best solution was obtained
+     */
+    static void storeEndOfAlgorithmInformation(int bestSolutionIteration);
+
     private:
     // This is a static class, prevent class creation
     Debugger();
@@ -85,5 +110,5 @@ class Debugger {
     // Different outbuffers (terminal and file)
     static bool outputChanged;
     static std::streambuf *coutbuf;
-    static std::ofstream filebuf;
+    static std::ofstream filebuf, infobuf;
 };

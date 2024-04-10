@@ -20,3 +20,6 @@ _deps
 # Ignore .vscode and .DS_Store
 .vscode
 .DS_Store
+
+# Ignore information output
+/info*

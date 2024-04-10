@@ -90,9 +90,11 @@ class AdaptiveOperator : public Operator {
      */
     Solution apply(Solution* solution, int iteration, std::default_random_engine& rng);
 
+    // Public for debugging purposes
+    std::vector<double> weights;
+
     private:
     std::vector<Operator*> operators;
-    std::vector<double> weights;
     std::vector<int> scores;
     std::vector<int> uses;
 
