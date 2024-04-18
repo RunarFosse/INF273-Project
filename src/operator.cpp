@@ -154,7 +154,7 @@ Solution SimilarRegretInsert::apply(Solution* solution, int iteration, std::defa
     std::vector<int> removedCalls = removeSimilar(callsToMove, &current, rng);
 
     // Infer k from current iteration
-    int k = std::uniform_int_distribution<int>(2, 5)(rng);
+    int k = std::uniform_int_distribution<int>(2, 4)(rng);
 
     // Insert them using greedy
     std::set<int> callIndices(removedCalls.begin(), removedCalls.end());
@@ -193,7 +193,7 @@ Solution CostlyRegretInsert::apply(Solution* solution, int iteration, std::defau
     std::vector<int> removedCalls = removeCostly(callsToMove, &current, rng);
 
     // Infer k from current iteration
-    int k = std::uniform_int_distribution<int>(2, 5)(rng);
+    int k = std::uniform_int_distribution<int>(2, 4)(rng);
 
     // Insert them using greedy
     std::set<int> callIndices(removedCalls.begin(), removedCalls.end());
@@ -233,7 +233,7 @@ Solution RandomRegretInsert::apply(Solution* solution, int iteration, std::defau
     std::vector<int> removedCalls = removeRandom(callsToMove, &current, rng);
 
     // Infer k from current iteration
-    int k = std::uniform_int_distribution<int>(2, 5)(rng);
+    int k = std::uniform_int_distribution<int>(2, 4)(rng);
 
     // Insert them using greedy
     std::set<int> callIndices(removedCalls.begin(), removedCalls.end());
@@ -244,7 +244,7 @@ Solution RandomRegretInsert::apply(Solution* solution, int iteration, std::defau
 }
 
 int boundedUniformSample(Solution* solution, int iteration, std::default_random_engine& rng) {
-    int lowerbound = 1;
-    int upperbound = std::max(4, 2 * solution->problem->noCalls / 5);
+    int lowerbound = std::uniform_int_distribution<int>(1, std::max(1, solution->problem->noCalls / 3))(rng);
+    int upperbound = std::max(lowerbound, solution->problem->noCalls / 2);
     return std::uniform_int_distribution<int>(1, upperbound)(rng);
 }

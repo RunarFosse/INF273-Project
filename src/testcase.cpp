@@ -239,7 +239,8 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
     std::string algorithm = title == "" ? "General Adaptive Metaheuristic" : title;
 
     // Decide if we output extra information
-    bool outputAlgorithmInformation = true;
+    bool outputAlgorithmInformation = false;
+    bool printEscapes = true;
 
     if (outputAlgorithmInformation) {
         Debugger::storeStartOfAlgorithmInformation(instance);
@@ -252,7 +253,7 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
     double initialObjective = bestSolutionOverall.getCost();
     double averageObjective = 0;
 
-    int iterfound = 0, lastIncumbantChange = 0, escapeCondition = 250;
+    int iterfound = 0, escapeCondition = 1000;
     
     // Declare probability of exploring during "warmup" period
     double explorationProbability = 0.8;
@@ -274,6 +275,8 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
         double temperature_f = 0.1, deltaAverage = 0.0;
         int updates = 1;
 
+        int lastIncumbantChange = 0;
+
         for (int w = 0; w < warmupIterations; w++) {
             Solution solution = neighbourOperator->apply(&incumbent, w, rng);
 
@@ -293,7 +296,6 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
                 if (random(rng) < explorationProbability) {
                     incumbent = solution;
                     lastIncumbantChange = w;
-
                 }
                 deltaAverage += (deltaE - deltaAverage) / updates;
                 updates++;
@@ -313,27 +315,36 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
         // Run iterations per experiment
         for (int j = warmupIterations; j < iterations; j++) {
             // If long since successful modification of incumbant, run escape algorithm
-            if (j - lastIncumbantChange > escapeCondition) {
+            if (j - lastIncumbantChange >= escapeCondition) {
+                if (printEscapes)
+                    Debugger::printToTerminal("Applying escape at iteration: " + std::to_string(j) + "\n");
                 // Copy incumbant to not make changes to best solution
                 incumbent = incumbent.copy();
 
-                // First outsource a lot of calls
-                int totalRemoved = 0, bound = std::uniform_int_distribution<int>(2 * incumbent.problem->noCalls / 5, 2 * incumbent.problem->noCalls / 3)(rng);
-                while (totalRemoved < bound) {
-                    int callsToRemove = std::max(3, boundedUniformSample(&incumbent, j, rng) / 2);
-                    std::vector<int> removedCalls = (random(rng) < 0.25) ? removeSimilar(callsToRemove, &incumbent, rng) : removeRandom(callsToRemove, &incumbent, rng);
+                // Then perform many small steps with most diversifying operator
+                for (int k = 0; k < 50; k++) {
+                    int lowerbound = std::max(1, incumbent.problem->noCalls / 25);
+                    int upperbound = std::max(3, incumbent.problem->noCalls / 5);
+                    int callsToRemove = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
 
-                    // But also have a small chance of reinserting them instead (in a random position)
-                    if (random(rng) < 0.8) {
-                        for (int callIndex : removedCalls) {
-                            incumbent.outsource(callIndex);
-                        }
-                    } else {
-                        std::set<int> callIndices(removedCalls.begin(), removedCalls.end());
+                    // Random removal
+                    std::vector<int> removedCalls = removeRandom(callsToRemove, &incumbent, rng);
+
+                    // Greedy insertion
+                    std::set<int> callIndices(removedCalls.begin(), removedCalls.end());
+                    // Tiny chance to insert random
+                    if (random(rng) < 0.03) {
                         insertRandom(callIndices, &incumbent, rng);
+                    } else {
+                        insertGreedy(callIndices, &incumbent);
                     }
 
-                    totalRemoved += callsToRemove;
+                    if (incumbent.getCost() < bestSolution.getCost()) {
+                        bestSolution = incumbent.copy();
+                        iterfound = j;
+                        if (printEscapes)
+                            Debugger::printToTerminal("Found new optimal during escape! Cost: " + std::to_string(incumbent.getCost()) + "\n");
+                    }
                 }
                 
                 lastIncumbantChange = j;
@@ -349,14 +360,15 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
             int deltaE = solution.getCost() - incumbent.getCost();
             if (deltaE < 0) {
                 incumbent = solution;
-                lastIncumbantChange = j;
                 if (incumbent.getCost() < bestSolution.getCost()) {
                     bestSolution = incumbent;
                     iterfound = j;
+                    lastIncumbantChange = j;
+                    if (printEscapes)
+                        Debugger::printToTerminal("Found new optimal at iteration: " + std::to_string(j) +". Cost: " + std::to_string(incumbent.getCost()) + "\n");
                 }
             } else if (random(rng) < exp(-deltaE / temperature)) {
                 incumbent = solution;
-                lastIncumbantChange = j;
             }
 
             if (outputAlgorithmInformation) {

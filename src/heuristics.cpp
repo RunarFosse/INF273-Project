@@ -36,7 +36,9 @@ std::vector<int> removeCostly(int callsToRemove, Solution* solution, std::defaul
 
         int cost = solution->costs[vehicleCall-1] - current.costs[vehicleCall-1];
         costlyCalls.push_back(std::make_pair(cost, callIndex));
+        current.updateCost(callIndex, true);
     }
+
 
     // And sort them from most-costly to least-costly
     std::sort(costlyCalls.begin(), costlyCalls.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
