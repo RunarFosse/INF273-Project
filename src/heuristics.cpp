@@ -27,28 +27,35 @@ std::vector<int> removeCostly(int callsToRemove, Solution* solution, std::defaul
     // Create a copy of the current solution
     Solution current = solution->copy();
 
-    // First calculate the cost of each call
-    std::vector<std::pair<int, int>> costlyCalls;
-    costlyCalls.reserve(solution->problem->noCalls);
-    for (int callIndex = 1; callIndex <= solution->problem->noCalls; callIndex++) {
-        int vehicleCall = solution->callDetails[callIndex-1].vehicle;
-        current.updateCost(callIndex, false);
-
-        int cost = solution->costs[vehicleCall-1] - current.costs[vehicleCall-1];
-        costlyCalls.push_back(std::make_pair(cost, callIndex));
-        current.updateCost(callIndex, true);
-    }
-
-
-    // And sort them from most-costly to least-costly
-    std::sort(costlyCalls.begin(), costlyCalls.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
-        return a.first > b.first;
-    });
-
-    // Then sample the most costly, remove them and return
+    // Store every removed costly call
     std::vector<int> callIndices;
     callIndices.reserve(callsToRemove);
+
+    // Iteratively sample every call
     for (int i = 0; i < callsToRemove; i++) {
+        // First calculate the cost of each call
+        std::vector<std::pair<int, int>> costlyCalls;
+        costlyCalls.reserve(solution->problem->noCalls);
+        for (int callIndex = 1; callIndex <= solution->problem->noCalls; callIndex++) {
+            // Skip removed calls
+            if (solution->callDetails[callIndex-1].removed) {
+                continue;
+            }
+
+            int vehicleCall = solution->callDetails[callIndex-1].vehicle;
+            current.updateCost(callIndex, false);
+
+            int cost = solution->costs[vehicleCall-1] - current.costs[vehicleCall-1];
+            costlyCalls.push_back(std::make_pair(cost, callIndex));
+            current.updateCost(callIndex, true);
+        }
+
+        // And sort them from most-costly to least-costly
+        std::sort(costlyCalls.begin(), costlyCalls.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+            return a.first > b.first;
+        });
+
+        // Then sample the current most costly and remove it
         int callIndex = costlyCalls[i].second;
         solution->remove(callIndex);
         callIndices.push_back(callIndex);
