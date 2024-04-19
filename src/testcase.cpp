@@ -409,3 +409,131 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
     // Print the results to standard output
     Debugger::printResults(instance, algorithm, averageObjective, bestSolutionOverall.getCost(), improvement, averageTime, &bestSolutionOverall);
 }
+
+void InstanceRunner::finalAdaptiveMetaheuristic(Operator* neighbourOperator, std::string instance, int experiments, double time, std::default_random_engine& rng, std::string title) {
+    // Parse the given test instance
+    Problem problem = Parser::parseProblem("data/" + instance + ".txt");
+    std::string algorithm = title == "" ? "Final Adaptive Metaheuristic" : title;
+
+    // Debug print escape information
+    bool printEscapes = true;
+
+    // Create a timer object
+    Timer timer = Timer(algorithm + ": " + instance, experiments);
+
+    // Compute a timebased deadline in seconds
+    double deadline = time * 60;
+    
+    Solution bestSolutionOverall = Solution::initialSolution(&problem);
+    double initialObjective = bestSolutionOverall.getCost();
+    double averageObjective = 0;
+
+    double timefound = 0.0;
+    int iterfound = 0, escapeCondition = 1000;
+
+    // Declare uniform [0, 1) distribution
+    std::uniform_real_distribution<double> random(0, 1);
+
+    // Run the experiments
+    for (int i = 0; i < experiments; i++) {
+        // Start timer
+        timer.start();
+
+        // Initialize the initial solution as the "current best"
+        Solution bestSolution = Solution::initialSolution(&problem);
+        Solution incumbent = Solution::initialSolution(&problem);
+
+        // Store last time new best is found
+        int lastBestFound = 0;
+
+        // Run iterations per experiment
+        int totalIterations = 0;
+        for (int j = 0; timer.check() < deadline; j++) {
+            totalIterations = j;
+
+            // If long since successful modification of incumbant, run escape algorithm
+            if (j - lastBestFound >= escapeCondition) {
+                if (printEscapes)
+                    Debugger::printToTerminal("Applying escape at iteration: " + std::to_string(j) + "\n");
+
+                // Copy incumbant to not make changes to best solution
+                incumbent = incumbent.copy();
+
+                // Then perform many small steps with most diversifying operator
+                for (int k = 0; k < 15; k++) {
+                    int lowerbound = std::max(1, incumbent.problem->noCalls / 50);
+                    int upperbound = std::max(2, incumbent.problem->noCalls / 20);
+                    int callsToRemove = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
+
+                    // Random removal
+                    std::vector<int> removedCalls = removeRandom(callsToRemove, &incumbent, rng);
+
+                    // Greedy insertion
+                    std::set<int> callIndices(removedCalls.begin(), removedCalls.end());
+                    // Tiny chance to insert random
+                    if (random(rng) < 0.03) {
+                        insertRandom(callIndices, &incumbent, rng);
+                    } else {
+                        insertGreedy(callIndices, &incumbent);
+                    }
+
+                    if (incumbent.getCost() < bestSolution.getCost()) {
+                        bestSolution = incumbent.copy();
+                        iterfound = j;
+                        timefound = timer.check();
+                        if (printEscapes)
+                            Debugger::printToTerminal("Found new optimal during escape! Cost: " + std::to_string(incumbent.getCost()) + "\n");
+                    }
+                }
+                
+                lastBestFound = j;
+            }
+
+            // Generate a new neighbour solution
+            Solution solution = neighbourOperator->apply(&incumbent, j, rng);
+
+            if (!solution.isFeasible()) {
+                continue;
+            }
+
+            int d = 0.2 * (deadline - timer.check()) / deadline * bestSolution.getCost();
+            if (solution.getCost() < bestSolution.getCost() + d) {
+                incumbent = solution;
+                if (incumbent.getCost() < bestSolution.getCost()) {
+                    bestSolution = incumbent;
+                    iterfound = j;
+                    timefound = timer.check();
+                    lastBestFound = j;
+                    if (printEscapes)
+                        Debugger::printToTerminal("Found new optimal at iteration: " + std::to_string(j) +". Cost: " + std::to_string(incumbent.getCost()) + "\n");
+                }
+            }
+        }
+
+        // Capture current time
+        timer.capture();
+
+        // At the end of the experiment, count the current best cost towards the average cost
+        averageObjective += (double)bestSolution.getCost() / experiments;
+        // and check if it is better than the current best overall solution
+        if (bestSolution.getCost() < bestSolutionOverall.getCost()) {
+            bestSolutionOverall = bestSolution;
+        }
+        if (true) {
+            Debugger::printSolution(&bestSolution);
+            std::cout << "Cost: " << std::to_string(bestSolution.getCost());
+            bestSolution.invalidateCache();
+            std::cout << " Actual: " << std::to_string(bestSolution.getCost()) << ", found after iteration " << std::to_string(iterfound) << " (" << Debugger::formatDouble(timefound, 2) << " seconds)" << std::endl;
+            std::cout << "Experiment ran for " << std::to_string(totalIterations) << " iterations." << std::endl;
+        }
+    }
+
+    // Calculate the improvement from the initial solution
+    double improvement = 100 * (initialObjective - bestSolutionOverall.getCost()) / initialObjective;
+
+    // Retrieve runtime from timer
+    double averageTime = timer.retrieve();
+
+    // Print the results to standard output
+    Debugger::printResults(instance, algorithm, averageObjective, bestSolutionOverall.getCost(), improvement, averageTime, &bestSolutionOverall);
+}

@@ -83,11 +83,11 @@ class InstanceRunner {
      * @param neighbourOperator Neighbourhood operator
      * @param instance Name of the test case instance to run
      * @param experiments Number of experiments to run
-     * @param iterations Number of iterations per experiment
+     * @param time Alloted time to run each experiment (in minutes)
      * @param rng Random number generator (for randomness)
      * @param title Output title in loading bar and result txt
      */
-    static void finalAdaptiveMetaheuristic(Operator* neighbourOperator, std::string instance, int experiments, int iterations, std::default_random_engine& rng, std::string title);
+    static void finalAdaptiveMetaheuristic(Operator* neighbourOperator, std::string instance, int experiments, double time, std::default_random_engine& rng, std::string title);
 
     private:
     // This is a static class, prevent class creation
