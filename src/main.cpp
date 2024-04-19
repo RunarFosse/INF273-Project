@@ -19,25 +19,17 @@ int main(int argc, char const *argv[])
         new RandomRegretInsert(),
     });
 
+    // Total number of experiments to run each algorithm for
+    int experiments = 5;
+
     // Run each test case given
-    Debugger::outputToFile("results.txt");
-    InstanceRunner::testAlgorithm(InstanceRunner::generalAdaptiveMetaheuristic, adaptiveOperator, 10, 10000, rng, "Adaptive Algorithm");
-
-    // Verify correct implementation of operator
-    //Problem problem = Parser::parseProblem("data/Call_7_Vehicle_3.txt");
-    //Solution initial = Solution::initialSolution(&problem);
-    //Solution solution = uniformOperator->apply(&initial, rng);
-    //Debugger::printSolution(&initial);
-    //Debugger::printToTerminal("Cost: " + std::to_string(initial.getCost()) + "\n");
-
-
-    //removeSimilar(2, &initial, rng);
-    //Debugger::printSolution(&initial);
-    //Debugger::printToTerminal("Cost: " + std::to_string(initial.getCost()) + "\n");
-
-    //for (auto [callIndex, relatedness] : problem.calls[5-1].similarities) {
-    //    Debugger::printToTerminal("(" + std::to_string(callIndex) + ", " + std::to_string(relatedness) + ")\n");
-    //}
+    Debugger::outputToFile("results_final.txt");
+    InstanceRunner::finalAdaptiveMetaheuristic(adaptiveOperator, "Call_7_Vehicle_3", experiments, 0.01, rng, "");
+    InstanceRunner::finalAdaptiveMetaheuristic(adaptiveOperator, "Call_18_Vehicle_5", experiments, 0.04, rng, "");
+    InstanceRunner::finalAdaptiveMetaheuristic(adaptiveOperator, "Call_35_Vehicle_7", experiments, 1.75, rng, "");
+    InstanceRunner::finalAdaptiveMetaheuristic(adaptiveOperator, "Call_80_Vehicle_20", experiments, 4.2, rng, "");
+    InstanceRunner::finalAdaptiveMetaheuristic(adaptiveOperator, "Call_130_Vehicle_40", experiments, 9.0, rng, "");
+    InstanceRunner::finalAdaptiveMetaheuristic(adaptiveOperator, "Call_300_Vehicle_90", experiments, 20.0, rng, "");
 
     return 0;
 }
