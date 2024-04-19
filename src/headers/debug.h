@@ -94,10 +94,6 @@ class Debugger {
      */
     static void storeEndOfAlgorithmInformation(int bestSolutionIteration);
 
-    private:
-    // This is a static class, prevent class creation
-    Debugger();
-
     /**
      * @brief Formats a double for printing.
      * 
@@ -106,6 +102,10 @@ class Debugger {
      * @return Formatted string
      */
     static std::string formatDouble(double number, int decimals);
+
+    private:
+    // This is a static class, prevent class creation
+    Debugger();
 
     // Different outbuffers (terminal and file)
     static bool outputChanged;
