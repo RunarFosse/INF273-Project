@@ -35,6 +35,12 @@ class Timer {
      */
     double retrieve();
 
+    /**
+     * @brief Check the current time since timer was last started.
+     * 
+     * @return Time in seconds
+     */
+    double check();
 
     private:
     double average = 0;

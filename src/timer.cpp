@@ -19,3 +19,8 @@ double Timer::retrieve() {
     Debugger::printProgress(this->title, this->iterations, experiments);
     return this->average;
 }
+
+ double Timer::check() {
+    std::chrono::steady_clock::time_point now = std::chrono::high_resolution_clock::now();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(now - this->started).count() / (1000.0);
+ }
