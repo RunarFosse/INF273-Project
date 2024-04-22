@@ -164,6 +164,27 @@ Solution SimilarRegretInsert::apply(Solution* solution, int iteration, std::defa
     return current;
 }
 
+Solution SimilarBeamInsert::apply(Solution* solution, int iteration, std::default_random_engine& rng) {
+    // Create a copy of the current solution
+    Solution current = solution->copy();
+
+    // Pick out the number of calls to move
+    int callsToMove = boundedUniformSample(solution, iteration, rng);
+
+    // Remove similar calls
+    std::vector<int> removedCalls = removeSimilar(callsToMove, &current, rng);
+
+    // Sample a random beam width size
+    int width = std::uniform_int_distribution<int>(2, 4)(rng);
+
+    // Insert them using greedy
+    std::set<int> callIndices(removedCalls.begin(), removedCalls.end());
+    insertBeam(callIndices, &current, width);
+
+    // Return the neighbour solution
+    return current;
+}
+
 Solution CostlyGreedyInsert::apply(Solution* solution, int iteration, std::default_random_engine& rng) {
     // Create a copy of the current solution
     Solution current = solution->copy();
@@ -203,6 +224,26 @@ Solution CostlyRegretInsert::apply(Solution* solution, int iteration, std::defau
     return current;
 }
 
+Solution CostlyBeamInsert::apply(Solution* solution, int iteration, std::default_random_engine& rng) {
+    // Create a copy of the current solution
+    Solution current = solution->copy();
+
+    // Pick out the number of calls to move
+    int callsToMove = boundedUniformSample(solution, iteration, rng);
+
+    // Remove current most costly calls
+    std::vector<int> removedCalls = removeCostly(callsToMove, &current, rng);
+
+    // Sample a random beam width size
+    int width = std::uniform_int_distribution<int>(2, 4)(rng);
+
+    // Insert them using greedy
+    std::set<int> callIndices(removedCalls.begin(), removedCalls.end());
+    insertBeam(callIndices, &current, width);
+
+    // Return the neighbour solution
+    return current;
+}
 
 Solution RandomGreedyInsert::apply(Solution* solution, int iteration, std::default_random_engine& rng) {
     // Create a copy of the current solution
@@ -243,8 +284,29 @@ Solution RandomRegretInsert::apply(Solution* solution, int iteration, std::defau
     return current;
 }
 
+Solution RandomBeamInsert::apply(Solution* solution, int iteration, std::default_random_engine& rng) {
+    // Create a copy of the current solution
+    Solution current = solution->copy();
+
+    // Pick out the number of calls to move
+    int callsToMove = boundedUniformSample(solution, iteration, rng);
+
+    // Remove random calls
+    std::vector<int> removedCalls = removeRandom(callsToMove, &current, rng);
+
+    // Sample a random beam width size
+    int width = std::uniform_int_distribution<int>(2, 4)(rng);
+
+    // Insert them using greedy
+    std::set<int> callIndices(removedCalls.begin(), removedCalls.end());
+    insertBeam(callIndices, &current, width);
+
+    // Return the neighbour solution
+    return current;
+}
+
 int boundedUniformSample(Solution* solution, int iteration, std::default_random_engine& rng) {
-    int lowerbound = std::uniform_int_distribution<int>(1, std::max(1, solution->problem->noCalls / 3))(rng);
+    int lowerbound = std::uniform_int_distribution<int>(1, std::max(1, solution->problem->noCalls / 10))(rng);
     int upperbound = std::max(lowerbound, solution->problem->noCalls / 2);
-    return std::uniform_int_distribution<int>(1, upperbound)(rng);
+    return std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
 }

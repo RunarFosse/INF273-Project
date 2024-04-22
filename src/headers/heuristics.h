@@ -55,6 +55,18 @@ void insertGreedy(std::set<int>& callIndices, Solution* solution);
 void insertRegret(std::set<int>& callIndices, Solution* solution, int k);
 
 /**
+ * @brief Insert all given calls into their best possible positions.
+ * Calls are inserted in a greedy order, but using beamsearch to widen the search space.
+ * 
+ * @note Beam width of 1 equals greedy insertion
+ * 
+ * @param callIndices Set of calls to insert
+ * @param solution Solution to insert into
+ * @param width Beam width (amount of solutions kept between each insertion iteration)
+ */
+void insertBeam(std::set<int>& callIndices, Solution* solution, int width);
+
+/**
  * @brief Insert all given calls into a random, feasible position.
  * 
  * @param callIndices Set of calls to insert

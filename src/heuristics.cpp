@@ -1,5 +1,4 @@
 #include "heuristics.h"
-
 #include "debug.h"
 
 std::vector<int> removeSimilar(int callsToRemove, Solution* solution, std::default_random_engine& rng) {
@@ -121,16 +120,12 @@ void insertGreedy(std::set<int>& callIndices, Solution* solution) {
         }
 
         // Store change in cost after insertion
-        //Debugger::printToTerminal("best = " + std::to_string(bestCost) + ", current = " + std::to_string(solution->getCost()) + "\n");
-        //Debugger::printSolution(solution);
         int deltaCost = bestCost - solution->getCost();
-        //Debugger::printToTerminal("DeltaCost: " + std::to_string(deltaCost) + "\n");
 
         // Move the current best call into its best position and remove it from the set
         solution->add(bestInsertion.vehicle, bestCall, bestInsertion.indices);
         callIndices.erase(bestCall);
-        //Debugger::printToTerminal("Actual: " + std::to_string(solution->getCost()) + "\n");
-        //Debugger::printSolution(solution);
+
         assert(deltaCost >= 0);
 
         // If the call was inserted into a vehicle (which is not outsource),
@@ -188,7 +183,6 @@ void insertRegret(std::set<int>& callIndices, Solution* solution, int k) {
 
             // Then calculate the regret for the current call
             long long regret = feasibleCallInsertionsUnwrapped[std::min(k, (int)feasibleCallInsertionsUnwrapped.size()-1)].first - feasibleCallInsertionsUnwrapped[0].first;
-            //Debugger::printToTerminal(std::to_string(feasibleCallInsertionsUnwrapped[std::min(k, (int)feasibleCallInsertionsUnwrapped.size()-1)].first) + " - " + std::to_string(feasibleCallInsertionsUnwrapped[0].first) + " = " + std::to_string(regret) + "\n");
             // Check if inserting the current call is better, if so, remember it
             if (regret > highestRegret || (regret == highestRegret && feasibleCallInsertionsUnwrapped[0].first < bestCost)) {
                 highestRegret = regret;
@@ -202,8 +196,6 @@ void insertRegret(std::set<int>& callIndices, Solution* solution, int k) {
 
         // Store change in cost after insertion
         int deltaCost = bestCost - solution->getCost();
-
-        //Debugger::printToTerminal("DeltaCost: " + std::to_string(deltaCost) + "\n");
 
         // Move the call with the highest regret into its best position and remove it from the set
         solution->add(bestInsertion.vehicle, bestCall, bestInsertion.indices);
@@ -229,6 +221,84 @@ void insertRegret(std::set<int>& callIndices, Solution* solution, int k) {
                 }
             }
         }
+    }
+}
+
+void insertBeam(std::set<int>& callIndices, Solution* solution, int width) {
+    // Keep track of the beam-width number of best solutions, together with its set of not yet inserted calls
+    std::vector<std::pair<Solution, std::pair<std::queue<std::pair<int, CallDetails>>, std::set<int>>>> beam;
+    beam.push_back(std::make_pair(solution->copy(), std::make_pair(std::queue<std::pair<int, CallDetails>>(), callIndices)));
+
+    for (int i = 0; i < callIndices.size(); i++) {
+        // Store the current most promising solutions
+        std::vector<std::pair<int, std::pair<Solution, std::pair<std::queue<std::pair<int, CallDetails>>, std::set<int>>>>> temporary;
+        temporary.reserve(beam.size() * width);
+
+        for (auto && [current, info] : beam) {
+            std::queue<std::pair<int, CallDetails>>& steps = info.first;
+            std::set<int>& calls = info.second;
+
+            // Initially calculate all feasible insertion positions for all the calls
+            std::vector<std::pair<int, std::pair<int, CallDetails>>> bestInsertions;
+            bestInsertions.reserve(calls.size() * width);
+
+            for (int callIndex : calls) {
+                // Find all feasible insertions for callIndex sorted from best-to-worst, unwrap them
+                std::vector<std::pair<int, CallDetails>> feasibleCallInsertionsUnwrapped;
+                for (auto && inner : calculateFeasibleInsertions(callIndex, &current, true)) {
+                    feasibleCallInsertionsUnwrapped.insert(feasibleCallInsertionsUnwrapped.end(), inner.begin(), inner.end());
+                }
+                std::sort(feasibleCallInsertionsUnwrapped.begin(), feasibleCallInsertionsUnwrapped.end(), [](const std::pair<int, CallDetails>& a, const std::pair<int, CallDetails>& b) {
+                    return a.first < b.first;
+                });
+
+                // and remember the (up to) beam-width best ones
+                for (int j = 0; j < std::min(width, (int)feasibleCallInsertionsUnwrapped.size()); j++) {
+                    bestInsertions.push_back(std::make_pair(callIndex, feasibleCallInsertionsUnwrapped[j]));
+                }
+            }
+
+            // Then sort this to get only the best of the best
+            std::sort(bestInsertions.begin(), bestInsertions.end(), [](const std::pair<int, std::pair<int, CallDetails>>& a, const std::pair<int, std::pair<int, CallDetails>>& b) {
+                return a.second.first < b.second.first;
+            });
+
+            // Store the beam-width best ones in temporary solution storage
+            for (int j = 0; j < std::min(width, (int)bestInsertions.size()); j++) {
+                int callIndex = bestInsertions[j].first;
+                CallDetails insertion = bestInsertions[j].second.second;
+
+                Solution copy = current.copy();
+                copy.add(insertion.vehicle, callIndex, insertion.indices);
+
+                std::queue<std::pair<int, CallDetails>> stepsCopy = steps;
+                stepsCopy.push(std::make_pair(callIndex, insertion));
+                std::set<int> callsCopy(calls.begin(), calls.end());
+                callsCopy.erase(callIndex);
+                temporary.push_back(std::make_pair(copy.getCost(), std::make_pair(copy, std::make_pair(stepsCopy, callsCopy))));
+            }
+        }
+
+        // Then sort all temporary solutions by cost and pick the beam-width best ones
+        std::sort(temporary.begin(), temporary.end(), [](const std::pair<int, std::pair<Solution, std::pair<std::queue<std::pair<int, CallDetails>>, std::set<int>>>>& a, const std::pair<int, std::pair<Solution, std::pair<std::queue<std::pair<int, CallDetails>>, std::set<int>>>>& b) {
+            return a.first < b.first;
+        });
+
+        beam.clear();
+        for (int j = 0; beam.size() < std::min(width, (int)temporary.size()); j++) {
+            beam.push_back(temporary[j].second);
+        }
+    }
+
+    // Now we have the best solution found through beam search
+    std::queue<std::pair<int, CallDetails>> steps = beam[0].second.first;
+
+    // TODO: Insert all the calls into solution given this best solution
+    while (!steps.empty()) {
+        auto && [callIndex, insertion] = steps.front();
+        steps.pop();
+        solution->add(insertion.vehicle, callIndex, insertion.indices);
+        //Debugger::printToTerminal("Moving " + std::to_string(callIndex) + " to " + std::to_string(insertion.vehicle) + " (" + std::to_string(insertion.indices.first) + ", " + std::to_string(insertion.indices.second) + ")\n");
     }
 }
 

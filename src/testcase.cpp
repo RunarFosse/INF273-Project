@@ -429,7 +429,7 @@ void InstanceRunner::finalAdaptiveMetaheuristic(Operator* neighbourOperator, std
     double averageObjective = 0;
 
     double timefound = 0.0;
-    int iterfound = 0, escapeCondition = 1000;
+    int iterfound = 0, escapeCondition = 2500;
 
     // Declare uniform [0, 1) distribution
     std::uniform_real_distribution<double> random(0, 1);
@@ -460,9 +460,9 @@ void InstanceRunner::finalAdaptiveMetaheuristic(Operator* neighbourOperator, std
                 incumbent = incumbent.copy();
 
                 // Then perform many small steps with most diversifying operator
-                for (int k = 0; k < 15; k++) {
-                    int lowerbound = std::max(1, incumbent.problem->noCalls / 50);
-                    int upperbound = std::max(2, incumbent.problem->noCalls / 20);
+                for (int k = 0; k < 20; k++) {
+                    int lowerbound = std::max(1, (int)std::floor(incumbent.problem->noCalls / 50.0));
+                    int upperbound = std::max(2, (int)std::ceil(incumbent.problem->noCalls / 15.0));
                     int callsToRemove = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
 
                     // Random removal
@@ -496,7 +496,7 @@ void InstanceRunner::finalAdaptiveMetaheuristic(Operator* neighbourOperator, std
                 continue;
             }
 
-            int d = 0.2 * (deadline - timer.check()) / deadline * bestSolution.getCost();
+            double d = 0.2 * std::pow((deadline - timer.check()) / deadline, 2.0) * bestSolution.getCost();
             if (solution.getCost() < bestSolution.getCost() + d) {
                 incumbent = solution;
                 if (incumbent.getCost() < bestSolution.getCost()) {

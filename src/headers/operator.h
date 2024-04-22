@@ -161,6 +161,21 @@ class SimilarRegretInsert : public Operator {
     Solution apply(Solution* solution, int iteration, std::default_random_engine& rng);
 };
 
+class SimilarBeamInsert : public Operator {
+    public:
+    /**
+     * @brief Similar-beam-insert is an operator which
+     * selects similar calls, and inserts them in the best
+     * possible position given by beam search.
+     * 
+     * @param solution Solution to apply operator on
+     * @param iteration Current iteration
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution* solution, int iteration, std::default_random_engine& rng);
+};
+
 class CostlyGreedyInsert : public Operator {
     public:
     /**
@@ -191,6 +206,21 @@ class CostlyRegretInsert : public Operator {
     Solution apply(Solution* solution, int iteration, std::default_random_engine& rng);
 };
 
+class CostlyBeamInsert : public Operator {
+    public:
+    /**
+     * @brief Costly-beam-insert is an operator which
+     * selects the most costly calls, and inserts them in the best
+     * possible position given by beam search.
+     * 
+     * @param solution Solution to apply operator on
+     * @param iteration Current iteration
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution* solution, int iteration, std::default_random_engine& rng);
+};
+
 class RandomGreedyInsert : public Operator {
     public:
     /**
@@ -212,6 +242,21 @@ class RandomRegretInsert : public Operator {
      * @brief Similar-regret-insert is an operator which
      * randomly selects several calls, and inserts them in the best
      * possible position given by a regret-k order.
+     * 
+     * @param solution Solution to apply operator on
+     * @param iteration Current iteration
+     * @param rng Random number generator Engine
+     * @return Neighbour solution
+     */
+    Solution apply(Solution* solution, int iteration, std::default_random_engine& rng);
+};
+
+class RandomBeamInsert : public Operator {
+    public:
+    /**
+     * @brief Similar-beam-insert is an operator which
+     * randomly selects several calls, and inserts them in the best
+     * possible position given by beam search.
      * 
      * @param solution Solution to apply operator on
      * @param iteration Current iteration
