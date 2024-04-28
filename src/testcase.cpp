@@ -410,13 +410,16 @@ void InstanceRunner::generalAdaptiveMetaheuristic(Operator* neighbourOperator, s
     Debugger::printResults(instance, algorithm, averageObjective, bestSolutionOverall.getCost(), improvement, averageTime, &bestSolutionOverall);
 }
 
-void InstanceRunner::finalAdaptiveMetaheuristic(Operator* neighbourOperator, std::string instance, int experiments, double time, std::default_random_engine& rng, std::string title) {
+AlgorithmInformation InstanceRunner::finalAdaptiveMetaheuristic(Operator* neighbourOperator, std::string instance, int experiments, double time, std::default_random_engine& rng, std::string title) {
     // Parse the given test instance
     Problem problem = Parser::parseProblem("data/" + instance + ".txt");
     std::string algorithm = title == "" ? "Final Adaptive Metaheuristic" : title;
 
+    // Store information about each episode
+    std::vector<EpisodeInformation> episodes;
+
     // Debug print escape information
-    bool printEscapes = true;
+    bool printEscapes = false;
 
     // Create a timer object
     Timer timer = Timer(algorithm + ": " + instance, experiments);
@@ -430,6 +433,7 @@ void InstanceRunner::finalAdaptiveMetaheuristic(Operator* neighbourOperator, std
 
     double timefound = 0.0;
     int iterfound = 0, escapeCondition = 2500;
+    double dMultiplier = 1.0 / std::pow(problem.noCalls, 1.0 / 3.0);
 
     // Declare uniform [0, 1) distribution
     std::uniform_real_distribution<double> random(0, 1);
@@ -453,8 +457,9 @@ void InstanceRunner::finalAdaptiveMetaheuristic(Operator* neighbourOperator, std
 
             // If long since successful modification of incumbant, run escape algorithm
             if (j - lastBestFound >= escapeCondition) {
-                if (printEscapes)
+                if (printEscapes) {
                     Debugger::printToTerminal("Applying escape at iteration: " + std::to_string(j) + "\n");
+                }
 
                 // Copy incumbant to not make changes to best solution
                 incumbent = incumbent.copy();
@@ -481,8 +486,9 @@ void InstanceRunner::finalAdaptiveMetaheuristic(Operator* neighbourOperator, std
                         bestSolution = incumbent.copy();
                         iterfound = j;
                         timefound = timer.check();
-                        if (printEscapes)
+                        if (printEscapes) {
                             Debugger::printToTerminal("Found new optimal during escape! Cost: " + std::to_string(incumbent.getCost()) + "\n");
+                        }
                     }
                 }
                 
@@ -496,7 +502,7 @@ void InstanceRunner::finalAdaptiveMetaheuristic(Operator* neighbourOperator, std
                 continue;
             }
 
-            double d = 0.2 * std::pow((deadline - timer.check()) / deadline, 2.0) * bestSolution.getCost();
+            double d = dMultiplier * std::pow((deadline - timer.check()) / deadline, 2.5) * bestSolution.getCost();
             if (solution.getCost() < bestSolution.getCost() + d) {
                 incumbent = solution;
                 if (incumbent.getCost() < bestSolution.getCost()) {
@@ -504,8 +510,9 @@ void InstanceRunner::finalAdaptiveMetaheuristic(Operator* neighbourOperator, std
                     iterfound = j;
                     timefound = timer.check();
                     lastBestFound = j;
-                    if (printEscapes)
+                    if (printEscapes) {
                         Debugger::printToTerminal("Found new optimal at iteration: " + std::to_string(j) +". Cost: " + std::to_string(incumbent.getCost()) + "\n");
+                    }
                 }
             }
         }
@@ -519,13 +526,12 @@ void InstanceRunner::finalAdaptiveMetaheuristic(Operator* neighbourOperator, std
         if (bestSolution.getCost() < bestSolutionOverall.getCost()) {
             bestSolutionOverall = bestSolution;
         }
-        if (true) {
-            Debugger::printSolution(&bestSolution);
-            std::cout << "Cost: " << std::to_string(bestSolution.getCost());
-            bestSolution.invalidateCache();
-            std::cout << " Actual: " << std::to_string(bestSolution.getCost()) << ", found after iteration " << std::to_string(iterfound) << " (" << Debugger::formatDouble(timefound, 2) << " seconds)" << std::endl;
-            std::cout << "Experiment ran for " << std::to_string(totalIterations) << " iterations." << std::endl;
-        }
+
+        // Store episode information
+        int greedyCost = bestSolution.getCost();
+        bestSolution.invalidateCache();
+        int actualCost = bestSolution.getCost();
+        episodes.push_back({bestSolution, greedyCost, actualCost, iterfound, timefound, totalIterations});
     }
 
     // Calculate the improvement from the initial solution
@@ -534,6 +540,7 @@ void InstanceRunner::finalAdaptiveMetaheuristic(Operator* neighbourOperator, std
     // Retrieve runtime from timer
     double averageTime = timer.retrieve();
 
-    // Print the results to standard output
-    Debugger::printResults(instance, algorithm, averageObjective, bestSolutionOverall.getCost(), improvement, averageTime, &bestSolutionOverall);
+    // Store and return algorithm information
+    AlgorithmInformation information = {instance, algorithm, averageObjective, bestSolutionOverall, improvement, averageTime, episodes};
+    return information;
 }

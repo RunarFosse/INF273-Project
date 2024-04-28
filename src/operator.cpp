@@ -306,7 +306,7 @@ Solution RandomBeamInsert::apply(Solution* solution, int iteration, std::default
 }
 
 int boundedUniformSample(Solution* solution, int iteration, std::default_random_engine& rng) {
-    int lowerbound = std::uniform_int_distribution<int>(1, std::max(1, solution->problem->noCalls / 10))(rng);
-    int upperbound = std::max(lowerbound, solution->problem->noCalls / 2);
+    int lowerbound = std::uniform_int_distribution<int>(1, solution->problem->noCalls / 10)(rng);
+    int upperbound = std::max(lowerbound, solution->problem->noCalls / 3);
     return std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
 }

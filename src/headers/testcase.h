@@ -9,6 +9,25 @@
 #include "debug.h"
 #include "operator.h"
 
+struct EpisodeInformation {
+    Solution solution;
+    int greedyCost;
+    int actualCost;
+    int iterfound;
+    double timefound;
+    int totalIterations;
+} typedef EpisodeInformation;
+
+struct AlgorithmInformation {
+    std::string instance;
+    std::string algorithm;
+    double averageObjective;
+    Solution bestSolution;
+    double improvement;
+    double averageTime;
+    std::vector<EpisodeInformation> episodes;
+} typedef AlgorithmInformation;
+
 class InstanceRunner {
     public:
     /**
@@ -86,8 +105,10 @@ class InstanceRunner {
      * @param time Alloted time to run each experiment (in minutes)
      * @param rng Random number generator (for randomness)
      * @param title Output title in loading bar and result txt
+     * 
+     * @return Return information about the given algorithm.
      */
-    static void finalAdaptiveMetaheuristic(Operator* neighbourOperator, std::string instance, int experiments, double time, std::default_random_engine& rng, std::string title);
+    static AlgorithmInformation finalAdaptiveMetaheuristic(Operator* neighbourOperator, std::string instance, int experiments, double time, std::default_random_engine& rng, std::string title);
 
     private:
     // This is a static class, prevent class creation

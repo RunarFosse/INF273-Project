@@ -298,7 +298,6 @@ void insertBeam(std::set<int>& callIndices, Solution* solution, int width) {
         auto && [callIndex, insertion] = steps.front();
         steps.pop();
         solution->add(insertion.vehicle, callIndex, insertion.indices);
-        //Debugger::printToTerminal("Moving " + std::to_string(callIndex) + " to " + std::to_string(insertion.vehicle) + " (" + std::to_string(insertion.indices.first) + ", " + std::to_string(insertion.indices.second) + ")\n");
     }
 }
 
