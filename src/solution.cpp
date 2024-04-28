@@ -178,7 +178,7 @@ void Solution::add(int vehicleIndex, int callIndex, std::pair<int, int> indices)
         }
 
         // Update any callDetails indices
-        if (this->callDetails[representation[i]-1].indices.first >= start and pickedCalls.find(representation[i]) == pickedCalls.end()) {
+        if (this->callDetails[representation[i]-1].indices.first >= start && pickedCalls.find(representation[i]) == pickedCalls.end()) {
             this->callDetails[representation[i]-1].indices.first = i;
             pickedCalls.insert(representation[i]);
         } else {
@@ -212,7 +212,7 @@ void Solution::remove(int callIndex) {
             representation[i] = representation[i+skip];
             
             // Update any callDetails indices
-            if (this->callDetails[representation[i]-1].indices.first >= start and pickedCalls.find(representation[i]) == pickedCalls.end()) {
+            if (this->callDetails[representation[i]-1].indices.first >= start && pickedCalls.find(representation[i]) == pickedCalls.end()) {
                 this->callDetails[representation[i]-1].indices.first = i;
                 pickedCalls.insert(representation[i]);
             } else {
@@ -378,7 +378,7 @@ std::pair<int, bool> Solution::updateFeasibility(int vehicleIndex, int startInde
         //    return feasibilityInformation;
         //}
 
-        if (this->callDetails[callIndex-1].indices.first >= startIndex and startedCalls.find(callIndex) == startedCalls.end()) {
+        if (this->callDetails[callIndex-1].indices.first >= startIndex && startedCalls.find(callIndex) == startedCalls.end()) {
             startedCalls.insert(callIndex);
             // Pickup call cargo
             Call& call = this->problem->calls[callIndex-1];
