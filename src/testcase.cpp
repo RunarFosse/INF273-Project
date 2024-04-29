@@ -476,11 +476,7 @@ AlgorithmInformation InstanceRunner::finalAdaptiveMetaheuristic(Operator* neighb
                     // Greedy insertion
                     std::set<int> callIndices(removedCalls.begin(), removedCalls.end());
                     // Tiny chance to insert random
-                    if (random(rng) < 0.03) {
-                        insertRandom(callIndices, &incumbent, rng);
-                    } else {
-                        insertGreedy(callIndices, &incumbent);
-                    }
+                    insertGreedy(callIndices, &incumbent);
 
                     if (incumbent.getCost() < bestSolution.getCost()) {
                         bestSolution = incumbent.copy();
