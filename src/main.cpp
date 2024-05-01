@@ -105,3 +105,58 @@ int main(int argc, char const *argv[])
 
     return 0;
 }
+
+
+/* 
+// Uncomment in case multithreaded algorithm does not run as expected.
+
+int main(int argc, char const *argv[])
+{
+    // Total number of experiments to run each algorithm for
+    int experiments = 10;
+
+    // Declare each instance to run
+    std::vector<std::pair<std::string, double>> instances = {{"Call_7_Vehicle_3", 0.01}, 
+                                                          {"Call_18_Vehicle_5", 0.05}, 
+                                                          {"Call_35_Vehicle_7", 2.0}, 
+                                                          {"Call_80_Vehicle_20", 4.0}, 
+                                                          {"Call_130_Vehicle_40", 9.0}, 
+                                                          {"Call_300_Vehicle_90", 10.0}};
+    
+    // Then run each instance in the main thread
+    Debugger::outputToFile("results_final.txt");
+    for (int i = 0; i < instances.size(); i++) {
+        std::string instance = instances[i].first;
+        double time = instances[i].second;
+
+        // Initialize a random number generator
+        std::default_random_engine rng{std::random_device {}()};
+
+        // Create a adaptive neighbourhood operator
+        Operator* adaptiveOperator = new AdaptiveOperator({
+            new SimilarGreedyInsert(),
+            new SimilarRegretInsert(),
+            new CostlyGreedyInsert(),
+            new CostlyRegretInsert(),
+            new RandomGreedyInsert(),
+            new RandomRegretInsert(),
+        });
+
+        // Get results
+        AlgorithmInformation information = InstanceRunner::finalAdaptiveMetaheuristic(adaptiveOperator, instance, experiments, time, rng, "");
+
+        // And output information
+        for (EpisodeInformation& episode : information.episodes) {
+            Debugger::printSolution(&episode.solution);
+            std::cout << "Cost: " << std::to_string(episode.greedyCost);
+            
+            std::cout << " Actual: " << std::to_string(episode.actualCost) << ", found after iteration " << std::to_string(episode.iterfound) << " (" << Debugger::formatDouble(episode.timefound, 2) << " seconds)" << std::endl;
+            std::cout << "Experiment ran for " << std::to_string(episode.totalIterations) << " iterations." << std::endl;
+        }
+
+        Debugger::printResults(information.instance, information.algorithm, information.averageObjective, information.bestSolution.getCost(), information.improvement, information.averageTime, &(information.bestSolution));
+    }
+
+    return 0;
+}
+*/
