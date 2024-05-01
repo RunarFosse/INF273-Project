@@ -5,7 +5,9 @@
 #include <memory>
 #include <vector>
 #include <random>
+#include <cassert>
 #include <algorithm>
+#include <functional>
 #include <unordered_set>
 
 #include "problem.h"

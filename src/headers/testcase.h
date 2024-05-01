@@ -3,6 +3,7 @@
 #include <cmath>
 #include <string>
 #include <random>
+#include <functional>
 
 #include "parser.h"
 #include "timer.h"
