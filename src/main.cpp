@@ -14,12 +14,14 @@ int main(int argc, char const *argv[])
     int experiments = 10;
 
     // Declare each instance to run
-    std::vector<std::pair<std::string, double>> instances = {{"Call_7_Vehicle_3", 2.0}, 
-                                                          {"Call_18_Vehicle_5", 5.0}, 
+    std::vector<std::pair<std::string, double>> instances = {
+                                                          {"Call_7_Vehicle_3", 0.5}, 
+                                                          {"Call_18_Vehicle_5", 2.0}, 
                                                           {"Call_35_Vehicle_7", 15.0}, 
                                                           {"Call_80_Vehicle_20", 15.0}, 
                                                           {"Call_130_Vehicle_40", 15.0}, 
-                                                          {"Call_300_Vehicle_90", 15.0}};
+                                                          {"Call_300_Vehicle_90", 15.0}
+                                                          };
     
     // Then run each instance in a multithreaded fashion
     std::vector<AlgorithmInformation> outputs;
