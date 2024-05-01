@@ -14,8 +14,8 @@ int main(int argc, char const *argv[])
     int experiments = 10;
 
     // Declare each instance to run
-    std::vector<std::pair<std::string, double>> instances = {{"Call_7_Vehicle_3", 1.0}, 
-                                                          {"Call_18_Vehicle_5", 3.0}, 
+    std::vector<std::pair<std::string, double>> instances = {{"Call_7_Vehicle_3", 2.0}, 
+                                                          {"Call_18_Vehicle_5", 5.0}, 
                                                           {"Call_35_Vehicle_7", 15.0}, 
                                                           {"Call_80_Vehicle_20", 15.0}, 
                                                           {"Call_130_Vehicle_40", 15.0}, 
@@ -25,7 +25,7 @@ int main(int argc, char const *argv[])
     std::vector<AlgorithmInformation> outputs;
     std::mutex outputsMutex;
     std::vector<std::thread> threads;
-    for (int i = 0; i < instances.size(); i++) {
+    for (int i = 2; i < instances.size(); i++) {
         std::string instance = instances[i].first;
         double time = instances[i].second;
 
@@ -36,13 +36,10 @@ int main(int argc, char const *argv[])
         Operator* adaptiveOperator = new AdaptiveOperator({
             new SimilarGreedyInsert(),
             new SimilarRegretInsert(),
-            //new SimilarBeamInsert(),
             new CostlyGreedyInsert(),
             new CostlyRegretInsert(),
-            //new CostlyBeamInsert(),
             new RandomGreedyInsert(),
             new RandomRegretInsert(),
-            //new RandomBeamInsert(),
         });
 
         // Start a thread running the algorithm
@@ -57,6 +54,33 @@ int main(int argc, char const *argv[])
             outputsMutex.unlock();
         });
     }
+
+    // Run first two instances in main thread
+    for (int i = 0; i < 2; i++) {
+        std::string instance = instances[i].first;
+        double time = instances[i].second;
+
+        // Initialize a random number generator
+        std::default_random_engine rng{std::random_device {}()};
+
+        // Create a adaptive neighbourhood operator
+        Operator* adaptiveOperator = new AdaptiveOperator({
+            new SimilarGreedyInsert(),
+            new SimilarRegretInsert(),
+            new CostlyGreedyInsert(),
+            new CostlyRegretInsert(),
+            new RandomGreedyInsert(),
+            new RandomRegretInsert(),
+        });
+
+        // Get results and push into vector
+        AlgorithmInformation output = InstanceRunner::finalAdaptiveMetaheuristic(adaptiveOperator, instance, experiments, time, rng, "");
+        outputsMutex.lock();
+        outputs.push_back(output);
+        outputsMutex.unlock();
+    }
+    
+
 
     // Wait for all threads to finish
     for (std::thread& thread : threads) {
