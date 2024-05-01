@@ -432,8 +432,8 @@ AlgorithmInformation InstanceRunner::finalAdaptiveMetaheuristic(Operator* neighb
     double averageObjective = 0;
 
     double timefound = 0.0;
-    int iterfound = 0, escapeCondition = 2500;
-    double dMultiplier = 1.0 / std::pow(problem.noCalls, 1.0 / 3.0);
+    int iterfound = 0, escapeCondition = 7500;
+    double dMultiplier = 1.0 / std::pow(problem.noCalls, 2.0 / 3.0);
 
     // Declare uniform [0, 1) distribution
     std::uniform_real_distribution<double> random(0, 1);
@@ -462,10 +462,14 @@ AlgorithmInformation InstanceRunner::finalAdaptiveMetaheuristic(Operator* neighb
                 }
 
                 // Copy incumbant to not make changes to best solution
-                incumbent = incumbent.copy();
+                if (random(rng) < 2.0 / incumbent.problem->noCalls) {
+                    incumbent = bestSolution.copy();
+                } else {
+                    incumbent = incumbent.copy();
+                }
 
                 // Then perform many small steps with most diversifying operator
-                for (int k = 0; k < 20; k++) {
+                for (int k = 0; k < 25; k++) {
                     int lowerbound = std::max(1, (int)std::floor(incumbent.problem->noCalls / 50.0));
                     int upperbound = std::max(2, (int)std::ceil(incumbent.problem->noCalls / 15.0));
                     int callsToRemove = std::uniform_int_distribution<int>(lowerbound, upperbound)(rng);
@@ -498,7 +502,7 @@ AlgorithmInformation InstanceRunner::finalAdaptiveMetaheuristic(Operator* neighb
                 continue;
             }
 
-            double d = dMultiplier * std::pow((deadline - timer.check()) / deadline, 2.5) * bestSolution.getCost();
+            double d = dMultiplier * std::max(std::pow((deadline - timer.check()) / deadline, 2.0), 0.01) * bestSolution.getCost();
             if (solution.getCost() < bestSolution.getCost() + d) {
                 incumbent = solution;
                 if (incumbent.getCost() < bestSolution.getCost()) {

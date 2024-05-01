@@ -11,11 +11,11 @@
 int main(int argc, char const *argv[])
 {
     // Total number of experiments to run each algorithm for
-    int experiments = 5;
+    int experiments = 10;
 
     // Declare each instance to run
-    std::vector<std::pair<std::string, double>> instances = {//{"Call_7_Vehicle_3", 15.0}, 
-                                                          //{"Call_18_Vehicle_5", 15.0}, 
+    std::vector<std::pair<std::string, double>> instances = {{"Call_7_Vehicle_3", 1.0}, 
+                                                          {"Call_18_Vehicle_5", 3.0}, 
                                                           {"Call_35_Vehicle_7", 15.0}, 
                                                           {"Call_80_Vehicle_20", 15.0}, 
                                                           {"Call_130_Vehicle_40", 15.0}, 
