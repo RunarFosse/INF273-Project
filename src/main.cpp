@@ -117,11 +117,10 @@ int main(int argc, char const *argv[])
 
     // Declare each instance to run
     std::vector<std::pair<std::string, double>> instances = {{"Call_7_Vehicle_3", 0.01}, 
-                                                          {"Call_18_Vehicle_5", 0.05}, 
+                                                          {"Call_18_Vehicle_5", 0.04}, 
                                                           {"Call_35_Vehicle_7", 2.0}, 
-                                                          {"Call_80_Vehicle_20", 4.0}, 
-                                                          {"Call_130_Vehicle_40", 9.0}, 
-                                                          {"Call_300_Vehicle_90", 10.0}};
+                                                          {"Call_80_Vehicle_20", 3.95}, 
+                                                          {"Call_130_Vehicle_40", 9.0}};
     
     // Then run each instance in the main thread
     Debugger::outputToFile("results_final.txt");
